@@ -10,6 +10,7 @@ Prerequisites:
 
 - Node.js LTS installed on your computer.
 - Git installed on your computer.
+- Docker Desktop installed on your computer.
 
 First run:
 
@@ -17,6 +18,8 @@ First run:
 cd "C:\Users\guilh\OneDrive\Documentos\Sponte"
 npm.cmd install
 Copy-Item .env.example .env.local
+docker compose up -d
+npm.cmd run prisma:validate
 npm.cmd run dev
 ```
 
@@ -32,9 +35,36 @@ Useful commands:
 npm.cmd run dev
 npm.cmd run build
 npm.cmd run typecheck
+npm.cmd run prisma:validate
+docker compose up -d
+docker compose down
 ```
 
 Note: use `npm.cmd` in PowerShell if your system blocks `npm.ps1` with an execution policy message.
+
+## Local Database
+
+The local database runs in Docker using PostgreSQL. The connection string in `.env.example` matches the database settings in `docker-compose.yml`.
+
+Start the database:
+
+```powershell
+docker compose up -d
+```
+
+Stop the database:
+
+```powershell
+docker compose down
+```
+
+Delete the local database data and start fresh:
+
+```powershell
+docker compose down -v
+```
+
+Do not use the local development password in production. Production will use a hosted PostgreSQL database with its own `DATABASE_URL`.
 
 ## Planning
 
