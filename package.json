@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
+    "db:seed": "prisma db execute --file prisma/seed.sql",
     "postinstall": "prisma generate"
   },
   "dependencies": {

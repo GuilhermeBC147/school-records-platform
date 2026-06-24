@@ -36,6 +36,7 @@ npm.cmd run dev
 npm.cmd run build
 npm.cmd run typecheck
 npm.cmd run prisma:validate
+npm.cmd run db:seed
 docker compose up -d
 docker compose down
 ```
@@ -65,6 +66,14 @@ docker compose down -v
 ```
 
 Do not use the local development password in production. Production will use a hosted PostgreSQL database with its own `DATABASE_URL`.
+
+Seed sample data:
+
+```powershell
+npm.cmd run db:seed
+```
+
+The seed data creates one admin, two teachers, two classes, five students, sample enrollments, and one submitted class record.
 
 ## Planning
 
