@@ -1,5 +1,6 @@
 # dependencies
 node_modules/
+.npm-cache/
 
 # Next.js
 .next/
@@ -7,6 +8,9 @@ out/
 
 # TypeScript
 tsconfig.tsbuildinfo
+
+# generated code
+src/generated/prisma/
 
 # production
 build/
@@ -24,3 +28,5 @@ pnpm-debug.log*
 # system
 .DS_Store
 Thumbs.db
+
+/src/generated/prisma
