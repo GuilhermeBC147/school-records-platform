@@ -18,25 +18,20 @@
 
 ## Later
 
-- Add Sponte API credentials.
-- Review Sponte API authentication flow.
-- Map local records to Sponte endpoints.
-- Add manual sync.
-- Add sync logs.
-- Add retry failed sync.
 - Add CSV export backup.
+- Add admin search and filtering.
+- Add record edit history.
+- Add class/student archive workflow.
 - Add tests for teacher access control.
 - Add tests for class record submission.
 
 ## Open Questions
 
-- Does each paper class record map to a Sponte lesson, turma, aula, or another object?
-- Does Sponte track homework completion directly, or does it need to be stored as an observation/occurrence?
-- Should an admin approve records before sync?
+- Should an admin approve records before they become final?
 - Should teachers be able to edit a submitted record?
 - What should happen when a class has a substitute teacher?
 - Does the school need Portuguese, English, or bilingual UI labels?
-- Should the app eventually import students/classes from Sponte instead of manual creation?
+- What export format does the school need for long-term records?
 
 ## Learning Goals
 
@@ -45,5 +40,5 @@
 - Learn how to build a full-stack web app.
 - Learn authentication and access control.
 - Learn database modeling.
-- Learn safe third-party API integration.
-- Learn how to handle sync failures without losing data.
+- Learn how to design reliable admin workflows.
+- Learn how to export and back up school records.

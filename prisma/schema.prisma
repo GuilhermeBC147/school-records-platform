@@ -36,43 +36,27 @@ enum HomeworkStatus {
   NOT_ASSIGNED
 }
 
-enum SyncStatus {
-  PENDING
-  RUNNING
-  SUCCESS
-  FAILED
-}
-
-enum SyncAction {
-  CREATE_ATTENDANCE
-  UPDATE_ATTENDANCE
-  CREATE_HOMEWORK
-  UPDATE_HOMEWORK
-}
-
 model User {
-  id              String   @id @default(cuid())
-  name            String
-  email           String   @unique
-  passwordHash    String
-  role            UserRole @default(TEACHER)
-  sponteTeacherId String?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(TEACHER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   classes          Class[]  @relation("TeacherClasses")
   submittedLessons Lesson[] @relation("SubmittedBy")
 }
 
 model Class {
-  id            String   @id @default(cuid())
-  name          String
-  level         String?
-  sponteClassId String?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  level     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   teacherId   String
   teacher     User         @relation("TeacherClasses", fields: [teacherId], references: [id])
@@ -83,13 +67,12 @@ model Class {
 }
 
 model Student {
-  id              String   @id @default(cuid())
-  fullName        String
-  preferredName   String?
-  sponteStudentId String?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  fullName      String
+  preferredName String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   enrollments       Enrollment[]
   attendanceRecords AttendanceRecord[]
@@ -114,14 +97,13 @@ model Enrollment {
 }
 
 model Lesson {
-  id             String       @id @default(cuid())
-  lessonDate     DateTime
-  status         LessonStatus @default(DRAFT)
-  notes          String?
-  submittedAt    DateTime?
-  sponteLessonId String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id          String       @id @default(cuid())
+  lessonDate  DateTime
+  status      LessonStatus @default(DRAFT)
+  notes       String?
+  submittedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   classId           String
   class             Class              @relation(fields: [classId], references: [id])
@@ -129,7 +111,6 @@ model Lesson {
   submittedBy       User?              @relation("SubmittedBy", fields: [submittedById], references: [id])
   attendanceRecords AttendanceRecord[]
   homeworkRecords   HomeworkRecord[]
-  syncJobs          SyncJob[]
 
   @@unique([classId, lessonDate])
   @@index([submittedById])
@@ -165,23 +146,4 @@ model HomeworkRecord {
 
   @@unique([lessonId, studentId])
   @@index([studentId])
-}
-
-model SyncJob {
-  id             String     @id @default(cuid())
-  action         SyncAction
-  status         SyncStatus @default(PENDING)
-  requestPayload Json?
-  responseBody   Json?
-  errorMessage   String?
-  attemptedAt    DateTime?
-  completedAt    DateTime?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-
-  lessonId String
-  lesson   Lesson @relation(fields: [lessonId], references: [id])
-
-  @@index([lessonId])
-  @@index([status])
 }

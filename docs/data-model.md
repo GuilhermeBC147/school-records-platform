@@ -2,9 +2,9 @@
 
 ## Purpose
 
-The first data model captures the school's local workflow before Sponte API credentials are available.
+The first data model captures the school's local class-record workflow.
 
-Teachers, classes, students, lessons, attendance, and homework are stored locally first. Optional Sponte IDs are included so each local record can later be matched to the correct Sponte object.
+Teachers, classes, students, lessons, attendance, and homework are stored in the app database.
 
 ## Main Tables
 
@@ -15,7 +15,6 @@ Teachers, classes, students, lessons, attendance, and homework are stored locall
 - `Lesson`: one dated class session.
 - `AttendanceRecord`: one student's attendance status for one lesson.
 - `HomeworkRecord`: one student's homework status for one lesson.
-- `SyncJob`: a future Sponte API sync attempt with status and error details.
 
 ## Important Rules
 
@@ -24,11 +23,11 @@ Teachers, classes, students, lessons, attendance, and homework are stored locall
 - A class can have only one lesson per date.
 - A student can have only one attendance record per lesson.
 - A student can have only one homework record per lesson.
-- Sync jobs are tracked separately so failed API calls do not erase local teacher submissions.
+- Submitted records stay in the app database and can be reviewed by admins.
 
 ## Future Questions
 
 - Should substitute teachers be supported with a separate assignment table?
 - Should teachers be able to edit submitted lessons?
-- Should admin approval be required before sync?
-- Does Sponte store homework completion directly, or will it need a notes/occurrence mapping?
+- Should admin approval be required before a lesson becomes final?
+- What export format would be most useful for school records?

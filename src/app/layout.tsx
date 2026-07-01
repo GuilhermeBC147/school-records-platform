@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Integracao Sponte",
-  description:
-    "Teacher attendance and homework records with future Sponte API sync.",
+  title: "Class Records Platform",
+  description: "Teacher attendance and homework records for ESL schools.",
 };
 
 export default function RootLayout({
