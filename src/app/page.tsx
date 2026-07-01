@@ -11,8 +11,8 @@ const workflowSteps = [
   },
   {
     label: "Step 3",
-    title: "Sponte sync",
-    description: "Local records will be synced after the API workflow is confirmed.",
+    title: "Admin review",
+    description: "Submitted records will be available for review and export.",
   },
 ];
 
@@ -27,7 +27,7 @@ const sprintTasks = [
   },
   {
     title: "Environment template",
-    detail: "Prepare placeholders for database, authentication, and Sponte settings.",
+    detail: "Prepare placeholders for database and authentication settings.",
   },
 ];
 
@@ -37,7 +37,7 @@ export default function Home() {
       <header className="topbar">
         <div className="topbar-inner">
           <div className="brand">
-            <strong>Integracao Sponte</strong>
+            <strong>Class Records Platform</strong>
             <span>ESL school class records</span>
           </div>
           <span className="status-pill">Sprint 1 foundation</span>
@@ -49,12 +49,11 @@ export default function Home() {
           <section className="intro" aria-labelledby="page-title">
             <p className="eyebrow">Teacher records platform</p>
             <h1 id="page-title">
-              Attendance and homework records, ready for Sponte integration.
+              Attendance and homework records without paper class sheets.
             </h1>
             <p className="lede">
               This app will help teachers record class information digitally,
-              store it safely, and later sync it with the school system through
-              the Sponte API.
+              store it safely, and make records easier for admins to review.
             </p>
 
             <div className="workflow" aria-label="Product workflow">

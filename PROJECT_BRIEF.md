@@ -1,32 +1,32 @@
-# Project Brief: Integracao Sponte
+# Project Brief: Class Records Platform
 
 ## Summary
 
-Integracao Sponte is a web platform for an ESL school where teachers can log in, choose their classes, record attendance and homework completion, and later sync those records to Sponte through the official API.
+Class Records Platform is a web platform for an ESL school where teachers can log in, choose their classes, and record attendance and homework completion digitally.
 
-The first version will store teachers, classes, students, attendance, and homework records locally. Sponte API integration will be added after credentials are available and the API workflow is validated.
+The app will store teachers, classes, students, attendance, and homework records in its own database.
 
 ## Problem
 
-Teachers currently record attendance and homework completion on paper class records. Someone later has to manually transfer that information into Sponte. This creates duplicate work, delays, and opportunities for mistakes.
+Teachers currently record attendance and homework completion on paper class records. This creates storage problems, delays, and opportunities for mistakes when staff need to review class information later.
 
 ## Users
 
 - Teacher: records attendance and homework completion for assigned classes.
-- Admin: manages teachers, classes, students, and reviews sync status.
-- Future coordinator role: reviews submitted records before syncing to Sponte, if the school needs approval.
+- Admin: manages teachers, classes, students, and reviews submitted records.
+- Future coordinator role: reviews submitted records, if the school needs approval.
 
 ## Goals
 
 - Let each teacher access only their own classes.
 - Make attendance and homework entry fast enough to use during or immediately after class.
-- Save submitted records locally before any external sync.
-- Prepare the data model for Sponte integration.
-- Add clear sync logs when the Sponte API is connected.
+- Save submitted records in a reliable database.
+- Make records searchable and reviewable by admins.
+- Reduce paper-based class record handling.
 
 ## Non-Goals for Version 1
 
-- Automatic import from Sponte before credentials are available.
+- External school-system connections.
 - Mobile app store release.
 - Payroll, grading, financial, or CRM features.
 - Complex permissions beyond teacher and admin.
@@ -40,8 +40,8 @@ Teachers currently record attendance and homework completion on paper class reco
 - Attendance record entry.
 - Homework completion entry.
 - Local database persistence.
-- Admin view for records and future sync status.
-- Sponte API notes and integration spike.
+- Admin view for records.
+- Search and filtering for classes, students, and lesson records.
 
 ## Technical Direction
 
@@ -55,14 +55,12 @@ Recommended stack:
 
 ## Key Risks
 
-- Sponte API behavior may require credentials before full endpoint testing.
-- Attendance and homework concepts in Sponte may not map one-to-one with the school's paper workflow.
 - Teacher accounts and class assignments need careful access control.
-- Sync failures must never erase local teacher submissions.
+- The app needs a clear backup/export strategy before production use.
 
 ## Success Criteria
 
 - A teacher can log in and submit attendance/homework for a manually created class.
 - An admin can see submitted records.
-- The app stores enough local data to later sync records to Sponte.
-- Failed or unavailable Sponte sync does not block teachers from recording class data.
+- Submitted records are stored and reviewable in the app.
+- Admins can manage the school data needed for normal class record workflows.

@@ -10,7 +10,7 @@ Branch naming:
 - `sprint-1-foundation`
 - `sprint-2-auth-dashboard`
 - `sprint-3-class-records`
-- `sprint-4-sponte-sync`
+- `sprint-4-admin-records`
 
 Commit style:
 
@@ -29,20 +29,20 @@ Tasks:
 - Write project brief.
 - Write sprint plan.
 - Create initial backlog.
-- Record Sponte API documentation links and open questions.
+- Capture product assumptions and open questions.
 - Confirm local Git/GitHub workflow.
 - Choose initial tech stack.
 
 Suggested commits:
 
 - `docs: add project planning notes`
-- `docs: document Sponte API references`
+- `docs: document product assumptions`
 
 Done when:
 
 - The repository explains what the project is.
 - The next sprint has concrete implementation tasks.
-- API uncertainty is captured instead of hidden.
+- Product uncertainty is captured instead of hidden.
 
 ## Sprint 1: Application Foundation
 
@@ -77,7 +77,7 @@ Tasks:
 
 - Add Prisma.
 - Configure PostgreSQL connection.
-- Create models for users, teachers, classes, students, lessons, attendance records, homework records, and sync jobs.
+- Create models for users, teachers, classes, students, lessons, attendance records, and homework records.
 - Add seed data for one admin, two teachers, sample classes, and students.
 - Add simple developer/admin data view.
 
@@ -143,50 +143,46 @@ Done when:
 - Submitted records are stored locally.
 - An admin can review submitted records.
 
-## Sprint 5: Sponte Integration Spike
+## Sprint 5: Admin Records
 
-Goal: understand and safely design the Sponte sync.
-
-Tasks:
-
-- Review official Sponte API documentation.
-- Confirm authentication requirements.
-- Identify endpoints for students, classes, lessons, attendance, and homework if available.
-- Create a Sponte API client module with placeholder configuration.
-- Create mapping notes between local records and Sponte payloads.
-- Add manual sync design before enabling real writes.
-
-Suggested commits:
-
-- `docs: map local records to Sponte API concepts`
-- `feat: add Sponte API client shell`
-
-Done when:
-
-- We know which Sponte endpoints are required.
-- Missing credentials or unclear endpoints are documented.
-- No production Sponte writes happen accidentally.
-
-## Sprint 6: Manual Sync and Logs
-
-Goal: send local records to Sponte with visibility and recovery.
+Goal: help admins find, review, and export submitted records.
 
 Tasks:
 
-- Add secure API credential configuration.
-- Add manual sync button for admin.
-- Record sync attempts and responses.
-- Add retry flow for failed syncs.
-- Add error messages that help staff resolve issues.
+- Add submitted records list.
+- Add filters by teacher, class, student, and date.
+- Add record detail page.
+- Add CSV export for class records.
+- Add simple backup/export documentation.
 
 Suggested commits:
 
-- `feat: add manual Sponte sync`
-- `feat: log Sponte sync attempts`
-- `feat: retry failed sync jobs`
+- `feat: add admin record search`
+- `feat: export class records to csv`
 
 Done when:
 
-- Admin can manually sync submitted records.
-- Sync results are visible.
-- Failed syncs can be retried without losing local records.
+- Admins can find submitted class records.
+- Admins can export records for backup or reporting.
+
+## Sprint 6: Production Readiness
+
+Goal: prepare the app for school-owned hosting and day-to-day use.
+
+Tasks:
+
+- Add production environment checklist.
+- Add hosted PostgreSQL setup notes.
+- Add backup/export routine.
+- Add basic monitoring/logging guidance.
+- Add tests for critical teacher and admin workflows.
+
+Suggested commits:
+
+- `docs: add production setup checklist`
+- `test: cover critical class record workflows`
+
+Done when:
+
+- The school has a clear handoff checklist.
+- Critical workflows are tested.
