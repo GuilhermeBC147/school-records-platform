@@ -51,7 +51,9 @@ ON CONFLICT ("email") DO UPDATE SET
 INSERT INTO "Class" (
   "id",
   "name",
-  "level",
+  "book",
+  "semester",
+  "year",
   "isActive",
   "createdAt",
   "updatedAt",
@@ -60,7 +62,9 @@ INSERT INTO "Class" (
   (
     'class_evening_a2',
     'Evening English A2',
-    'A2',
+    'Book 2',
+    1,
+    2026,
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
@@ -69,7 +73,9 @@ INSERT INTO "Class" (
   (
     'class_saturday_b1',
     'Saturday Conversation B1',
-    'B1',
+    'Book 3',
+    1,
+    2026,
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
@@ -77,7 +83,9 @@ INSERT INTO "Class" (
   )
 ON CONFLICT ("id") DO UPDATE SET
   "name" = EXCLUDED."name",
-  "level" = EXCLUDED."level",
+  "book" = EXCLUDED."book",
+  "semester" = EXCLUDED."semester",
+  "year" = EXCLUDED."year",
   "isActive" = EXCLUDED."isActive",
   "teacherId" = EXCLUDED."teacherId",
   "updatedAt" = CURRENT_TIMESTAMP;

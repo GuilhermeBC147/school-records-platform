@@ -20,14 +20,15 @@ export default async function DashboardPage() {
             teacherId: currentUser.id,
             isActive: true,
           }
-        : {
-            isActive: true,
-          },
+        : {},
     orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
-      level: true,
+      book: true,
+      semester: true,
+      year: true,
+      isActive: true,
       teacher: {
         select: { name: true },
       },
@@ -69,6 +70,9 @@ export default async function DashboardPage() {
               <Link className="primary-link" href="/admin/teachers">
                 Manage teachers
               </Link>
+              <Link className="primary-link" href="/admin/classes">
+                Manage classes
+              </Link>
               <Link className="primary-link" href="/admin/records">
                 Review submitted records
               </Link>
@@ -80,9 +84,17 @@ export default async function DashboardPage() {
           {classes.map((schoolClass) => (
             <article className="panel class-card" key={schoolClass.id}>
               <div>
-                <p className="eyebrow">{schoolClass.level ?? "No level"}</p>
+                <p className="eyebrow">
+                  {schoolClass.book ?? "Class"}
+                  {schoolClass.semester && schoolClass.year
+                    ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+                    : ""}
+                </p>
                 <h2>{schoolClass.name}</h2>
                 <p>{schoolClass.teacher.name}</p>
+                {currentUser.role === "ADMIN" ? (
+                  <p>{schoolClass.isActive ? "Active" : "Inactive"}</p>
+                ) : null}
               </div>
               <dl>
                 <div>

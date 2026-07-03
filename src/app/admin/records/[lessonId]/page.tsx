@@ -42,7 +42,6 @@ export default async function AdminRecordDetailPage({
       class: {
         select: {
           name: true,
-          level: true,
           teacher: {
             select: {
               email: true,
@@ -110,7 +109,7 @@ export default async function AdminRecordDetailPage({
           <Link className="text-link" href="/admin/records">
             Back to records
           </Link>
-          <p className="eyebrow">{lesson.class.level ?? "No level"}</p>
+          <p className="eyebrow">Submitted record</p>
           <h1 id="record-detail-title">
             {lesson.name ?? "Untitled lesson"}
           </h1>

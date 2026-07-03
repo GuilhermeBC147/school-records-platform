@@ -105,4 +105,5 @@ The project is being built sprint by sprint as a learning-focused product. See:
 - [BACKLOG.md](BACKLOG.md)
 - [docs/account-management.md](docs/account-management.md)
 - [docs/backup-export.md](docs/backup-export.md)
+- [docs/class-management.md](docs/class-management.md)
 - [docs/production-readiness.md](docs/production-readiness.md)

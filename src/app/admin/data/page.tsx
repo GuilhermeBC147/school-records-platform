@@ -23,7 +23,9 @@ export default async function AdminDataPage() {
       select: {
         id: true,
         name: true,
-        level: true,
+        book: true,
+        semester: true,
+        year: true,
         teacher: {
           select: { name: true },
         },
@@ -146,7 +148,8 @@ export default async function AdminDataPage() {
                 <thead>
                   <tr>
                     <th>Class</th>
-                    <th>Level</th>
+                    <th>Book</th>
+                    <th>Term</th>
                     <th>Teacher</th>
                     <th>Students</th>
                   </tr>
@@ -155,7 +158,12 @@ export default async function AdminDataPage() {
                   {classes.map((schoolClass) => (
                     <tr key={schoolClass.id}>
                       <td>{schoolClass.name}</td>
-                      <td>{schoolClass.level ?? "-"}</td>
+                      <td>{schoolClass.book ?? "-"}</td>
+                      <td>
+                        {schoolClass.semester && schoolClass.year
+                          ? `Semester ${schoolClass.semester}/${schoolClass.year}`
+                          : "-"}
+                      </td>
                       <td>{schoolClass.teacher.name}</td>
                       <td>{schoolClass._count.enrollments}</td>
                     </tr>

@@ -31,7 +31,10 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
     select: {
       id: true,
       name: true,
-      level: true,
+      book: true,
+      semester: true,
+      year: true,
+      isActive: true,
       teacher: {
         select: {
           name: true,
@@ -102,11 +105,19 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
             <Link className="text-link" href="/dashboard">
               Back to dashboard
             </Link>
-            <p className="eyebrow">{schoolClass.level ?? "No level"}</p>
+            <p className="eyebrow">
+              {schoolClass.book ?? "Class"}
+              {schoolClass.semester && schoolClass.year
+                ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+                : ""}
+            </p>
             <h1 id="class-title">{schoolClass.name}</h1>
             <p className="lede">
               Teacher: {schoolClass.teacher.name} ({schoolClass.teacher.email})
             </p>
+            {schoolClass.isActive ? null : (
+              <p className="muted-copy">Inactive</p>
+            )}
             <div className="action-row">
               <Link className="primary-link" href={`/dashboard/classes/${schoolClass.id}/record`}>
                 New class record

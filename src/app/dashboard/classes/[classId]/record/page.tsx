@@ -67,7 +67,9 @@ export default async function ClassRecordPage({
     select: {
       id: true,
       name: true,
-      level: true,
+      book: true,
+      semester: true,
+      year: true,
       teacher: {
         select: { name: true },
       },
@@ -147,7 +149,12 @@ export default async function ClassRecordPage({
           <Link className="text-link" href={`/dashboard/classes/${schoolClass.id}`}>
             Back to class
           </Link>
-          <p className="eyebrow">{schoolClass.level ?? "No level"}</p>
+          <p className="eyebrow">
+            {schoolClass.book ?? "Class"}
+            {schoolClass.semester && schoolClass.year
+              ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+              : ""}
+          </p>
           <h1 id="record-title">
             {isEditingSubmitted ? "Edit class record" : "Class record"}
           </h1>

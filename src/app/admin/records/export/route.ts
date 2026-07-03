@@ -74,7 +74,6 @@ export async function GET(request: Request) {
       class: {
         select: {
           name: true,
-          level: true,
           teacher: {
             select: {
               name: true,
@@ -117,7 +116,6 @@ export async function GET(request: Request) {
       "lesson_name",
       "lesson_date",
       "class",
-      "level",
       "teacher",
       "student",
       "preferred_name",
@@ -144,7 +142,6 @@ export async function GET(request: Request) {
         lesson.name ?? "",
         formatShortDateTime(lesson.lessonDate),
         lesson.class.name,
-        lesson.class.level ?? "",
         lesson.class.teacher.name,
         attendanceRecord.student.fullName,
         attendanceRecord.student.preferredName ?? "",
