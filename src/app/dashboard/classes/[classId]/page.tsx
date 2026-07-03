@@ -62,6 +62,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
         take: 8,
         select: {
           id: true,
+          name: true,
           lessonDate: true,
           status: true,
           _count: {
@@ -156,6 +157,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
               <table>
                 <thead>
                   <tr>
+                    <th>Lesson</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Attendance</th>
@@ -166,6 +168,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                 <tbody>
                   {schoolClass.lessons.map((lesson) => (
                     <tr key={lesson.id}>
+                      <td>{lesson.name ?? "-"}</td>
                       <td>{formatShortDateTime(lesson.lessonDate)}</td>
                       <td>{lesson.status}</td>
                       <td>{lesson._count.attendanceRecords}</td>
@@ -182,7 +185,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                   ))}
                   {schoolClass.lessons.length === 0 ? (
                     <tr>
-                      <td colSpan={5}>No lessons recorded yet.</td>
+                      <td colSpan={6}>No lessons recorded yet.</td>
                     </tr>
                   ) : null}
                 </tbody>

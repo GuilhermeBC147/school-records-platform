@@ -93,6 +93,7 @@ export default async function ClassRecordPage({
         take: 1,
         select: {
           id: true,
+          name: true,
           lessonDate: true,
           notes: true,
           status: true,
@@ -162,6 +163,16 @@ export default async function ClassRecordPage({
           ) : null}
 
           <section className="panel record-settings" aria-label="Lesson details">
+            <label>
+              <span>Lesson name</span>
+              <input
+                defaultValue={lessonRecord?.name ?? ""}
+                name="lessonName"
+                placeholder="Conversation practice"
+                required
+                type="text"
+              />
+            </label>
             <label>
               <span>Lesson date</span>
               <input

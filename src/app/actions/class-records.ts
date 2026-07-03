@@ -75,8 +75,13 @@ async function persistClassRecord(
 
   const classId = String(formData.get("classId") ?? "");
   const lessonId = String(formData.get("lessonId") ?? "");
+  const lessonName = String(formData.get("lessonName") ?? "").trim();
   const lessonDate = readLessonDate(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
+
+  if (!lessonName) {
+    throw new Error("Lesson name is required.");
+  }
 
   const schoolClass = await prisma.class.findFirst({
     where: {
@@ -164,6 +169,7 @@ async function persistClassRecord(
           where: { id: existingLesson.id },
           data: {
             lessonDate,
+            name: lessonName,
             notes,
             status,
             ...submissionFields,
@@ -174,6 +180,7 @@ async function persistClassRecord(
           data: {
             classId,
             lessonDate,
+            name: lessonName,
             notes,
             status,
             ...submissionFields,

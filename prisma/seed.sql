@@ -156,6 +156,7 @@ ON CONFLICT ("classId", "studentId") DO UPDATE SET
 
 INSERT INTO "Lesson" (
   "id",
+  "name",
   "lessonDate",
   "status",
   "notes",
@@ -167,6 +168,7 @@ INSERT INTO "Lesson" (
 ) VALUES
   (
     'lesson_a2_sample',
+    'Past simple review',
     TIMESTAMP '2026-06-24 18:30:00',
     'SUBMITTED',
     'Sample submitted lesson for attendance and homework review.',
@@ -177,6 +179,7 @@ INSERT INTO "Lesson" (
     'user_teacher_ana'
   )
 ON CONFLICT ("classId", "lessonDate") DO UPDATE SET
+  "name" = EXCLUDED."name",
   "status" = EXCLUDED."status",
   "notes" = EXCLUDED."notes",
   "submittedAt" = EXCLUDED."submittedAt",
