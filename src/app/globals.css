@@ -471,6 +471,30 @@ input[type="time"],
   justify-content: flex-end;
 }
 
+.filter-form {
+  align-items: end;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto;
+}
+
+.filter-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.filter-form label span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.filter-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
 .records-review {
   display: grid;
   gap: 18px;
@@ -503,6 +527,34 @@ input[type="time"],
 
 .compact-metric {
   margin-top: 0;
+}
+
+.detail-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.detail-list div {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.detail-list div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.detail-list dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.detail-list dd {
+  font-size: 15px;
+  margin: 5px 0 0;
 }
 
 .data-page {
@@ -585,12 +637,15 @@ th {
   .class-grid,
   .record-settings,
   .student-record-row,
-  .record-review-header {
+  .record-review-header,
+  .filter-form {
     grid-template-columns: 1fr;
   }
 
-  .record-actions {
+  .record-actions,
+  .filter-actions {
     flex-direction: column-reverse;
+    align-items: stretch;
   }
 
   h1 {
