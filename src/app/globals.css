@@ -461,7 +461,42 @@ input[type="date"],
 
 .record-actions {
   display: flex;
+  gap: 12px;
   justify-content: flex-end;
+}
+
+.records-review {
+  display: grid;
+  gap: 18px;
+}
+
+.record-review {
+  display: grid;
+  gap: 18px;
+}
+
+.record-review-header {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 0.2fr);
+}
+
+.record-review-header h2 {
+  margin-bottom: 8px;
+}
+
+.record-review-header p,
+.record-notes,
+.muted-copy {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.compact-metric {
+  margin-top: 0;
 }
 
 .data-page {
@@ -543,8 +578,13 @@ th {
   .data-grid,
   .class-grid,
   .record-settings,
-  .student-record-row {
+  .student-record-row,
+  .record-review-header {
     grid-template-columns: 1fr;
+  }
+
+  .record-actions {
+    flex-direction: column-reverse;
   }
 
   h1 {

@@ -48,7 +48,10 @@ function readLessonDate(formData: FormData) {
   return lessonDate;
 }
 
-export async function submitClassRecordAction(formData: FormData) {
+async function persistClassRecord(
+  formData: FormData,
+  status: "DRAFT" | "SUBMITTED",
+) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -81,31 +84,51 @@ export async function submitClassRecordAction(formData: FormData) {
   }
 
   await prisma.$transaction(async (transaction) => {
-    const lesson = await transaction.lesson.upsert({
+    const existingLesson = await transaction.lesson.findUnique({
       where: {
-        classId_lessonDate: {
-          classId,
-          lessonDate,
-        },
-      },
-      create: {
-        classId,
-        lessonDate,
-        notes,
-        status: "SUBMITTED",
-        submittedAt: new Date(),
-        submittedById: currentUser.id,
-      },
-      update: {
-        notes,
-        status: "SUBMITTED",
-        submittedAt: new Date(),
-        submittedById: currentUser.id,
+        classId_lessonDate: { classId, lessonDate },
       },
       select: {
         id: true,
+        status: true,
       },
     });
+
+    if (existingLesson?.status === "SUBMITTED") {
+      return;
+    }
+
+    const submissionFields =
+      status === "SUBMITTED"
+        ? {
+            submittedAt: new Date(),
+            submittedById: currentUser.id,
+          }
+        : {
+            submittedAt: null,
+            submittedById: null,
+          };
+
+    const lesson = existingLesson
+      ? await transaction.lesson.update({
+          where: { id: existingLesson.id },
+          data: {
+            notes,
+            status,
+            ...submissionFields,
+          },
+          select: { id: true },
+        })
+      : await transaction.lesson.create({
+          data: {
+            classId,
+            lessonDate,
+            notes,
+            status,
+            ...submissionFields,
+          },
+          select: { id: true },
+        });
 
     for (const enrollment of schoolClass.enrollments) {
       const attendanceStatus = readStatus(
@@ -158,4 +181,12 @@ export async function submitClassRecordAction(formData: FormData) {
   });
 
   redirect(`/dashboard/classes/${classId}`);
+}
+
+export async function saveDraftClassRecordAction(formData: FormData) {
+  await persistClassRecord(formData, "DRAFT");
+}
+
+export async function submitClassRecordAction(formData: FormData) {
+  await persistClassRecord(formData, "SUBMITTED");
 }

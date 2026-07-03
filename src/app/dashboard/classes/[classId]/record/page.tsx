@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { submitClassRecordAction } from "@/app/actions/class-records";
+import {
+  saveDraftClassRecordAction,
+  submitClassRecordAction,
+} from "@/app/actions/class-records";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDateInput } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -16,6 +19,14 @@ type ClassRecordPageProps = {
 
 function todayInputValue() {
   return formatShortDateInput(new Date());
+}
+
+function findStudentStatus<T extends { studentId: string; status: string }>(
+  records: T[],
+  studentId: string,
+  fallback: string,
+) {
+  return records.find((record) => record.studentId === studentId)?.status ?? fallback;
 }
 
 export default async function ClassRecordPage({ params }: ClassRecordPageProps) {
@@ -56,12 +67,35 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
           },
         },
       },
+      lessons: {
+        where: { status: "DRAFT" },
+        orderBy: { updatedAt: "desc" },
+        take: 1,
+        select: {
+          lessonDate: true,
+          notes: true,
+          attendanceRecords: {
+            select: {
+              studentId: true,
+              status: true,
+            },
+          },
+          homeworkRecords: {
+            select: {
+              studentId: true,
+              status: true,
+            },
+          },
+        },
+      },
     },
   });
 
   if (!schoolClass) {
     notFound();
   }
+
+  const draftLesson = schoolClass.lessons[0];
 
   return (
     <main className="app-shell">
@@ -85,7 +119,7 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
             Back to class
           </Link>
           <p className="eyebrow">{schoolClass.level ?? "No level"}</p>
-          <h1 id="record-title">New class record</h1>
+          <h1 id="record-title">Class record</h1>
           <p className="lede">
             {schoolClass.name} with {schoolClass.teacher.name}
           </p>
@@ -99,7 +133,11 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
               <span>Lesson date</span>
               <input
                 className="date-input"
-                defaultValue={todayInputValue()}
+                defaultValue={
+                  draftLesson
+                    ? formatShortDateInput(draftLesson.lessonDate)
+                    : todayInputValue()
+                }
                 inputMode="numeric"
                 name="lessonDate"
                 pattern="[0-9]{2}/[0-9]{2}/[0-9]{2,4}"
@@ -111,6 +149,7 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
             <label>
               <span>Notes</span>
               <textarea
+                defaultValue={draftLesson?.notes ?? ""}
                 name="notes"
                 placeholder="Optional notes about this lesson"
                 rows={3}
@@ -131,7 +170,11 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
                   <label>
                     <span>Attendance</span>
                     <select
-                      defaultValue="PRESENT"
+                      defaultValue={findStudentStatus(
+                        draftLesson?.attendanceRecords ?? [],
+                        enrollment.student.id,
+                        "PRESENT",
+                      )}
                       name={`attendance:${enrollment.student.id}`}
                     >
                       <option value="PRESENT">Present</option>
@@ -144,7 +187,11 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
                   <label>
                     <span>Homework</span>
                     <select
-                      defaultValue="NOT_ASSIGNED"
+                      defaultValue={findStudentStatus(
+                        draftLesson?.homeworkRecords ?? [],
+                        enrollment.student.id,
+                        "NOT_ASSIGNED",
+                      )}
                       name={`homework:${enrollment.student.id}`}
                     >
                       <option value="COMPLETED">Completed</option>
@@ -158,6 +205,13 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
           </section>
 
           <div className="record-actions">
+            <button
+              className="secondary-button"
+              formAction={saveDraftClassRecordAction}
+              type="submit"
+            >
+              Save draft
+            </button>
             <button className="primary-button" type="submit">
               Submit class record
             </button>
