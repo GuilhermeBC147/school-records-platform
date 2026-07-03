@@ -5,7 +5,7 @@ import {
   submitClassRecordAction,
 } from "@/app/actions/class-records";
 import { logoutAction } from "@/app/actions/auth";
-import { formatShortDateInput } from "@/lib/date-format";
+import { formatShortDateInput, formatShortTimeInput } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -15,10 +15,26 @@ type ClassRecordPageProps = {
   params: Promise<{
     classId: string;
   }>;
+  searchParams: Promise<{
+    lessonId?: string;
+  }>;
 };
 
 function todayInputValue() {
-  return formatShortDateInput(new Date());
+  const date = new Date();
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2);
+
+  return `${day}/${month}/${year}`;
+}
+
+function currentTimeInputValue() {
+  const date = new Date();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${hours}:${minutes}`;
 }
 
 function findStudentStatus<T extends { studentId: string; status: string }>(
@@ -29,7 +45,10 @@ function findStudentStatus<T extends { studentId: string; status: string }>(
   return records.find((record) => record.studentId === studentId)?.status ?? fallback;
 }
 
-export default async function ClassRecordPage({ params }: ClassRecordPageProps) {
+export default async function ClassRecordPage({
+  params,
+  searchParams,
+}: ClassRecordPageProps) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -37,6 +56,7 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
   }
 
   const { classId } = await params;
+  const { lessonId } = await searchParams;
 
   const schoolClass = await prisma.class.findFirst({
     where: {
@@ -68,12 +88,14 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
         },
       },
       lessons: {
-        where: { status: "DRAFT" },
+        where: lessonId ? { id: lessonId } : { status: "DRAFT" },
         orderBy: { updatedAt: "desc" },
         take: 1,
         select: {
+          id: true,
           lessonDate: true,
           notes: true,
+          status: true,
           attendanceRecords: {
             select: {
               studentId: true,
@@ -95,7 +117,13 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
     notFound();
   }
 
-  const draftLesson = schoolClass.lessons[0];
+  const lessonRecord = schoolClass.lessons[0];
+
+  if (lessonId && !lessonRecord) {
+    notFound();
+  }
+
+  const isEditingSubmitted = lessonRecord?.status === "SUBMITTED";
 
   return (
     <main className="app-shell">
@@ -119,7 +147,9 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
             Back to class
           </Link>
           <p className="eyebrow">{schoolClass.level ?? "No level"}</p>
-          <h1 id="record-title">Class record</h1>
+          <h1 id="record-title">
+            {isEditingSubmitted ? "Edit class record" : "Class record"}
+          </h1>
           <p className="lede">
             {schoolClass.name} with {schoolClass.teacher.name}
           </p>
@@ -127,6 +157,9 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
 
         <form action={submitClassRecordAction} className="record-form">
           <input name="classId" type="hidden" value={schoolClass.id} />
+          {lessonRecord ? (
+            <input name="lessonId" type="hidden" value={lessonRecord.id} />
+          ) : null}
 
           <section className="panel record-settings" aria-label="Lesson details">
             <label>
@@ -134,8 +167,8 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
               <input
                 className="date-input"
                 defaultValue={
-                  draftLesson
-                    ? formatShortDateInput(draftLesson.lessonDate)
+                  lessonRecord
+                    ? formatShortDateInput(lessonRecord.lessonDate)
                     : todayInputValue()
                 }
                 inputMode="numeric"
@@ -147,9 +180,23 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
               />
             </label>
             <label>
+              <span>Lesson time</span>
+              <input
+                className="date-input"
+                defaultValue={
+                  lessonRecord
+                    ? formatShortTimeInput(lessonRecord.lessonDate)
+                    : currentTimeInputValue()
+                }
+                name="lessonTime"
+                required
+                type="time"
+              />
+            </label>
+            <label>
               <span>Notes</span>
               <textarea
-                defaultValue={draftLesson?.notes ?? ""}
+                defaultValue={lessonRecord?.notes ?? ""}
                 name="notes"
                 placeholder="Optional notes about this lesson"
                 rows={3}
@@ -171,7 +218,7 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
                     <span>Attendance</span>
                     <select
                       defaultValue={findStudentStatus(
-                        draftLesson?.attendanceRecords ?? [],
+                        lessonRecord?.attendanceRecords ?? [],
                         enrollment.student.id,
                         "PRESENT",
                       )}
@@ -188,7 +235,7 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
                     <span>Homework</span>
                     <select
                       defaultValue={findStudentStatus(
-                        draftLesson?.homeworkRecords ?? [],
+                        lessonRecord?.homeworkRecords ?? [],
                         enrollment.student.id,
                         "NOT_ASSIGNED",
                       )}
@@ -205,15 +252,17 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
           </section>
 
           <div className="record-actions">
-            <button
-              className="secondary-button"
-              formAction={saveDraftClassRecordAction}
-              type="submit"
-            >
-              Save draft
-            </button>
+            {isEditingSubmitted ? null : (
+              <button
+                className="secondary-button"
+                formAction={saveDraftClassRecordAction}
+                type="submit"
+              >
+                Save draft
+              </button>
+            )}
             <button className="primary-button" type="submit">
-              Submit class record
+              {isEditingSubmitted ? "Update submission" : "Submit class record"}
             </button>
           </div>
         </form>

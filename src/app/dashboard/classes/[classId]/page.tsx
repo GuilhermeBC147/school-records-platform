@@ -160,6 +160,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                     <th>Status</th>
                     <th>Attendance</th>
                     <th>Homework</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -169,11 +170,19 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                       <td>{lesson.status}</td>
                       <td>{lesson._count.attendanceRecords}</td>
                       <td>{lesson._count.homeworkRecords}</td>
+                      <td>
+                        <Link
+                          className="text-link compact-link"
+                          href={`/dashboard/classes/${schoolClass.id}/record?lessonId=${lesson.id}`}
+                        >
+                          Edit
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                   {schoolClass.lessons.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>No lessons recorded yet.</td>
+                      <td colSpan={5}>No lessons recorded yet.</td>
                     </tr>
                   ) : null}
                 </tbody>
