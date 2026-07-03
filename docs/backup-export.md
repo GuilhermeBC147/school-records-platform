@@ -13,7 +13,7 @@ Use the filters for teacher, class, student, or lesson date first. The `Export C
 The CSV includes one row per student record with:
 
 - lesson name and date
-- class, level, and teacher
+- class and teacher
 - student and preferred name
 - attendance status
 - homework status

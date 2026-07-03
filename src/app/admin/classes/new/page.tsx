@@ -74,10 +74,6 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
               <input name="name" placeholder="Evening English A2" required type="text" />
             </label>
             <label>
-              <span>Level</span>
-              <input name="level" placeholder="A2" type="text" />
-            </label>
-            <label>
               <span>Book</span>
               <input list="book-options" name="book" placeholder="Book 1" type="text" />
             </label>

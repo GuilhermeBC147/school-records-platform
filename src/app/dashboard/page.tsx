@@ -25,7 +25,6 @@ export default async function DashboardPage() {
     select: {
       id: true,
       name: true,
-      level: true,
       book: true,
       semester: true,
       year: true,
@@ -85,15 +84,14 @@ export default async function DashboardPage() {
           {classes.map((schoolClass) => (
             <article className="panel class-card" key={schoolClass.id}>
               <div>
-                <p className="eyebrow">{schoolClass.level ?? "No level"}</p>
-                <h2>{schoolClass.name}</h2>
-                <p>{schoolClass.teacher.name}</p>
-                <p>
-                  {schoolClass.book ?? "No book"}
+                <p className="eyebrow">
+                  {schoolClass.book ?? "Class"}
                   {schoolClass.semester && schoolClass.year
                     ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
                     : ""}
                 </p>
+                <h2>{schoolClass.name}</h2>
+                <p>{schoolClass.teacher.name}</p>
                 {currentUser.role === "ADMIN" ? (
                   <p>{schoolClass.isActive ? "Active" : "Inactive"}</p>
                 ) : null}

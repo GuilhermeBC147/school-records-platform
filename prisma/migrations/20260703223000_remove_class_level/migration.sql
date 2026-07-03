@@ -1,0 +1,1 @@
+ALTER TABLE "Class" DROP COLUMN "level";

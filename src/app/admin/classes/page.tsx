@@ -39,7 +39,6 @@ export default async function AdminClassesPage({
     select: {
       id: true,
       name: true,
-      level: true,
       book: true,
       semester: true,
       year: true,
@@ -116,10 +115,7 @@ export default async function AdminClassesPage({
               <tbody>
                 {classes.map((schoolClass) => (
                   <tr key={schoolClass.id}>
-                    <td>
-                      {schoolClass.name}
-                      {schoolClass.level ? ` (${schoolClass.level})` : ""}
-                    </td>
+                    <td>{schoolClass.name}</td>
                     <td>{schoolClass.book ?? "-"}</td>
                     <td>{formatTerm(schoolClass.semester, schoolClass.year)}</td>
                     <td>{schoolClass.teacher.name}</td>

@@ -88,7 +88,7 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(dashboardPage, /isActive: true/);
 });
 
-test("admin CSV export includes record filters and student-level rows", async () => {
+test("admin CSV export includes record filters and student rows", async () => {
   const exportRoute = await readProjectFile(
     "src/app/admin/records/export/route.ts",
   );

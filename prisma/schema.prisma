@@ -67,7 +67,6 @@ model PasswordResetToken {
 model Class {
   id        String   @id @default(cuid())
   name      String
-  level     String?
   book      String?
   semester  Int?
   year      Int?

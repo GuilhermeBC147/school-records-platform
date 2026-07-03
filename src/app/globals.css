@@ -545,6 +545,21 @@ input[type="time"],
   width: 18px;
 }
 
+.roster-list {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+}
+
+.roster-student {
+  border-bottom: 1px solid var(--line);
+  padding: 12px;
+}
+
+.roster-student:last-child {
+  border-bottom: 0;
+}
+
 .records-review {
   display: grid;
   gap: 18px;

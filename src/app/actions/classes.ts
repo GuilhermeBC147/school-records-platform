@@ -39,7 +39,6 @@ async function requireAdmin() {
 
 async function readClassForm(formData: FormData) {
   const name = readRequiredString(formData, "name");
-  const level = readOptionalString(formData, "level");
   const book = readOptionalString(formData, "book");
   const semester = readTermNumber(formData, "semester");
   const year = readTermNumber(formData, "year");
@@ -71,7 +70,6 @@ async function readClassForm(formData: FormData) {
   return {
     book,
     isActive,
-    level,
     name,
     semester,
     teacherId,
@@ -120,4 +118,72 @@ export async function updateClassAction(formData: FormData) {
   });
 
   redirect("/admin/classes?status=updated");
+}
+
+export async function updateClassRosterAction(formData: FormData) {
+  await requireAdmin();
+
+  const classId = readRequiredString(formData, "classId");
+  const selectedStudentIds = formData
+    .getAll("studentIds")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  if (!classId) {
+    redirect("/admin/classes");
+  }
+
+  const [schoolClass, activeStudents] = await Promise.all([
+    prisma.class.findUnique({
+      where: { id: classId },
+      select: { id: true },
+    }),
+    prisma.student.findMany({
+      where: {
+        id: { in: selectedStudentIds },
+        isActive: true,
+      },
+      select: { id: true },
+    }),
+  ]);
+
+  if (!schoolClass || activeStudents.length !== selectedStudentIds.length) {
+    redirect(`/admin/classes/${classId}?error=roster`);
+  }
+
+  await prisma.$transaction([
+    prisma.enrollment.updateMany({
+      where: {
+        classId,
+        studentId: { notIn: selectedStudentIds },
+        status: "ACTIVE",
+      },
+      data: {
+        endDate: new Date(),
+        status: "INACTIVE",
+      },
+    }),
+    ...selectedStudentIds.map((studentId) =>
+      prisma.enrollment.upsert({
+        where: {
+          classId_studentId: {
+            classId,
+            studentId,
+          },
+        },
+        create: {
+          classId,
+          studentId,
+          startDate: new Date(),
+          status: "ACTIVE",
+        },
+        update: {
+          endDate: null,
+          status: "ACTIVE",
+        },
+      }),
+    ),
+  ]);
+
+  redirect(`/admin/classes/${classId}?status=roster-updated`);
 }

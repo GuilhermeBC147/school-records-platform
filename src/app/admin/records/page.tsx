@@ -123,7 +123,6 @@ export default async function AdminRecordsPage({
       class: {
         select: {
           name: true,
-          level: true,
           teacher: {
             select: {
               name: true,
@@ -258,9 +257,7 @@ export default async function AdminRecordsPage({
               <article className="panel data-panel record-review" key={lesson.id}>
                 <div className="record-review-header">
                   <div>
-                    <p className="eyebrow">
-                      {lesson.class.level ?? "No level"}
-                    </p>
+                    <p className="eyebrow">Submitted record</p>
                     <h2>{lesson.class.name}</h2>
                     <p>Lesson name: {lesson.name ?? "Untitled lesson"}</p>
                     <p>

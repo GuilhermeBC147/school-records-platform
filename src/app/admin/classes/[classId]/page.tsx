@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { updateClassAction } from "@/app/actions/classes";
+import {
+  updateClassAction,
+  updateClassRosterAction,
+} from "@/app/actions/classes";
 import { logoutAction } from "@/app/actions/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -11,6 +14,7 @@ type EditClassPageProps = {
   }>;
   searchParams: Promise<{
     error?: string;
+    status?: string;
   }>;
 };
 
@@ -29,19 +33,35 @@ export default async function EditClassPage({
   }
 
   const { classId } = await params;
-  const [query, schoolClass, teachers] = await Promise.all([
+  const [query, schoolClass, teachers, students] = await Promise.all([
     searchParams,
     prisma.class.findUnique({
       where: { id: classId },
       select: {
         id: true,
         name: true,
-        level: true,
         book: true,
         semester: true,
         year: true,
         isActive: true,
         teacherId: true,
+        enrollments: {
+          orderBy: {
+            student: { fullName: "asc" },
+          },
+          select: {
+            id: true,
+            status: true,
+            studentId: true,
+            student: {
+              select: {
+                fullName: true,
+                preferredName: true,
+                isActive: true,
+              },
+            },
+          },
+        },
       },
     }),
     prisma.user.findMany({
@@ -53,6 +73,15 @@ export default async function EditClassPage({
       select: {
         id: true,
         name: true,
+      },
+    }),
+    prisma.student.findMany({
+      orderBy: { fullName: "asc" },
+      select: {
+        id: true,
+        fullName: true,
+        preferredName: true,
+        isActive: true,
       },
     }),
   ]);
@@ -92,15 +121,14 @@ export default async function EditClassPage({
               Enter a class name, active teacher, and valid semester/year.
             </p>
           ) : null}
+          {query.status === "roster-updated" ? (
+            <p className="form-success">Class roster updated.</p>
+          ) : null}
           <form action={updateClassAction} className="admin-form">
             <input name="classId" type="hidden" value={schoolClass.id} />
             <label>
               <span>Name</span>
               <input defaultValue={schoolClass.name} name="name" required type="text" />
-            </label>
-            <label>
-              <span>Level</span>
-              <input defaultValue={schoolClass.level ?? ""} name="level" type="text" />
             </label>
             <label>
               <span>Book</span>
@@ -161,6 +189,49 @@ export default async function EditClassPage({
               </Link>
               <button className="primary-button" type="submit">
                 Save class
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="panel data-panel" aria-labelledby="roster-title">
+          {query.error === "roster" ? (
+            <p className="form-error">Choose active students for this roster.</p>
+          ) : null}
+          <h2 id="roster-title">Class roster</h2>
+          <form action={updateClassRosterAction} className="admin-form">
+            <input name="classId" type="hidden" value={schoolClass.id} />
+            <div className="roster-list">
+              {students.map((student) => {
+                const enrollment = schoolClass.enrollments.find(
+                  (item) => item.studentId === student.id,
+                );
+                const isEnrolled = enrollment?.status === "ACTIVE";
+
+                return (
+                  <label className="checkbox-label roster-student" key={student.id}>
+                    <input
+                      defaultChecked={isEnrolled}
+                      disabled={!student.isActive && !isEnrolled}
+                      name="studentIds"
+                      type="checkbox"
+                      value={student.id}
+                    />
+                    <span>
+                      {student.fullName}
+                      {student.preferredName ? ` (${student.preferredName})` : ""}
+                      {student.isActive ? "" : " - inactive"}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            {students.length === 0 ? (
+              <p className="muted-copy">No students have been created yet.</p>
+            ) : null}
+            <div className="record-actions">
+              <button className="primary-button" type="submit">
+                Save roster
               </button>
             </div>
           </form>
