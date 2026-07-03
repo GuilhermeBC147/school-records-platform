@@ -2,36 +2,38 @@
 
 ## Now
 
-- Confirm Git branch and commit workflow.
-- Scaffold the Next.js application.
-- Add setup instructions to the README.
-- Decide whether development database will be local PostgreSQL, Docker PostgreSQL, or hosted PostgreSQL.
+- Add password reset token model.
+- Add forgot password and reset password pages.
+- Add admin teacher account management.
+- Prevent inactive users from logging in.
+- Document production email requirements for password reset.
 
 ## Next
 
-- Add Prisma schema.
-- Add seed data.
-- Add email/password authentication.
-- Add teacher dashboard.
-- Add class record entry page.
-- Add admin review page.
+- Add class fields for book, semester, year, and active status.
+- Add admin class creation and editing.
+- Assign classes to teachers from the admin UI.
+- Show only active classes to teachers.
+- Add admin student creation and editing.
+- Add class roster management.
 
 ## Later
 
-- Add CSV export backup.
-- Add admin search and filtering.
+- Add admin approval workflow for submitted records.
 - Add record edit history.
 - Add class/student archive workflow.
-- Add tests for teacher access control.
-- Add tests for class record submission.
+- Add substitute teacher support.
+- Add bilingual UI labels if needed.
+- Add broader workflow tests around admin setup.
 
 ## Open Questions
 
 - Should an admin approve records before they become final?
-- Should teachers be able to edit a submitted record?
 - What should happen when a class has a substitute teacher?
 - Does the school need Portuguese, English, or bilingual UI labels?
-- What export format does the school need for long-term records?
+- Should password reset emails be sent through the hosting provider, SMTP, or a transactional email service?
+- Should class books be free text or selected from an admin-managed book list?
+- Should semesters be fixed to 1 and 2, or support custom terms?
 
 ## Learning Goals
 

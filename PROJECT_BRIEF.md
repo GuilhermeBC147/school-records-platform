@@ -13,7 +13,7 @@ Teachers currently record attendance and homework completion on paper class reco
 ## Users
 
 - Teacher: records attendance and homework completion for assigned classes.
-- Admin: manages teachers, classes, students, and reviews submitted records.
+- Admin: manages teacher accounts, classes, students, rosters, and reviews submitted records.
 - Future coordinator role: reviews submitted records, if the school needs approval.
 
 ## Goals
@@ -35,7 +35,10 @@ Teachers currently record attendance and homework completion on paper class reco
 ## First Version Scope
 
 - Email/password login.
+- Forgot password and reset password flow.
 - Manual creation of teachers, classes, and students.
+- Admin class setup with teacher assignment, book, semester, year, and active status.
+- Admin class roster setup with enrolled students.
 - Teacher dashboard with assigned classes.
 - Attendance record entry.
 - Homework completion entry.
@@ -56,11 +59,15 @@ Recommended stack:
 ## Key Risks
 
 - Teacher accounts and class assignments need careful access control.
+- Password reset needs a production-ready email path before school use.
+- Admin setup screens need enough validation to avoid broken class rosters.
 - The app needs a clear backup/export strategy before production use.
 
 ## Success Criteria
 
 - A teacher can log in and submit attendance/homework for a manually created class.
+- A teacher can recover account access through a password reset flow.
+- An admin can create teacher accounts, classes, and class rosters.
 - An admin can see submitted records.
 - Submitted records are stored and reviewable in the app.
 - Admins can manage the school data needed for normal class record workflows.

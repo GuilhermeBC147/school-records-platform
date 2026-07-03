@@ -8,9 +8,14 @@ Branch naming:
 
 - `sprint-0-planning`
 - `sprint-1-foundation`
-- `sprint-2-auth-dashboard`
-- `sprint-3-class-records`
-- `sprint-4-admin-records`
+- `sprint-2-data-model`
+- `sprint-3-auth-dashboard`
+- `sprint-4-class-records`
+- `sprint-5-admin-records`
+- `sprint-6-account-management`
+- `sprint-7-class-management`
+- `sprint-8-student-enrollments`
+- `sprint-9-production-readiness`
 
 Commit style:
 
@@ -165,7 +170,87 @@ Done when:
 - Admins can find submitted class records.
 - Admins can export records for backup or reporting.
 
-## Sprint 6: Production Readiness
+## Sprint 6: Account Management
+
+Goal: admins can manage user accounts and staff can recover access safely.
+
+Tasks:
+
+- Add password reset token model.
+- Add forgot password request page.
+- Add reset password page.
+- Add development-safe password reset flow.
+- Document production email provider requirements.
+- Add admin teacher account list.
+- Add admin create teacher account form.
+- Add admin edit teacher account form.
+- Add active/inactive teacher account status.
+- Prevent inactive users from logging in.
+
+Suggested commits:
+
+- `feat: add password reset flow`
+- `feat: add admin teacher management`
+
+Done when:
+
+- A teacher can recover access without a developer editing the database.
+- An admin can create and deactivate teacher accounts.
+- Inactive accounts cannot log in.
+
+## Sprint 7: Class Management
+
+Goal: admins can create and maintain classes assigned to teachers.
+
+Tasks:
+
+- Add class fields for book, semester, and year.
+- Add admin class list.
+- Add admin create class form.
+- Add admin edit class form.
+- Assign a teacher to each class.
+- Set class active/inactive status.
+- Show only active classes on teacher dashboards.
+- Keep inactive classes available to admins for historical records.
+
+Suggested commits:
+
+- `feat: add class metadata`
+- `feat: add admin class management`
+
+Done when:
+
+- An admin can create a class with name, book, semester, year, teacher, and active status.
+- Teachers only see active assigned classes.
+- Admin records remain reviewable for inactive classes.
+
+## Sprint 8: Student and Enrollment Management
+
+Goal: admins can manage students and class rosters.
+
+Tasks:
+
+- Add admin student list.
+- Add admin create student form.
+- Add admin edit student form.
+- Add active/inactive student status controls.
+- Add class roster management page.
+- Add students to a class.
+- Remove or deactivate students from a class roster.
+- Ensure inactive students do not appear in new class record forms.
+
+Suggested commits:
+
+- `feat: add admin student management`
+- `feat: add class roster management`
+
+Done when:
+
+- An admin can create students.
+- An admin can add students to classes.
+- Teachers see the current active roster when submitting a class record.
+
+## Sprint 9: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 
