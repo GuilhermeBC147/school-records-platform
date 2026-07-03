@@ -40,6 +40,10 @@ textarea {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
 .app-shell {
   min-height: 100vh;
 }
@@ -102,6 +106,26 @@ textarea {
   color: #ffffff;
   display: inline-flex;
   padding: 11px 14px;
+}
+
+.primary-button,
+.secondary-button {
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.primary-button {
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: #ffffff;
+  padding: 12px 14px;
+}
+
+.secondary-button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--foreground);
+  padding: 9px 12px;
 }
 
 .primary-link:hover,
@@ -233,6 +257,125 @@ h1 {
   margin-top: 3px;
 }
 
+.auth-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.auth-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  width: min(460px, 100%);
+  padding: 32px;
+}
+
+.auth-panel h1 {
+  font-size: 32px;
+}
+
+.form-stack {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.form-stack label {
+  display: grid;
+  gap: 7px;
+}
+
+.form-stack label span {
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-stack input {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--foreground);
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.form-error {
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  border-radius: 6px;
+  background: rgba(185, 28, 28, 0.08);
+  color: #991b1b;
+  font-size: 14px;
+  margin: 18px 0 0;
+  padding: 10px 12px;
+}
+
+.demo-credentials {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
+  margin-top: 24px;
+  padding-top: 18px;
+}
+
+.demo-credentials strong {
+  font-size: 14px;
+}
+
+.demo-credentials span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.class-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.class-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.class-card h2 {
+  margin-bottom: 6px;
+}
+
+.class-card p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.class-card dl {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.class-card dl div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.class-card dt {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.class-card dd {
+  color: var(--brand);
+  font-size: 24px;
+  font-weight: 800;
+  margin: 4px 0 0;
+}
+
 .data-page {
   display: grid;
   gap: 24px;
@@ -309,7 +452,8 @@ th {
   .workspace,
   .workflow,
   .metric-grid,
-  .data-grid {
+  .data-grid,
+  .class-grid {
     grid-template-columns: 1fr;
   }
 

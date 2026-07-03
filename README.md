@@ -35,6 +35,20 @@ Development data preview:
 http://localhost:3000/admin/data
 ```
 
+Teacher dashboard:
+
+```text
+http://localhost:3000/login
+```
+
+Development accounts use `password123`:
+
+```text
+admin@example.com
+ana@example.com
+bruno@example.com
+```
+
 Useful commands:
 
 ```powershell
