@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -83,6 +84,9 @@ export default async function DashboardPage() {
                   <dd>{schoolClass._count.lessons}</dd>
                 </div>
               </dl>
+              <Link className="text-link" href={`/dashboard/classes/${schoolClass.id}`}>
+                Open class
+              </Link>
             </article>
           ))}
         </section>

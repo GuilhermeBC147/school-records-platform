@@ -376,6 +376,21 @@ h1 {
   margin: 4px 0 0;
 }
 
+.class-detail-hero {
+  display: grid;
+  gap: 24px;
+}
+
+.class-detail-hero .text-link {
+  display: inline-flex;
+  margin-bottom: 18px;
+}
+
+.compact-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0;
+}
+
 .data-page {
   display: grid;
   gap: 24px;
