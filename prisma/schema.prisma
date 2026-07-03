@@ -46,7 +46,22 @@ model User {
   updatedAt    DateTime @updatedAt
 
   classes          Class[]  @relation("TeacherClasses")
+  passwordResetTokens PasswordResetToken[]
   submittedLessons Lesson[] @relation("SubmittedBy")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Class {

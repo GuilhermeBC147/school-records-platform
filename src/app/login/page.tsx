@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
 import { getCurrentUser } from "@/lib/session";
 
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
+    reset?: string;
   }>;
 };
 
@@ -36,6 +38,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </p>
 
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
+        {params.reset === "success" ? (
+          <p className="form-success">Password updated. Sign in again.</p>
+        ) : null}
 
         <form action={loginAction} className="form-stack">
           <label>
@@ -64,6 +69,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Sign in
           </button>
         </form>
+
+        <Link className="text-link" href="/forgot-password">
+          Forgot your password?
+        </Link>
 
         <div className="demo-credentials">
           <strong>Development accounts</strong>

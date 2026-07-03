@@ -321,7 +321,8 @@ input[type="time"],
   width: 100%;
 }
 
-.form-error {
+.form-error,
+.form-success {
   border: 1px solid rgba(185, 28, 28, 0.25);
   border-radius: 6px;
   background: rgba(185, 28, 28, 0.08);
@@ -329,6 +330,25 @@ input[type="time"],
   font-size: 14px;
   margin: 18px 0 0;
   padding: 10px 12px;
+}
+
+.form-success {
+  border-color: rgba(40, 125, 79, 0.25);
+  background: rgba(40, 125, 79, 0.08);
+  color: var(--success);
+}
+
+.dev-reset-link {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 12px;
+}
+
+.dev-reset-link strong {
+  font-size: 14px;
 }
 
 .demo-credentials {
@@ -493,6 +513,33 @@ input[type="time"],
   align-items: center;
   display: flex;
   gap: 10px;
+}
+
+.admin-form {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-form label span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.checkbox-label {
+  align-items: center;
+  display: flex !important;
+  gap: 10px !important;
+}
+
+.checkbox-label input {
+  height: 18px;
+  width: 18px;
 }
 
 .records-review {
