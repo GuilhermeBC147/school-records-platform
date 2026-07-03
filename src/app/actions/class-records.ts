@@ -18,31 +18,46 @@ function readStatus<T extends readonly string[]>(
 }
 
 function readLessonDate(formData: FormData) {
-  const value = String(formData.get("lessonDate") ?? "");
+  const dateValue = String(formData.get("lessonDate") ?? "");
+  const timeValue = String(formData.get("lessonTime") ?? "");
 
-  if (!value) {
+  if (!dateValue) {
     throw new Error("Lesson date is required.");
   }
 
-  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{2}|\d{4})$/);
+  if (!timeValue) {
+    throw new Error("Lesson time is required.");
+  }
 
-  if (!match) {
+  const dateMatch = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{2}|\d{4})$/);
+  const timeMatch = timeValue.match(/^(\d{2}):(\d{2})$/);
+
+  if (!dateMatch) {
     throw new Error("Lesson date must use DD/MM/YY format.");
   }
 
-  const [, dayValue, monthValue, yearValue] = match;
+  if (!timeMatch) {
+    throw new Error("Lesson time must use HH:MM format.");
+  }
+
+  const [, dayValue, monthValue, yearValue] = dateMatch;
+  const [, hourValue, minuteValue] = timeMatch;
   const day = Number(dayValue);
   const month = Number(monthValue);
   const year =
     yearValue.length === 2 ? Number(`20${yearValue}`) : Number(yearValue);
-  const lessonDate = new Date(Date.UTC(year, month - 1, day));
+  const hours = Number(hourValue);
+  const minutes = Number(minuteValue);
+  const lessonDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
 
   if (
     lessonDate.getUTCFullYear() !== year ||
     lessonDate.getUTCMonth() !== month - 1 ||
-    lessonDate.getUTCDate() !== day
+    lessonDate.getUTCDate() !== day ||
+    lessonDate.getUTCHours() !== hours ||
+    lessonDate.getUTCMinutes() !== minutes
   ) {
-    throw new Error("Lesson date is invalid.");
+    throw new Error("Lesson date or time is invalid.");
   }
 
   return lessonDate;
@@ -59,6 +74,7 @@ async function persistClassRecord(
   }
 
   const classId = String(formData.get("classId") ?? "");
+  const lessonId = String(formData.get("lessonId") ?? "");
   const lessonDate = readLessonDate(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
@@ -84,18 +100,52 @@ async function persistClassRecord(
   }
 
   await prisma.$transaction(async (transaction) => {
-    const existingLesson = await transaction.lesson.findUnique({
-      where: {
-        classId_lessonDate: { classId, lessonDate },
-      },
-      select: {
-        id: true,
-        status: true,
-      },
-    });
+    const existingLesson = lessonId
+      ? await transaction.lesson.findFirst({
+          where: {
+            id: lessonId,
+            classId,
+          },
+          select: {
+            id: true,
+            lessonDate: true,
+            status: true,
+          },
+        })
+      : await transaction.lesson.findUnique({
+          where: {
+            classId_lessonDate: { classId, lessonDate },
+          },
+          select: {
+            id: true,
+            lessonDate: true,
+            status: true,
+          },
+        });
 
-    if (existingLesson?.status === "SUBMITTED") {
+    if (!existingLesson && lessonId) {
       return;
+    }
+
+    if (!lessonId && existingLesson?.status === "SUBMITTED") {
+      return;
+    }
+
+    if (
+      lessonId &&
+      existingLesson &&
+      existingLesson.lessonDate.getTime() !== lessonDate.getTime()
+    ) {
+      const conflictingLesson = await transaction.lesson.findUnique({
+        where: {
+          classId_lessonDate: { classId, lessonDate },
+        },
+        select: { id: true },
+      });
+
+      if (conflictingLesson && conflictingLesson.id !== existingLesson.id) {
+        return;
+      }
     }
 
     const submissionFields =
@@ -113,6 +163,7 @@ async function persistClassRecord(
       ? await transaction.lesson.update({
           where: { id: existingLesson.id },
           data: {
+            lessonDate,
             notes,
             status,
             ...submissionFields,
