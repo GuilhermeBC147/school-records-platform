@@ -9,7 +9,7 @@ Teachers, classes, students, lessons, attendance, and homework are stored in the
 ## Main Tables
 
 - `User`: login account for admins and teachers.
-- `Class`: a school class assigned to one teacher.
+- `Class`: a school class assigned to one teacher, with book, semester, year, and active status.
 - `Student`: a learner who can be enrolled in one or more classes.
 - `Enrollment`: the connection between a student and a class.
 - `Lesson`: one named class session at a specific date and time.
@@ -19,6 +19,8 @@ Teachers, classes, students, lessons, attendance, and homework are stored in the
 ## Important Rules
 
 - A class belongs to one teacher for the first version.
+- Teachers only see active assigned classes.
+- Admins can keep inactive classes for historical record review.
 - A student can be enrolled in multiple classes.
 - A class can have multiple lessons on the same date, but only one lesson for the same exact date and time.
 - A student can have only one attendance record per lesson.

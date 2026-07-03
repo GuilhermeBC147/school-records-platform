@@ -69,6 +69,25 @@ test("account management supports reset tokens and admin teacher setup", async (
   assert.match(teachersPage, /Create teacher/);
 });
 
+test("class management supports metadata and active teacher assignment", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const classActions = await readProjectFile("src/app/actions/classes.ts");
+  const classesPage = await readProjectFile("src/app/admin/classes/page.tsx");
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+
+  assert.match(schema, /book\s+String\?/);
+  assert.match(schema, /semester\s+Int\?/);
+  assert.match(schema, /year\s+Int\?/);
+  assert.match(classActions, /createClassAction/);
+  assert.match(classActions, /updateClassAction/);
+  assert.match(classActions, /role: "TEACHER"/);
+  assert.match(classActions, /isActive: true/);
+  assert.match(classesPage, /Create class/);
+  assert.match(classesPage, /Semester/);
+  assert.match(dashboardPage, /currentUser\.role === "TEACHER"/);
+  assert.match(dashboardPage, /isActive: true/);
+});
+
 test("admin CSV export includes record filters and student-level rows", async () => {
   const exportRoute = await readProjectFile(
     "src/app/admin/records/export/route.ts",

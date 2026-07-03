@@ -68,6 +68,9 @@ export default async function ClassRecordPage({
       id: true,
       name: true,
       level: true,
+      book: true,
+      semester: true,
+      year: true,
       teacher: {
         select: { name: true },
       },
@@ -153,6 +156,12 @@ export default async function ClassRecordPage({
           </h1>
           <p className="lede">
             {schoolClass.name} with {schoolClass.teacher.name}
+          </p>
+          <p className="muted-copy">
+            {schoolClass.book ?? "No book"}
+            {schoolClass.semester && schoolClass.year
+              ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+              : ""}
           </p>
         </section>
 
