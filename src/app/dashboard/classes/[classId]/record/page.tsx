@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { submitClassRecordAction } from "@/app/actions/class-records";
 import { logoutAction } from "@/app/actions/auth";
+import { formatShortDateInput } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -14,7 +15,7 @@ type ClassRecordPageProps = {
 };
 
 function todayInputValue() {
-  return new Date().toISOString().slice(0, 10);
+  return formatShortDateInput(new Date());
 }
 
 export default async function ClassRecordPage({ params }: ClassRecordPageProps) {
@@ -96,7 +97,16 @@ export default async function ClassRecordPage({ params }: ClassRecordPageProps) 
           <section className="panel record-settings" aria-label="Lesson details">
             <label>
               <span>Lesson date</span>
-              <input defaultValue={todayInputValue()} name="lessonDate" required type="date" />
+              <input
+                className="date-input"
+                defaultValue={todayInputValue()}
+                inputMode="numeric"
+                name="lessonDate"
+                pattern="[0-9]{2}/[0-9]{2}/[0-9]{2,4}"
+                placeholder="DD/MM/YY"
+                required
+                type="text"
+              />
             </label>
             <label>
               <span>Notes</span>
