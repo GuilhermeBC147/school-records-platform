@@ -24,10 +24,34 @@ function readLessonDate(formData: FormData) {
     throw new Error("Lesson date is required.");
   }
 
-  return new Date(`${value}T00:00:00.000Z`);
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{2}|\d{4})$/);
+
+  if (!match) {
+    throw new Error("Lesson date must use DD/MM/YY format.");
+  }
+
+  const [, dayValue, monthValue, yearValue] = match;
+  const day = Number(dayValue);
+  const month = Number(monthValue);
+  const year =
+    yearValue.length === 2 ? Number(`20${yearValue}`) : Number(yearValue);
+  const lessonDate = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    lessonDate.getUTCFullYear() !== year ||
+    lessonDate.getUTCMonth() !== month - 1 ||
+    lessonDate.getUTCDate() !== day
+  ) {
+    throw new Error("Lesson date is invalid.");
+  }
+
+  return lessonDate;
 }
 
-export async function submitClassRecordAction(formData: FormData) {
+async function persistClassRecord(
+  formData: FormData,
+  status: "DRAFT" | "SUBMITTED",
+) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -60,31 +84,51 @@ export async function submitClassRecordAction(formData: FormData) {
   }
 
   await prisma.$transaction(async (transaction) => {
-    const lesson = await transaction.lesson.upsert({
+    const existingLesson = await transaction.lesson.findUnique({
       where: {
-        classId_lessonDate: {
-          classId,
-          lessonDate,
-        },
-      },
-      create: {
-        classId,
-        lessonDate,
-        notes,
-        status: "SUBMITTED",
-        submittedAt: new Date(),
-        submittedById: currentUser.id,
-      },
-      update: {
-        notes,
-        status: "SUBMITTED",
-        submittedAt: new Date(),
-        submittedById: currentUser.id,
+        classId_lessonDate: { classId, lessonDate },
       },
       select: {
         id: true,
+        status: true,
       },
     });
+
+    if (existingLesson?.status === "SUBMITTED") {
+      return;
+    }
+
+    const submissionFields =
+      status === "SUBMITTED"
+        ? {
+            submittedAt: new Date(),
+            submittedById: currentUser.id,
+          }
+        : {
+            submittedAt: null,
+            submittedById: null,
+          };
+
+    const lesson = existingLesson
+      ? await transaction.lesson.update({
+          where: { id: existingLesson.id },
+          data: {
+            notes,
+            status,
+            ...submissionFields,
+          },
+          select: { id: true },
+        })
+      : await transaction.lesson.create({
+          data: {
+            classId,
+            lessonDate,
+            notes,
+            status,
+            ...submissionFields,
+          },
+          select: { id: true },
+        });
 
     for (const enrollment of schoolClass.enrollments) {
       const attendanceStatus = readStatus(
@@ -137,4 +181,12 @@ export async function submitClassRecordAction(formData: FormData) {
   });
 
   redirect(`/dashboard/classes/${classId}`);
+}
+
+export async function saveDraftClassRecordAction(formData: FormData) {
+  await persistClassRecord(formData, "DRAFT");
+}
+
+export async function submitClassRecordAction(formData: FormData) {
+  await persistClassRecord(formData, "SUBMITTED");
 }

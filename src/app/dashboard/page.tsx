@@ -64,6 +64,13 @@ export default async function DashboardPage() {
             This is the first protected page. It already uses your login session
             to decide which classes you can see.
           </p>
+          {currentUser.role === "ADMIN" ? (
+            <div className="action-row">
+              <Link className="primary-link" href="/admin/records">
+                Review submitted records
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         <section className="class-grid" aria-label="Assigned classes">
