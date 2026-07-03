@@ -112,6 +112,11 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
             <p className="lede">
               Teacher: {schoolClass.teacher.name} ({schoolClass.teacher.email})
             </p>
+            <div className="action-row">
+              <Link className="primary-link" href={`/dashboard/classes/${schoolClass.id}/record`}>
+                New class record
+              </Link>
+            </div>
           </div>
 
           <div className="metric-grid compact-metrics" aria-label="Class totals">
