@@ -53,6 +53,22 @@ test("admin records and export routes require admin sessions", async () => {
   }
 });
 
+test("account management supports reset tokens and admin teacher setup", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const accountActions = await readProjectFile("src/app/actions/accounts.ts");
+  const teachersPage = await readProjectFile("src/app/admin/teachers/page.tsx");
+
+  assert.match(schema, /model PasswordResetToken/);
+  assert.match(schema, /tokenHash\s+String\s+@unique/);
+  assert.match(accountActions, /requestPasswordResetAction/);
+  assert.match(accountActions, /resetPasswordAction/);
+  assert.match(accountActions, /createTeacherAction/);
+  assert.match(accountActions, /updateTeacherAction/);
+  assert.match(accountActions, /role: "TEACHER"/);
+  assert.match(accountActions, /isActive/);
+  assert.match(teachersPage, /Create teacher/);
+});
+
 test("admin CSV export includes record filters and student-level rows", async () => {
   const exportRoute = await readProjectFile(
     "src/app/admin/records/export/route.ts",

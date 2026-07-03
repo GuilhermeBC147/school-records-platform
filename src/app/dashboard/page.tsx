@@ -66,6 +66,9 @@ export default async function DashboardPage() {
           </p>
           {currentUser.role === "ADMIN" ? (
             <div className="action-row">
+              <Link className="primary-link" href="/admin/teachers">
+                Manage teachers
+              </Link>
               <Link className="primary-link" href="/admin/records">
                 Review submitted records
               </Link>
