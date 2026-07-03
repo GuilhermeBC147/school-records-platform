@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const workflowSteps = [
   {
     label: "Step 1",
@@ -55,6 +57,11 @@ export default function Home() {
               This app will help teachers record class information digitally,
               store it safely, and make records easier for admins to review.
             </p>
+            <div className="action-row">
+              <Link className="primary-link" href="/admin/data">
+                View database preview
+              </Link>
+            </div>
 
             <div className="workflow" aria-label="Product workflow">
               {workflowSteps.map((step) => (
