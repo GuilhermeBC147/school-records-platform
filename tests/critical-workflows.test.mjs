@@ -1,0 +1,81 @@
+import { readFile } from "node:fs/promises";
+import assert from "node:assert/strict";
+import test from "node:test";
+
+const root = new URL("../", import.meta.url);
+
+async function readProjectFile(path) {
+  return readFile(new URL(path, root), "utf8");
+}
+
+test("teacher class pages restrict class access to assigned teachers", async () => {
+  const dashboard = await readProjectFile("src/app/dashboard/page.tsx");
+  const classDetail = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/page.tsx",
+  );
+  const recordForm = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/record/page.tsx",
+  );
+
+  assert.match(dashboard, /currentUser\.role === "TEACHER"/);
+  assert.match(dashboard, /teacherId: currentUser\.id/);
+  assert.match(classDetail, /currentUser\.role === "TEACHER"/);
+  assert.match(classDetail, /teacherId: currentUser\.id/);
+  assert.match(recordForm, /currentUser\.role === "TEACHER"/);
+  assert.match(recordForm, /teacherId: currentUser\.id/);
+});
+
+test("class record submission protects duplicate and unauthorized writes", async () => {
+  const action = await readProjectFile("src/app/actions/class-records.ts");
+
+  assert.match(action, /getCurrentUser/);
+  assert.match(action, /redirect\("\/login"\)/);
+  assert.match(action, /teacherId: currentUser\.id/);
+  assert.match(action, /lessonName/);
+  assert.match(action, /lessonTime/);
+  assert.match(action, /status === "SUBMITTED"/);
+  assert.match(action, /existingLesson\?\.status === "SUBMITTED"/);
+  assert.match(action, /prisma\.\$transaction/);
+});
+
+test("admin records and export routes require admin sessions", async () => {
+  const listPage = await readProjectFile("src/app/admin/records/page.tsx");
+  const detailPage = await readProjectFile(
+    "src/app/admin/records/[lessonId]/page.tsx",
+  );
+  const exportRoute = await readProjectFile(
+    "src/app/admin/records/export/route.ts",
+  );
+
+  for (const source of [listPage, detailPage, exportRoute]) {
+    assert.match(source, /getCurrentUser/);
+    assert.match(source, /currentUser\.role !== "ADMIN"/);
+  }
+});
+
+test("admin CSV export includes record filters and student-level rows", async () => {
+  const exportRoute = await readProjectFile(
+    "src/app/admin/records/export/route.ts",
+  );
+
+  assert.match(exportRoute, /classId/);
+  assert.match(exportRoute, /teacherId/);
+  assert.match(exportRoute, /studentId/);
+  assert.match(exportRoute, /readFilterDate/);
+  assert.match(exportRoute, /text\/csv/);
+  assert.match(exportRoute, /lesson_name/);
+  assert.match(exportRoute, /attendance/);
+  assert.match(exportRoute, /homework/);
+});
+
+test("production handoff documents deployment, backups, and smoke tests", async () => {
+  const productionDoc = await readProjectFile("docs/production-readiness.md");
+  const backupDoc = await readProjectFile("docs/backup-export.md");
+
+  assert.match(productionDoc, /DATABASE_URL/);
+  assert.match(productionDoc, /AUTH_SECRET/);
+  assert.match(productionDoc, /prisma migrate deploy/);
+  assert.match(productionDoc, /automated backups/);
+  assert.match(productionDoc, /Release Smoke Test/);
+  assert.match(backupDoc, /Export CSV/);
+});

@@ -54,6 +54,7 @@ Useful commands:
 ```powershell
 npm.cmd run dev
 npm.cmd run build
+npm.cmd run test
 npm.cmd run typecheck
 npm.cmd run prisma:validate
 npm.cmd run db:seed
@@ -103,3 +104,4 @@ The project is being built sprint by sprint as a learning-focused product. See:
 - [SPRINTS.md](SPRINTS.md)
 - [BACKLOG.md](BACKLOG.md)
 - [docs/backup-export.md](docs/backup-export.md)
+- [docs/production-readiness.md](docs/production-readiness.md)
