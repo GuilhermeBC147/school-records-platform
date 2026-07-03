@@ -91,41 +91,46 @@ button {
 
 .text-link,
 .primary-link {
+  align-items: center;
   border-radius: 6px;
+  display: inline-flex;
   font-size: 14px;
   font-weight: 700;
+  justify-content: center;
+  min-height: 44px;
   text-decoration: none;
 }
 
 .text-link {
   color: var(--brand);
+  padding: 10px 6px;
 }
 
 .primary-link {
   background: var(--brand);
   color: #ffffff;
-  display: inline-flex;
-  padding: 11px 14px;
+  padding: 12px 18px;
 }
 
 .primary-button,
 .secondary-button {
   border-radius: 6px;
   font-weight: 700;
+  min-height: 44px;
 }
 
 .primary-button {
   border: 1px solid var(--brand);
   background: var(--brand);
   color: #ffffff;
-  padding: 12px 14px;
+  padding: 12px 18px;
 }
 
 .secondary-button {
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--foreground);
-  padding: 9px 12px;
+  padding: 11px 16px;
 }
 
 .primary-link:hover,
@@ -297,6 +302,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--foreground);
+  min-height: 46px;
   padding: 11px 12px;
   width: 100%;
 }
@@ -307,7 +313,8 @@ input[type="date"] {
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--foreground);
-  padding: 10px 12px;
+  min-height: 46px;
+  padding: 11px 12px;
   width: 100%;
 }
 
