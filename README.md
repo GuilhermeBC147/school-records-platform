@@ -29,6 +29,12 @@ Then open:
 http://localhost:3000
 ```
 
+Development data preview:
+
+```text
+http://localhost:3000/admin/data
+```
+
 Useful commands:
 
 ```powershell
