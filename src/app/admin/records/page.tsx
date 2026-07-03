@@ -23,6 +23,7 @@ export default async function AdminRecordsPage() {
     orderBy: [{ lessonDate: "desc" }, { updatedAt: "desc" }],
     select: {
       id: true,
+      name: true,
       lessonDate: true,
       notes: true,
       submittedAt: true,
@@ -112,6 +113,7 @@ export default async function AdminRecordsPage() {
                       {lesson.class.level ?? "No level"}
                     </p>
                     <h2>{lesson.class.name}</h2>
+                    <p>Lesson name: {lesson.name ?? "Untitled lesson"}</p>
                     <p>
                       Lesson: {formatShortDateTime(lesson.lessonDate)}
                       {" | "}

@@ -97,6 +97,7 @@ model Enrollment {
 
 model Lesson {
   id          String       @id @default(cuid())
+  name        String?
   lessonDate  DateTime
   status      LessonStatus @default(DRAFT)
   notes       String?

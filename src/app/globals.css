@@ -309,7 +309,9 @@ h1 {
 
 textarea,
 select,
+input[type="text"],
 input[type="date"],
+input[type="time"],
 .date-input {
   border: 1px solid var(--line);
   border-radius: 6px;
