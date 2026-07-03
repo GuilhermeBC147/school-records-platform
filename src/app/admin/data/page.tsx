@@ -1,14 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { formatShortDateTime } from "@/lib/date-format";
 
 export const dynamic = "force-dynamic";
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
 
 export default async function AdminDataPage() {
   const [teachers, classes, students, recentLessons] = await Promise.all([
@@ -210,7 +204,7 @@ export default async function AdminDataPage() {
                 <tbody>
                   {recentLessons.map((lesson) => (
                     <tr key={lesson.id}>
-                      <td>{formatDate(lesson.lessonDate)}</td>
+                      <td>{formatShortDateTime(lesson.lessonDate)}</td>
                       <td>{lesson.class.name}</td>
                       <td>{lesson.status}</td>
                       <td>{lesson.submittedBy?.name ?? "-"}</td>

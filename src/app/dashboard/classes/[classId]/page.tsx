@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
+import { formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -11,13 +12,6 @@ type ClassDetailPageProps = {
     classId: string;
   }>;
 };
-
-function formatLessonDate(date: Date) {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
 
 export default async function ClassDetailPage({ params }: ClassDetailPageProps) {
   const currentUser = await getCurrentUser();
@@ -171,7 +165,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                 <tbody>
                   {schoolClass.lessons.map((lesson) => (
                     <tr key={lesson.id}>
-                      <td>{formatLessonDate(lesson.lessonDate)}</td>
+                      <td>{formatShortDateTime(lesson.lessonDate)}</td>
                       <td>{lesson.status}</td>
                       <td>{lesson._count.attendanceRecords}</td>
                       <td>{lesson._count.homeworkRecords}</td>
