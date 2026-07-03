@@ -58,6 +58,9 @@ export default function Home() {
               store it safely, and make records easier for admins to review.
             </p>
             <div className="action-row">
+              <Link className="primary-link" href="/login">
+                Sign in
+              </Link>
               <Link className="primary-link" href="/admin/data">
                 View database preview
               </Link>

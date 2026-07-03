@@ -15,7 +15,7 @@ INSERT INTO "User" (
     'user_admin_demo',
     'Admin Demo',
     'admin@example.com',
-    'dev-password-placeholder',
+    'pbkdf2_sha256$120000$dev_seed_auth_salt_v1$bvo_8hrvWUEeSseYrGHL0b6gtOps5XcKYzUVKPSbWCU',
     'ADMIN',
     true,
     CURRENT_TIMESTAMP,
@@ -25,7 +25,7 @@ INSERT INTO "User" (
     'user_teacher_ana',
     'Ana Martins',
     'ana@example.com',
-    'dev-password-placeholder',
+    'pbkdf2_sha256$120000$dev_seed_auth_salt_v1$bvo_8hrvWUEeSseYrGHL0b6gtOps5XcKYzUVKPSbWCU',
     'TEACHER',
     true,
     CURRENT_TIMESTAMP,
@@ -35,7 +35,7 @@ INSERT INTO "User" (
     'user_teacher_bruno',
     'Bruno Costa',
     'bruno@example.com',
-    'dev-password-placeholder',
+    'pbkdf2_sha256$120000$dev_seed_auth_salt_v1$bvo_8hrvWUEeSseYrGHL0b6gtOps5XcKYzUVKPSbWCU',
     'TEACHER',
     true,
     CURRENT_TIMESTAMP,
@@ -43,6 +43,7 @@ INSERT INTO "User" (
   )
 ON CONFLICT ("email") DO UPDATE SET
   "name" = EXCLUDED."name",
+  "passwordHash" = EXCLUDED."passwordHash",
   "role" = EXCLUDED."role",
   "isActive" = EXCLUDED."isActive",
   "updatedAt" = CURRENT_TIMESTAMP;
