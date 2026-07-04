@@ -9,6 +9,7 @@ datasource db {
 
 enum UserRole {
   ADMIN
+  RECEPTION
   TEACHER
 }
 
@@ -72,6 +73,12 @@ enum TeacherWorkCategory {
   OTHER
 }
 
+enum BonusClassStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
 enum Weekday {
   MONDAY
   TUESDAY
@@ -93,12 +100,14 @@ model User {
   updatedAt    DateTime @updatedAt
 
   classes             Class[]              @relation("TeacherClasses")
+  createdBonusClasses BonusClass[]         @relation("CreatedBonusClasses")
   createdWorkLogs     TeacherWorkLog[]     @relation("CreatedTeacherWorkLogs")
   passwordResetTokens PasswordResetToken[]
   submittedLessons    Lesson[]             @relation("SubmittedBy")
   resolvedRiskRecords StudentRiskResolution[] @relation("ResolvedRiskRecords")
   reviewedSubstitutions Lesson[]           @relation("ReviewedSubstitutions")
   taughtLessons       Lesson[]             @relation("TaughtBy")
+  taughtBonusClasses  BonusClass[]         @relation("TaughtBonusClasses")
   teacherWorkLogs     TeacherWorkLog[]     @relation("TeacherWorkLogs")
 }
 
@@ -148,6 +157,7 @@ model Student {
 
   enrollments             Enrollment[]
   attendanceRecords       AttendanceRecord[]
+  bonusClasses            BonusClass[]
   homeworkRecords         HomeworkRecord[]
   partialEvaluationGrades PartialEvaluationGrade[]
   riskResolutions         StudentRiskResolution[]
@@ -240,6 +250,31 @@ model TeacherWorkLog {
 
   @@index([teacherId, workDate])
   @@index([createdById])
+}
+
+model BonusClass {
+  id              String           @id @default(cuid())
+  subject         String
+  scheduledDate   DateTime
+  startTime       String
+  durationMinutes Int
+  status          BonusClassStatus @default(SCHEDULED)
+  notes           String?
+  completedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  studentId   String
+  student     Student @relation(fields: [studentId], references: [id])
+  teacherId   String
+  teacher     User    @relation("TaughtBonusClasses", fields: [teacherId], references: [id])
+  createdById String
+  createdBy   User    @relation("CreatedBonusClasses", fields: [createdById], references: [id])
+
+  @@index([createdById])
+  @@index([studentId])
+  @@index([teacherId, scheduledDate])
+  @@index([status])
 }
 
 model AttendanceRecord {

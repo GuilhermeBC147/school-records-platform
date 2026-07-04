@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
+import { formatStartTime } from "@/lib/bonus-classes";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import {
@@ -134,6 +135,7 @@ export default async function AdminWorkSummaryPage({
                   <h2>{summary.teacher.name}</h2>
                   <p className="muted-copy">
                     {summary.lessons.length} lessons and{" "}
+                    {summary.bonusClasses.length} bonus classes and{" "}
                     {summary.workLogs.length} paid activities.
                     {summary.pendingSubstituteLessons.length > 0
                       ? ` ${summary.pendingSubstituteLessons.length} substitute lessons pending approval.`
@@ -154,6 +156,14 @@ export default async function AdminWorkSummaryPage({
                 <article className="metric">
                   <span>{formatHours(summary.lessonMinutes)}</span>
                   <strong>Lesson hours</strong>
+                </article>
+                <article className="metric">
+                  <span>{summary.bonusClasses.length}</span>
+                  <strong>Bonus classes</strong>
+                </article>
+                <article className="metric">
+                  <span>{formatHours(summary.bonusClassMinutes)}</span>
+                  <strong>Bonus hours</strong>
                 </article>
                 <article className="metric">
                   <span>{summary.workLogs.length}</span>
@@ -194,6 +204,19 @@ export default async function AdminWorkSummaryPage({
                         <td>Class record</td>
                       </tr>
                     ))}
+                    {summary.bonusClasses.map((bonusClass) => (
+                      <tr key={bonusClass.id}>
+                        <td>Completed bonus class</td>
+                        <td>{formatShortDate(bonusClass.scheduledDate)}</td>
+                        <td>
+                          {bonusClass.student.fullName} | {bonusClass.subject} |{" "}
+                          {formatStartTime(bonusClass.startTime)}
+                        </td>
+                        <td>{bonusClass.subject}</td>
+                        <td>{bonusClass.durationMinutes}</td>
+                        <td>Reception schedule</td>
+                      </tr>
+                    ))}
                     {summary.workLogs.map((workLog) => (
                       <tr key={workLog.id}>
                         <td>{formatTeacherWorkCategory(workLog.category)}</td>
@@ -217,6 +240,7 @@ export default async function AdminWorkSummaryPage({
                       </tr>
                     ))}
                     {summary.lessons.length +
+                      summary.bonusClasses.length +
                       summary.workLogs.length +
                       summary.pendingSubstituteLessons.length ===
                     0 ? (

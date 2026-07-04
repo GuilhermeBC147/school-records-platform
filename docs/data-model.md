@@ -20,6 +20,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - `PartialEvaluationGrade`: one student's partial evaluation grade for the 7th or 23rd class.
 - `TestGrade`: one student's Mid-term or Final test grade.
 - `TeacherWorkLog`: one paid non-class activity counted for a teacher's monthly work summary.
+- `BonusClass`: one independently scheduled bonus class assigned to a teacher.
 
 ## Important Rules
 
@@ -45,12 +46,16 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Teacher work logs store category, title, optional subject, date, optional start time, duration, notes, counted teacher, and creator.
 - Bonus class work logs require a subject so monthly summaries show what the class covered.
 - Work log categories are bonus class, extra activity, meeting, and other.
+- Reception accounts can schedule independent bonus classes with student, subject, teacher, date, start time, duration, and notes.
+- Scheduled bonus classes cannot overlap another non-canceled bonus class for the same teacher on the same date.
+- Completed scheduled bonus classes count toward the assigned teacher's monthly work summary.
 
 ## Teacher Work Summaries
 
-Teacher monthly work summaries are computed from two sources:
+Teacher monthly work summaries are computed from three sources:
 
 - Submitted regular lessons during the month.
+- Completed scheduled bonus classes during the month.
 - Manual teacher work logs during the month.
 
 Regular lessons count automatically for the class's assigned teacher. Approved substitute lessons count for the teacher stored on the lesson as `taughtBy`; pending substitute lessons are visible in summaries but excluded from finalized totals.

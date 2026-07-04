@@ -45,6 +45,7 @@ Development accounts use `password123`:
 
 ```text
 admin@example.com
+reception@example.com
 ana@example.com
 bruno@example.com
 ```

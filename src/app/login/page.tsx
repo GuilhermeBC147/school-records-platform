@@ -77,6 +77,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="demo-credentials">
           <strong>Development accounts</strong>
           <span>admin@example.com / password123</span>
+          <span>reception@example.com / password123</span>
           <span>ana@example.com / password123</span>
           <span>bruno@example.com / password123</span>
         </div>

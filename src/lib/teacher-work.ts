@@ -62,7 +62,7 @@ export async function getTeacherWorkSummary({
     return null;
   }
 
-  const [lessons, workLogs] = await Promise.all([
+  const [lessons, bonusClasses, workLogs] = await Promise.all([
     prisma.lesson.findMany({
       where: {
         lessonDate: {
@@ -98,6 +98,29 @@ export async function getTeacherWorkSummary({
                 name: true,
               },
             },
+          },
+        },
+      },
+    }),
+    prisma.bonusClass.findMany({
+      where: {
+        scheduledDate: {
+          gte: start,
+          lt: end,
+        },
+        status: "COMPLETED",
+        teacherId,
+      },
+      orderBy: [{ scheduledDate: "asc" }, { startTime: "asc" }],
+      select: {
+        id: true,
+        durationMinutes: true,
+        scheduledDate: true,
+        startTime: true,
+        subject: true,
+        student: {
+          select: {
+            fullName: true,
           },
         },
       },
@@ -161,17 +184,23 @@ export async function getTeacherWorkSummary({
     (total, lesson) => total + lesson.class.durationMinutes,
     0,
   );
+  const bonusClassMinutes = bonusClasses.reduce(
+    (total, bonusClass) => total + bonusClass.durationMinutes,
+    0,
+  );
   const workLogMinutes = workLogs.reduce(
     (total, workLog) => total + workLog.durationMinutes,
     0,
   );
 
   return {
+    bonusClassMinutes,
+    bonusClasses,
     lessonMinutes,
     lessons,
     pendingSubstituteLessons,
     teacher,
-    totalMinutes: lessonMinutes + workLogMinutes,
+    totalMinutes: lessonMinutes + bonusClassMinutes + workLogMinutes,
     workLogMinutes,
     workLogs,
   };
