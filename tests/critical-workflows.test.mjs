@@ -242,6 +242,44 @@ test("admin risk review flags attendance and homework signals", async () => {
   assert.match(dataModelDoc, /Risk Review/);
 });
 
+test("teacher work summaries count lessons and paid activity logs", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const workLib = await readProjectFile("src/lib/teacher-work.ts");
+  const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
+  const teacherWorkPage = await readProjectFile("src/app/dashboard/work/page.tsx");
+  const adminWorkPage = await readProjectFile("src/app/admin/work-summary/page.tsx");
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260704140000_add_teacher_work_logs/migration.sql",
+  );
+
+  assert.match(schema, /enum TeacherWorkCategory/);
+  assert.match(schema, /BONUS_CLASS/);
+  assert.match(schema, /GAME_NIGHT/);
+  assert.match(schema, /model TeacherWorkLog/);
+  assert.match(schema, /teacherId\s+String/);
+  assert.match(schema, /createdById\s+String/);
+  assert.match(schema, /@@index\(\[teacherId, workDate\]\)/);
+  assert.match(migration, /TeacherWorkLog_durationMinutes_check/);
+  assert.match(workLib, /getTeacherWorkSummary/);
+  assert.match(workLib, /status: "SUBMITTED"/);
+  assert.match(workLib, /durationMinutes/);
+  assert.match(workActions, /createTeacherWorkLogAction/);
+  assert.match(workActions, /currentUser\.role === "ADMIN"/);
+  assert.match(workActions, /role: "TEACHER"/);
+  assert.match(workActions, /teacherWorkLog\.create/);
+  assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
+  assert.match(teacherWorkPage, /createTeacherWorkLogAction/);
+  assert.match(adminWorkPage, /Teacher work summaries/);
+  assert.match(adminWorkPage, /getTeacherWorkSummary/);
+  assert.match(adminWorkPage, /All teachers/);
+  assert.match(dashboardPage, /\/dashboard\/work/);
+  assert.match(dashboardPage, /\/admin\/work-summary/);
+  assert.match(dataModelDoc, /Teacher Work Summaries/);
+  assert.match(dataModelDoc, /class's assigned teacher/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");

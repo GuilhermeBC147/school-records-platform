@@ -6,6 +6,7 @@ The first data model captures the school's local class-record workflow.
 
 Teachers, classes, students, lessons, attendance, and homework are stored in the app database.
 Grades are stored against each student within a class.
+Teacher work summaries combine submitted lessons with manually entered paid activity logs.
 
 ## Main Tables
 
@@ -18,6 +19,7 @@ Grades are stored against each student within a class.
 - `HomeworkRecord`: one student's homework status for one lesson.
 - `PartialEvaluationGrade`: one student's partial evaluation grade for the 7th or 23rd class.
 - `TestGrade`: one student's Mid-term or Final test grade.
+- `TeacherWorkLog`: one paid non-class activity counted for a teacher's monthly work summary.
 
 ## Important Rules
 
@@ -36,6 +38,21 @@ Grades are stored against each student within a class.
 - Each test grade has an oral letter grade, a composition score from 0 to 2, and a written test score from 0 to 8.
 - The written total is calculated as composition plus written test, from 0 to 10.
 - Submitted records stay in the app database and can be reviewed by admins.
+- Submitted lessons count toward the class teacher's monthly work summary using the class duration.
+- Paid work outside regular submitted lessons is stored as a teacher work log.
+- Teacher work logs store category, title, date, optional start time, duration, notes, counted teacher, and creator.
+- Work log categories are bonus class, event, game night, holiday activity, meeting, and other.
+
+## Teacher Work Summaries
+
+Teacher monthly work summaries are computed from two sources:
+
+- Submitted regular lessons during the month.
+- Manual teacher work logs during the month.
+
+Regular lessons count automatically for the class's assigned teacher in this sprint. Substitution-specific counted teachers are planned separately so the class owner, submitter, and paid teacher can be modeled deliberately.
+
+Teachers can add their own paid activities. Admins can review all teacher summaries and add activity records for a teacher when corrections are needed.
 
 ## Risk Review
 

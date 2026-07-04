@@ -82,12 +82,18 @@ export default async function DashboardPage() {
               <Link className="primary-link" href="/admin/risk">
                 Review student risk
               </Link>
+              <Link className="primary-link" href="/admin/work-summary">
+                Teacher work summaries
+              </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account
               </Link>
             </div>
           ) : (
             <div className="action-row">
+              <Link className="primary-link" href="/dashboard/work">
+                Monthly work summary
+              </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account
               </Link>
