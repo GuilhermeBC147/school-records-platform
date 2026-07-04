@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -70,25 +71,29 @@ export async function resolveRiskRecordAction(formData: FormData) {
     redirect(buildRiskRedirect(formData));
   }
 
-  await prisma.studentRiskResolution.upsert({
-    where: {
-      classId_studentId: {
-        classId,
-        studentId,
-      },
-    },
-    create: {
-      classId,
-      resolvedById: currentUser.id,
-      resolvedThroughDate,
-      studentId,
-    },
-    update: {
-      resolvedAt: new Date(),
-      resolvedById: currentUser.id,
-      resolvedThroughDate,
-    },
-  });
+  await prisma.$executeRaw`
+    INSERT INTO "StudentRiskResolution" (
+      "id",
+      "classId",
+      "studentId",
+      "resolvedById",
+      "resolvedThroughDate",
+      "updatedAt"
+    )
+    VALUES (
+      ${randomUUID()},
+      ${classId},
+      ${studentId},
+      ${currentUser.id},
+      ${resolvedThroughDate},
+      ${new Date()}
+    )
+    ON CONFLICT ("classId", "studentId") DO UPDATE SET
+      "resolvedAt" = CURRENT_TIMESTAMP,
+      "resolvedById" = EXCLUDED."resolvedById",
+      "resolvedThroughDate" = EXCLUDED."resolvedThroughDate",
+      "updatedAt" = CURRENT_TIMESTAMP
+  `;
 
   redirect(buildRiskRedirect(formData));
 }
