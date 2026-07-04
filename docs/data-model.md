@@ -39,7 +39,7 @@ Grades are stored against each student within a class.
 
 ## Risk Review
 
-The admin risk review report is computed from submitted class records. It does not store a separate risk table.
+The admin risk review report is computed from submitted class records. Admins can mark a student/class risk row as resolved; that stores the latest resolved lesson date so future reports only count submitted records after that point.
 
 Default thresholds are kept in `src/app/admin/risk/page.tsx` so they can be adjusted in one place:
 

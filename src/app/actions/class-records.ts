@@ -103,9 +103,11 @@ async function persistClassRecord(
             status: true,
           },
         })
-      : await transaction.lesson.findUnique({
+      : await transaction.lesson.findFirst({
           where: {
-            classId_lessonDate_name: { classId, lessonDate, name: lessonName },
+            classId,
+            lessonDate,
+            name: lessonName,
           },
           select: {
             id: true,
@@ -129,9 +131,11 @@ async function persistClassRecord(
       (existingLesson.lessonDate.getTime() !== lessonDate.getTime() ||
         existingLesson.name !== lessonName)
     ) {
-      const conflictingLesson = await transaction.lesson.findUnique({
+      const conflictingLesson = await transaction.lesson.findFirst({
         where: {
-          classId_lessonDate_name: { classId, lessonDate, name: lessonName },
+          classId,
+          lessonDate,
+          name: lessonName,
         },
         select: { id: true },
       });
