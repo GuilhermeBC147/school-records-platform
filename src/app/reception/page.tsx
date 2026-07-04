@@ -41,6 +41,11 @@ export default async function ReceptionDashboardPage() {
             parent-facing student or class questions.
           </p>
           <div className="action-row">
+            {currentUser.role === "ADMIN" ? (
+              <Link className="secondary-link" href="/dashboard">
+                Back to dashboard
+              </Link>
+            ) : null}
             <Link className="primary-link" href="/reception/bonus-classes">
               Schedule bonus class
             </Link>

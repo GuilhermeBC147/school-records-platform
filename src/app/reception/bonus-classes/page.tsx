@@ -107,6 +107,11 @@ export default async function ReceptionBonusClassesPage({
             date, time, duration, and notes.
           </p>
           <div className="action-row">
+            {currentUser.role === "ADMIN" ? (
+              <Link className="secondary-link" href="/dashboard">
+                Back to dashboard
+              </Link>
+            ) : null}
             <Link className="primary-link" href="/reception/calendar">
               View calendar
             </Link>

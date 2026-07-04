@@ -254,6 +254,13 @@ export default async function ReceptionLookupPage({
             Search student attendance and homework history, or filter active
             classes by teacher and weekday.
           </p>
+          {currentUser.role === "ADMIN" ? (
+            <div className="action-row">
+              <Link className="secondary-link" href="/dashboard">
+                Back to dashboard
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         <section className="panel" aria-label="Lookup filters">
