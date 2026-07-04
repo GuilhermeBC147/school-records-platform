@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatShortDateTime } from "@/lib/date-format";
+import { formatShortDate } from "@/lib/date-format";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +42,6 @@ export default async function AdminDataPage() {
       select: {
         id: true,
         fullName: true,
-        preferredName: true,
         _count: {
           select: { enrollments: true },
         },
@@ -180,7 +179,6 @@ export default async function AdminDataPage() {
                 <thead>
                   <tr>
                     <th>Name</th>
-                    <th>Preferred</th>
                     <th>Classes</th>
                   </tr>
                 </thead>
@@ -188,7 +186,6 @@ export default async function AdminDataPage() {
                   {students.map((student) => (
                     <tr key={student.id}>
                       <td>{student.fullName}</td>
-                      <td>{student.preferredName ?? "-"}</td>
                       <td>{student._count.enrollments}</td>
                     </tr>
                   ))}
@@ -212,7 +209,7 @@ export default async function AdminDataPage() {
                 <tbody>
                   {recentLessons.map((lesson) => (
                     <tr key={lesson.id}>
-                      <td>{formatShortDateTime(lesson.lessonDate)}</td>
+                      <td>{formatShortDate(lesson.lessonDate)}</td>
                       <td>{lesson.class.name}</td>
                       <td>{lesson.status}</td>
                       <td>{lesson.submittedBy?.name ?? "-"}</td>

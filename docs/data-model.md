@@ -12,7 +12,7 @@ Teachers, classes, students, lessons, attendance, and homework are stored in the
 - `Class`: a school class assigned to one teacher, with book, semester, year, and active status.
 - `Student`: a learner who can be enrolled in one or more classes.
 - `Enrollment`: the connection between a student and a class.
-- `Lesson`: one named class session at a specific date and time.
+- `Lesson`: one named class session on a specific date.
 - `AttendanceRecord`: one student's attendance status for one lesson.
 - `HomeworkRecord`: one student's homework status for one lesson.
 
@@ -22,7 +22,7 @@ Teachers, classes, students, lessons, attendance, and homework are stored in the
 - Teachers only see active assigned classes.
 - Admins can keep inactive classes for historical record review.
 - A student can be enrolled in multiple classes.
-- A class can have multiple lessons on the same date, but only one lesson for the same exact date and time.
+- A class can have only one lesson record for the same date.
 - A student can have only one attendance record per lesson.
 - A student can have only one homework record per lesson.
 - Submitted records stay in the app database and can be reviewed by admins.

@@ -57,7 +57,6 @@ export default async function EditClassPage({
             student: {
               select: {
                 fullName: true,
-                preferredName: true,
                 isActive: true,
               },
             },
@@ -81,7 +80,6 @@ export default async function EditClassPage({
       select: {
         id: true,
         fullName: true,
-        preferredName: true,
         isActive: true,
       },
     }),

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { formatShortDateTime } from "@/lib/date-format";
+import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -146,7 +146,6 @@ export default async function AdminRecordsPage({
             select: {
               id: true,
               fullName: true,
-              preferredName: true,
             },
           },
         },
@@ -261,7 +260,7 @@ export default async function AdminRecordsPage({
                     <h2>{lesson.class.name}</h2>
                     <p>Lesson name: {lesson.name ?? "Untitled lesson"}</p>
                     <p>
-                      Lesson: {formatShortDateTime(lesson.lessonDate)}
+                      Lesson: {formatShortDate(lesson.lessonDate)}
                       {" | "}
                       Teacher: {lesson.class.teacher.name}
                     </p>
@@ -291,7 +290,6 @@ export default async function AdminRecordsPage({
                     <thead>
                       <tr>
                         <th>Student</th>
-                        <th>Preferred</th>
                         <th>Attendance</th>
                         <th>Homework</th>
                       </tr>
@@ -300,7 +298,6 @@ export default async function AdminRecordsPage({
                       {lesson.attendanceRecords.map((record) => (
                         <tr key={record.id}>
                           <td>{record.student.fullName}</td>
-                          <td>{record.student.preferredName ?? "-"}</td>
                           <td>{record.status}</td>
                           <td>
                             {homeworkByStudentId.get(record.student.id) ??

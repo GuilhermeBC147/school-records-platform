@@ -19,45 +19,30 @@ function readStatus<T extends readonly string[]>(
 
 function readLessonDate(formData: FormData) {
   const dateValue = String(formData.get("lessonDate") ?? "");
-  const timeValue = String(formData.get("lessonTime") ?? "");
 
   if (!dateValue) {
     throw new Error("Lesson date is required.");
   }
 
-  if (!timeValue) {
-    throw new Error("Lesson time is required.");
-  }
-
   const dateMatch = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{2}|\d{4})$/);
-  const timeMatch = timeValue.match(/^(\d{2}):(\d{2})$/);
 
   if (!dateMatch) {
     throw new Error("Lesson date must use DD/MM/YY format.");
   }
 
-  if (!timeMatch) {
-    throw new Error("Lesson time must use HH:MM format.");
-  }
-
   const [, dayValue, monthValue, yearValue] = dateMatch;
-  const [, hourValue, minuteValue] = timeMatch;
   const day = Number(dayValue);
   const month = Number(monthValue);
   const year =
     yearValue.length === 2 ? Number(`20${yearValue}`) : Number(yearValue);
-  const hours = Number(hourValue);
-  const minutes = Number(minuteValue);
-  const lessonDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+  const lessonDate = new Date(Date.UTC(year, month - 1, day));
 
   if (
     lessonDate.getUTCFullYear() !== year ||
     lessonDate.getUTCMonth() !== month - 1 ||
-    lessonDate.getUTCDate() !== day ||
-    lessonDate.getUTCHours() !== hours ||
-    lessonDate.getUTCMinutes() !== minutes
+    lessonDate.getUTCDate() !== day
   ) {
-    throw new Error("Lesson date or time is invalid.");
+    throw new Error("Lesson date is invalid.");
   }
 
   return lessonDate;

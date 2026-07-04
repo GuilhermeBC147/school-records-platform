@@ -32,7 +32,7 @@ test("class record submission protects duplicate and unauthorized writes", async
   assert.match(action, /redirect\("\/login"\)/);
   assert.match(action, /teacherId: currentUser\.id/);
   assert.match(action, /lessonName/);
-  assert.match(action, /lessonTime/);
+  assert.doesNotMatch(action, /lessonTime/);
   assert.match(action, /status === "SUBMITTED"/);
   assert.match(action, /existingLesson\?\.status === "SUBMITTED"/);
   assert.match(action, /prisma\.\$transaction/);
@@ -114,6 +114,7 @@ test("admin student management supports creating and editing students", async ()
   assert.match(studentActions, /updateStudentAction/);
   assert.match(studentActions, /currentUser\.role !== "ADMIN"/);
   assert.match(studentActions, /fullName/);
+  assert.doesNotMatch(studentActions, /preferredName/);
   assert.match(studentActions, /isActive/);
   assert.match(studentsPage, /Create student/);
   assert.match(newStudentPage, /createStudentAction/);

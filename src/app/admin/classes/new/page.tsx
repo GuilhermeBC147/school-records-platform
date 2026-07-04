@@ -42,7 +42,6 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
       select: {
         id: true,
         fullName: true,
-        preferredName: true,
       },
     }),
   ]);

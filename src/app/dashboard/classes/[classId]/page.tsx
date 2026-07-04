@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { formatShortDateTime } from "@/lib/date-format";
+import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -53,7 +53,6 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
           student: {
             select: {
               fullName: true,
-              preferredName: true,
             },
           },
         },
@@ -145,7 +144,6 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                 <thead>
                   <tr>
                     <th>Name</th>
-                    <th>Preferred</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -153,7 +151,6 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                   {schoolClass.enrollments.map((enrollment) => (
                     <tr key={enrollment.id}>
                       <td>{enrollment.student.fullName}</td>
-                      <td>{enrollment.student.preferredName ?? "-"}</td>
                       <td>{enrollment.status}</td>
                     </tr>
                   ))}
@@ -180,7 +177,7 @@ export default async function ClassDetailPage({ params }: ClassDetailPageProps) 
                   {schoolClass.lessons.map((lesson) => (
                     <tr key={lesson.id}>
                       <td>{lesson.name ?? "-"}</td>
-                      <td>{formatShortDateTime(lesson.lessonDate)}</td>
+                      <td>{formatShortDate(lesson.lessonDate)}</td>
                       <td>{lesson.status}</td>
                       <td>{lesson._count.attendanceRecords}</td>
                       <td>{lesson._count.homeworkRecords}</td>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { formatShortDateTime } from "@/lib/date-format";
+import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -66,7 +66,6 @@ export default async function AdminRecordDetailPage({
             select: {
               id: true,
               fullName: true,
-              preferredName: true,
             },
           },
         },
@@ -124,7 +123,7 @@ export default async function AdminRecordDetailPage({
             <dl className="detail-list">
               <div>
                 <dt>Date</dt>
-                <dd>{formatShortDateTime(lesson.lessonDate)}</dd>
+                <dd>{formatShortDate(lesson.lessonDate)}</dd>
               </div>
               <div>
                 <dt>Teacher</dt>
@@ -157,7 +156,6 @@ export default async function AdminRecordDetailPage({
               <thead>
                 <tr>
                   <th>Student</th>
-                  <th>Preferred</th>
                   <th>Attendance</th>
                   <th>Homework</th>
                 </tr>
@@ -166,7 +164,6 @@ export default async function AdminRecordDetailPage({
                 {lesson.attendanceRecords.map((record) => (
                   <tr key={record.id}>
                     <td>{record.student.fullName}</td>
-                    <td>{record.student.preferredName ?? "-"}</td>
                     <td>{record.status}</td>
                     <td>
                       {homeworkByStudentId.get(record.student.id) ??

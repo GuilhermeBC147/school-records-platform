@@ -59,10 +59,6 @@ export default async function NewStudentPage({
               <span>Full name</span>
               <input name="fullName" required type="text" />
             </label>
-            <label>
-              <span>Preferred name</span>
-              <input name="preferredName" type="text" />
-            </label>
             <label className="checkbox-label">
               <input defaultChecked name="isActive" type="checkbox" />
               <span>Active student</span>

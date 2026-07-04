@@ -8,10 +8,6 @@ function readRequiredString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
-function readOptionalString(formData: FormData, key: string) {
-  return readRequiredString(formData, key) || null;
-}
-
 async function requireAdmin() {
   const currentUser = await getCurrentUser();
 
@@ -30,7 +26,6 @@ export async function createStudentAction(formData: FormData) {
   await requireAdmin();
 
   const fullName = readRequiredString(formData, "fullName");
-  const preferredName = readOptionalString(formData, "preferredName");
   const isActive = formData.get("isActive") === "on";
 
   if (!fullName) {
@@ -40,7 +35,6 @@ export async function createStudentAction(formData: FormData) {
   await prisma.student.create({
     data: {
       fullName,
-      preferredName,
       isActive,
     },
   });
@@ -53,7 +47,6 @@ export async function updateStudentAction(formData: FormData) {
 
   const studentId = readRequiredString(formData, "studentId");
   const fullName = readRequiredString(formData, "fullName");
-  const preferredName = readOptionalString(formData, "preferredName");
   const isActive = formData.get("isActive") === "on";
 
   if (!studentId || !fullName) {
@@ -73,7 +66,6 @@ export async function updateStudentAction(formData: FormData) {
     where: { id: studentId },
     data: {
       fullName,
-      preferredName,
       isActive,
     },
   });
