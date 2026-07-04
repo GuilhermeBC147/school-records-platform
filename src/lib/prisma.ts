@@ -3,9 +3,11 @@ import { PrismaClient } from "@/generated/prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
+  prismaSchemaVersion?: string;
 };
 
 const connectionString = process.env.DATABASE_URL;
+const prismaSchemaVersion = "20260704001000_add_grading_model";
 
 if (!connectionString) {
   throw new Error("DATABASE_URL is required to connect to the database.");
@@ -14,11 +16,14 @@ if (!connectionString) {
 const adapter = new PrismaPg({ connectionString });
 
 export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter,
-  });
+  globalForPrisma.prismaSchemaVersion === prismaSchemaVersion &&
+  globalForPrisma.prisma
+    ? globalForPrisma.prisma
+    : new PrismaClient({
+        adapter,
+      });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
+  globalForPrisma.prismaSchemaVersion = prismaSchemaVersion;
 }
