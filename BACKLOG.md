@@ -2,36 +2,54 @@
 
 ## Now
 
-- Confirm Git branch and commit workflow.
-- Scaffold the Next.js application.
-- Add setup instructions to the README.
-- Decide whether development database will be local PostgreSQL, Docker PostgreSQL, or hosted PostgreSQL.
+- Finish teacher self-service and admin risk review on the current sprint branch.
+- Keep risk-review thresholds easy to adjust.
+- Confirm admin risk report links back to relevant class/student records.
 
 ## Next
 
-- Add Prisma schema.
-- Add seed data.
-- Add email/password authentication.
-- Add teacher dashboard.
-- Add class record entry page.
-- Add admin review page.
+- Add monthly teacher work summaries for payroll support.
+- Count regular submitted lessons by the teacher who actually taught them.
+- Add teacher-created paid activity records for events, game nights, Halloween, meetings, and other work.
+- Add admin review/correction for monthly teacher work totals.
 
 ## Later
 
-- Add CSV export backup.
-- Add admin search and filtering.
+- Add reception accounts with limited access.
+- Add independent bonus class scheduling.
+- Prevent double-booking a teacher for bonus classes.
+- Prevent bonus classes from overlapping regular class schedules when schedule data is available.
+- Count completed bonus classes in monthly teacher work summaries.
+- Add substitute teacher support for regular class lessons.
+- Separate lesson submitter/audit history from the teacher counted for payroll.
+- Add admin approval workflow for submitted records.
 - Add record edit history.
 - Add class/student archive workflow.
-- Add tests for teacher access control.
-- Add tests for class record submission.
+- Add bilingual UI labels if needed.
+- Add broader workflow tests around admin setup.
 
 ## Open Questions
 
+- What threshold counts as "a lot" of incomplete homework assignments?
+- What threshold counts as "a lot" of missed classes?
+- Should absences marked `EXCUSED` count as missed classes in the admin risk report?
+- Should late arrivals count in the risk report, or only absences?
+- Should grade entry be editable after the teacher saves it, or locked after an admin review?
+- Should admins be able to edit grades, or only view/export them?
+- Should grade reports be exportable to CSV in the first grading sprint?
 - Should an admin approve records before they become final?
-- Should teachers be able to edit a submitted record?
-- What should happen when a class has a substitute teacher?
+- Who is allowed to assign a substitute teacher: admins only, the primary teacher, or reception too?
+- Should substitute teachers be able to see the full class page, or only the lesson record they are covering?
+- Should extra activities require admin approval before they count for payroll?
+- What paid activity categories should be fixed options instead of free text?
+- What default duration should a bonus class have?
+- Can a bonus class include more than one student?
+- Should reception be able to edit or cancel bonus classes after the teacher confirms them?
+- Should payroll summaries count by lessons, hours, or both?
 - Does the school need Portuguese, English, or bilingual UI labels?
-- What export format does the school need for long-term records?
+- Should password reset emails be sent through the hosting provider, SMTP, or a transactional email service?
+- Should class books be free text or selected from an admin-managed book list?
+- Should semesters be fixed to 1 and 2, or support custom terms?
 
 ## Learning Goals
 

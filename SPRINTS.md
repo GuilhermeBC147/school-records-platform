@@ -8,9 +8,21 @@ Branch naming:
 
 - `sprint-0-planning`
 - `sprint-1-foundation`
-- `sprint-2-auth-dashboard`
-- `sprint-3-class-records`
-- `sprint-4-admin-records`
+- `sprint-2-data-model`
+- `sprint-3-auth-dashboard`
+- `sprint-4-class-records`
+- `sprint-5-admin-records`
+- `sprint-6-account-management`
+- `sprint-7-class-management`
+- `sprint-8-student-enrollments`
+- `sprint-9-record-cleanup`
+- `sprint-10-grading-model`
+- `sprint-11-teacher-grades`
+- `sprint-12-admin-risk-review`
+- `sprint-13-teacher-work-log`
+- `sprint-14-bonus-scheduling`
+- `sprint-15-substitution-payroll`
+- `sprint-16-production-readiness`
 
 Commit style:
 
@@ -165,7 +177,286 @@ Done when:
 - Admins can find submitted class records.
 - Admins can export records for backup or reporting.
 
-## Sprint 6: Production Readiness
+## Sprint 6: Account Management
+
+Goal: admins can manage user accounts and staff can recover access safely.
+
+Tasks:
+
+- Add password reset token model.
+- Add forgot password request page.
+- Add reset password page.
+- Add development-safe password reset flow.
+- Document production email provider requirements.
+- Add admin teacher account list.
+- Add admin create teacher account form.
+- Add admin edit teacher account form.
+- Add active/inactive teacher account status.
+- Prevent inactive users from logging in.
+
+Suggested commits:
+
+- `feat: add password reset flow`
+- `feat: add admin teacher management`
+
+Done when:
+
+- A teacher can recover access without a developer editing the database.
+- An admin can create and deactivate teacher accounts.
+- Inactive accounts cannot log in.
+
+## Sprint 7: Class Management
+
+Goal: admins can create and maintain classes assigned to teachers.
+
+Tasks:
+
+- Add class fields for book, semester, and year.
+- Add admin class list.
+- Add admin create class form.
+- Add admin edit class form.
+- Assign a teacher to each class.
+- Set class active/inactive status.
+- Show only active classes on teacher dashboards.
+- Keep inactive classes available to admins for historical records.
+
+Suggested commits:
+
+- `feat: add class metadata`
+- `feat: add admin class management`
+
+Done when:
+
+- An admin can create a class with name, book, semester, year, teacher, and active status.
+- Teachers only see active assigned classes.
+- Admin records remain reviewable for inactive classes.
+
+## Sprint 8: Student and Enrollment Management
+
+Goal: admins can manage students and class rosters.
+
+Tasks:
+
+- Add admin student list.
+- Add admin create student form.
+- Add admin edit student form.
+- Add active/inactive student status controls.
+- Add class roster management page.
+- Add students to a class.
+- Remove or deactivate students from a class roster.
+- Ensure inactive students do not appear in new class record forms.
+
+Suggested commits:
+
+- `feat: add admin student management`
+- `feat: add class roster management`
+
+Done when:
+
+- An admin can create students.
+- An admin can add students to classes.
+- Teachers see the current active roster when submitting a class record.
+
+## Sprint 9: Student and Lesson Record Cleanup
+
+Goal: simplify class records before adding grades and reporting.
+
+Tasks:
+
+- Remove preferred name from the student schema.
+- Remove preferred name from admin student forms, lists, roster pickers, class pages, record pages, exports, seed data, and tests.
+- Add a migration that drops `Student.preferredName`.
+- Remove lesson time from the teacher class-record form.
+- Store lesson records by class and lesson date only, using one normalized time internally if the database still stores a `DateTime`.
+- Update duplicate-record protection to prevent two records for the same class on the same date.
+- Update data-model documentation to describe lessons as dated class sessions, not date-and-time sessions.
+
+Suggested commits:
+
+- `feat: remove student preferred names`
+- `feat: simplify lesson records to dates`
+
+Done when:
+
+- Admins and teachers only see student full names.
+- Teachers enter lesson date but not lesson time.
+- A class cannot accidentally create duplicate records for the same date.
+- Existing tests and documentation match the simplified model.
+
+## Sprint 10: Grading Data Model
+
+Goal: model the school's partial evaluations and test grades safely.
+
+Tasks:
+
+- Add grade enums for letter grades from `D-`, `D`, `D+` through `A`, with no `A+`.
+- Add partial evaluation records for each student in a class.
+- Track whether a partial evaluation is for the 7th class or the 23rd class.
+- Add test grade records for each student in a class.
+- Track two test periods: Mid-term and Final.
+- Store oral grade as a letter grade.
+- Store composition score as a numeric score from 0 to 2.
+- Store written test score as a numeric score from 0 to 8.
+- Compute written total as composition plus written test, from 0 to 10.
+- Add indexes and uniqueness rules so each student has only one grade record per class, period, and grade type.
+- Seed sample grades if helpful for UI development.
+- Document grading rules in `docs/data-model.md` or a new grading doc.
+
+Suggested commits:
+
+- `feat: add grading schema`
+- `docs: document grading model`
+
+Done when:
+
+- Prisma can validate and generate the new schema.
+- The model prevents duplicate partial, mid-term, and final grades for the same student/class.
+- The model can represent all required grade components without UI workarounds.
+
+## Sprint 11: Teacher Grade Entry
+
+Goal: teachers can enter and maintain grades for their own active classes.
+
+Tasks:
+
+- Add a Grades area to the teacher class-management page.
+- Show enrolled active students in a grade-entry table.
+- Add entry/edit UI for 7th-class and 23rd-class partial evaluations.
+- Add entry/edit UI for Mid-term and Final test grades.
+- Validate letter grades against the allowed scale.
+- Validate composition scores between 0 and 2.
+- Validate written test scores between 0 and 8.
+- Display computed written total out of 10.
+- Save grade drafts or updates without affecting attendance/homework records.
+- Restrict grade access so teachers can only manage grades for their own classes.
+- Add admin read-only visibility for grades if needed for review.
+
+Suggested commits:
+
+- `feat: add teacher grade entry`
+- `test: cover grade access rules`
+
+Done when:
+
+- A teacher can open one of their classes and enter all partial and test grades.
+- Invalid grade values are rejected.
+- Teachers cannot view or edit grades for another teacher's class.
+
+## Sprint 12: Teacher Self-Service and Admin Risk Review
+
+Goal: reduce admin account work and highlight students who need attention.
+
+Tasks:
+
+- Add a logged-in teacher account page.
+- Add a change-password form for teachers.
+- Require current password before changing to a new password.
+- Validate new password length and confirmation.
+- Reuse existing password hashing helpers.
+- Add an admin review report for student risk signals.
+- Flag students with many incomplete homework records.
+- Flag students with many total missed classes.
+- Flag students with two missed classes in a row.
+- Let admins filter the report by class, teacher, and date range.
+- Link report rows back to the student's records or relevant class records.
+- Document the default thresholds and make them easy to change.
+
+Suggested commits:
+
+- `feat: add teacher password change`
+- `feat: add admin student risk report`
+
+Done when:
+
+- Teachers can change their own password while logged in.
+- Admins can see students with repeated homework or attendance issues.
+- Consecutive absences are detected from submitted lesson records in date order.
+
+## Sprint 13: Teacher Work Log and Monthly Counts
+
+Goal: count the paid work teachers completed each month.
+
+Tasks:
+
+- Add a teacher work-log model for paid non-class work.
+- Define paid work categories such as regular lesson, bonus class, event, game night, holiday activity, meeting, and other.
+- Store date, start time, duration, description, and counted teacher for each paid work item.
+- Count submitted regular class lessons toward the assigned or substitute teacher.
+- Add a teacher monthly summary page showing total counted lessons, extra activities, and paid hours.
+- Add an admin monthly summary page filtered by teacher and date range.
+- Include enough detail for admins to audit which records make up each monthly total.
+- Document which records count automatically and which must be added manually.
+
+Suggested commits:
+
+- `feat: add teacher work log model`
+- `feat: add monthly teacher work summaries`
+
+Done when:
+
+- Teachers and admins can see a monthly count of paid work.
+- Regular lessons and extra activities can both be counted.
+- Admins can trace each total back to the underlying records.
+
+## Sprint 14: Bonus Class and Reception Scheduling
+
+Goal: let reception schedule independent bonus classes without double-booking teachers.
+
+Tasks:
+
+- Add a `RECEPTION` user role.
+- Restrict reception accounts to bonus-class scheduling screens only.
+- Add an independent bonus class/session model separate from regular classes.
+- Store student, assigned teacher, date, start time, duration, status, and notes for each bonus class.
+- Prevent two bonus classes from being scheduled for the same teacher at overlapping times.
+- Prevent bonus classes from overlapping with regular class schedules for the same teacher when schedule data is available.
+- Let reception assign or reassign the teacher before the bonus class happens.
+- Let the assigned teacher record or confirm that the bonus class happened.
+- Count completed bonus classes toward the assigned teacher's monthly paid work.
+
+Suggested commits:
+
+- `feat: add reception accounts`
+- `feat: add bonus class scheduling`
+- `fix: prevent teacher schedule conflicts`
+
+Done when:
+
+- Reception can schedule bonus classes and assign teachers.
+- Reception cannot access admin-only or teacher-only management areas.
+- The app blocks teacher double-booking for bonus classes.
+- Completed bonus classes appear in teacher monthly work summaries.
+
+## Sprint 15: Substitutions and Payroll Accuracy
+
+Goal: make substitutions and extra school activities count for the correct teacher.
+
+Tasks:
+
+- Add per-lesson substitute teacher support for regular classes.
+- Distinguish the class's primary teacher from the teacher who actually taught a specific lesson.
+- Keep `submittedBy` for audit history while storing a separate counted teacher for payroll.
+- Let admins or authorized teachers assign a substitute teacher to a lesson.
+- Show substitute lessons on the substitute teacher's dashboard or work summary.
+- Ensure regular class access rules still prevent unrelated teachers from viewing student data.
+- Let teachers create extra activity records for events such as Halloween, game nights, and school activities.
+- Add admin review or correction controls for extra activity records before payroll is finalized.
+- Export monthly teacher work summaries to CSV.
+
+Suggested commits:
+
+- `feat: add substitute lesson tracking`
+- `feat: add extra activity records`
+- `feat: export teacher payroll summaries`
+
+Done when:
+
+- A substituted lesson can be submitted and counted for the substitute teacher.
+- The original class teacher remains visible on the class record.
+- Extra activities can be recorded and included in monthly totals.
+- Admins can export a teacher's monthly paid work details.
+
+## Sprint 16: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 
@@ -175,12 +466,16 @@ Tasks:
 - Add hosted PostgreSQL setup notes.
 - Add backup/export routine.
 - Add basic monitoring/logging guidance.
-- Add tests for critical teacher and admin workflows.
+- Add tests for critical teacher, grading, account, and admin review workflows.
+- Confirm exports still include the records the school needs after grading, risk review, bonus classes, substitutions, and teacher work summaries are added.
+- Add backup guidance for grades, risk-review data, bonus classes, substitutions, and teacher work summaries.
+- Add tests for reception scheduling permissions and teacher double-booking prevention.
+- Add tests for substitution payroll counts and extra activity approval.
 
 Suggested commits:
 
 - `docs: add production setup checklist`
-- `test: cover critical class record workflows`
+- `test: cover critical school workflows`
 
 Done when:
 
