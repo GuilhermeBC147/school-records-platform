@@ -190,6 +190,23 @@ test("teacher grade entry validates values and class access", async () => {
   assert.match(classDetail, /written/);
 });
 
+test("teacher account page supports changing own password", async () => {
+  const accountActions = await readProjectFile("src/app/actions/accounts.ts");
+  const accountPage = await readProjectFile("src/app/dashboard/account/page.tsx");
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+
+  assert.match(accountActions, /changeOwnPasswordAction/);
+  assert.match(accountActions, /getCurrentUser/);
+  assert.match(accountActions, /redirect\("\/login"\)/);
+  assert.match(accountActions, /verifyPassword\(currentPassword/);
+  assert.match(accountActions, /hashPassword\(newPassword\)/);
+  assert.match(accountPage, /changeOwnPasswordAction/);
+  assert.match(accountPage, /currentPassword/);
+  assert.match(accountPage, /newPassword/);
+  assert.match(accountPage, /confirmPassword/);
+  assert.match(dashboardPage, /\/dashboard\/account/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");

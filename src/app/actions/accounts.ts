@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto";
 import { redirect } from "next/navigation";
-import { hashPassword } from "@/lib/password";
+import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -119,6 +119,45 @@ export async function resetPasswordAction(formData: FormData) {
   ]);
 
   redirect("/login?reset=success");
+}
+
+export async function changeOwnPasswordAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  const currentPassword = String(formData.get("currentPassword") ?? "");
+  const newPassword = String(formData.get("newPassword") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (
+    !currentPassword ||
+    newPassword.length < 8 ||
+    newPassword !== confirmPassword
+  ) {
+    redirect("/dashboard/account?password=invalid");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: currentUser.id },
+    select: {
+      id: true,
+      passwordHash: true,
+    },
+  });
+
+  if (!user || !verifyPassword(currentPassword, user.passwordHash)) {
+    redirect("/dashboard/account?password=current");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: hashPassword(newPassword) },
+  });
+
+  redirect("/dashboard/account?password=updated");
 }
 
 export async function createTeacherAction(formData: FormData) {

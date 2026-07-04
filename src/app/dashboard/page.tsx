@@ -83,7 +83,13 @@ export default async function DashboardPage() {
                 Review submitted records
               </Link>
             </div>
-          ) : null}
+          ) : (
+            <div className="action-row">
+              <Link className="primary-link" href="/dashboard/account">
+                Manage account
+              </Link>
+            </div>
+          )}
         </section>
 
         <section className="class-grid" aria-label="Assigned classes">
