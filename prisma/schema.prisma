@@ -59,6 +59,16 @@ enum TestPeriod {
   FINAL
 }
 
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -89,14 +99,16 @@ model PasswordResetToken {
 }
 
 model Class {
-  id        String   @id @default(cuid())
-  name      String
-  book      String?
-  semester  Int?
-  year      Int?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(cuid())
+  name            String
+  book            String?
+  semester        Int?
+  year            Int?
+  durationMinutes Int       @default(60)
+  weekDays        Weekday[] @default([])
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   teacherId               String
   teacher                 User                     @relation("TeacherClasses", fields: [teacherId], references: [id])

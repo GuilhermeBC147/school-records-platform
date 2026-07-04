@@ -504,7 +504,36 @@ input[type="time"],
 
 .grade-form {
   display: grid;
-  gap: 16px;
+  gap: 22px;
+}
+
+.grade-section {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  padding-top: 18px;
+}
+
+.grade-section:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.grade-section-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.grade-section-heading h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.grade-section-heading p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
 }
 
 .grade-table th,
@@ -514,7 +543,20 @@ input[type="time"],
 
 .grade-table select,
 .grade-table input {
-  min-width: 88px;
+  min-width: 104px;
+}
+
+.partial-grade-table {
+  max-width: 620px;
+}
+
+.test-grade-table {
+  min-width: 760px;
+}
+
+.grade-total {
+  color: var(--brand);
+  font-weight: 800;
 }
 
 .grade-scale {
@@ -589,6 +631,19 @@ input[type="time"],
 .checkbox-label input {
   height: 18px;
   width: 18px;
+}
+
+.weekday-picker {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  padding: 8px;
+}
+
+.weekday-picker .checkbox-label {
+  padding: 8px;
 }
 
 .roster-list {

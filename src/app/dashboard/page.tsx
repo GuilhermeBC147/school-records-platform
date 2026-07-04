@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
+import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -28,6 +29,8 @@ export default async function DashboardPage() {
       book: true,
       semester: true,
       year: true,
+      durationMinutes: true,
+      weekDays: true,
       isActive: true,
       teacher: {
         select: { name: true },
@@ -95,6 +98,10 @@ export default async function DashboardPage() {
                 </p>
                 <h2>{schoolClass.name}</h2>
                 <p>{schoolClass.teacher.name}</p>
+                <p>
+                  {formatWeekdays(schoolClass.weekDays)} |{" "}
+                  {formatDuration(schoolClass.durationMinutes)}
+                </p>
                 {currentUser.role === "ADMIN" ? (
                   <p>{schoolClass.isActive ? "Active" : "Inactive"}</p>
                 ) : null}
