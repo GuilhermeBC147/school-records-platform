@@ -73,6 +73,9 @@ export default async function DashboardPage() {
               <Link className="primary-link" href="/admin/classes">
                 Manage classes
               </Link>
+              <Link className="primary-link" href="/admin/students">
+                Manage students
+              </Link>
               <Link className="primary-link" href="/admin/records">
                 Review submitted records
               </Link>

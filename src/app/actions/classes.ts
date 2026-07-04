@@ -23,6 +23,17 @@ function readTermNumber(formData: FormData, key: string) {
   return Number.isInteger(numberValue) ? numberValue : null;
 }
 
+function readSelectedStudentIds(formData: FormData) {
+  return Array.from(
+    new Set(
+      formData
+        .getAll("studentIds")
+        .map((value) => String(value).trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
 async function requireAdmin() {
   const currentUser = await getCurrentUser();
 
@@ -35,6 +46,22 @@ async function requireAdmin() {
   }
 
   return currentUser;
+}
+
+async function hasInvalidStudents(studentIds: string[], activeOnly: boolean) {
+  if (studentIds.length === 0) {
+    return false;
+  }
+
+  const students = await prisma.student.findMany({
+    where: {
+      id: { in: studentIds },
+      ...(activeOnly ? { isActive: true } : {}),
+    },
+    select: { id: true },
+  });
+
+  return students.length !== studentIds.length;
 }
 
 async function readClassForm(formData: FormData) {
@@ -81,13 +108,23 @@ export async function createClassAction(formData: FormData) {
   await requireAdmin();
 
   const classData = await readClassForm(formData);
+  const selectedStudentIds = readSelectedStudentIds(formData);
 
-  if (!classData) {
+  if (!classData || (await hasInvalidStudents(selectedStudentIds, true))) {
     redirect("/admin/classes/new?error=invalid");
   }
 
   await prisma.class.create({
-    data: classData,
+    data: {
+      ...classData,
+      enrollments: {
+        create: selectedStudentIds.map((studentId) => ({
+          studentId,
+          startDate: new Date(),
+          status: "ACTIVE",
+        })),
+      },
+    },
   });
 
   redirect("/admin/classes?status=created");
@@ -124,30 +161,18 @@ export async function updateClassRosterAction(formData: FormData) {
   await requireAdmin();
 
   const classId = readRequiredString(formData, "classId");
-  const selectedStudentIds = formData
-    .getAll("studentIds")
-    .map((value) => String(value).trim())
-    .filter(Boolean);
+  const selectedStudentIds = readSelectedStudentIds(formData);
 
   if (!classId) {
     redirect("/admin/classes");
   }
 
-  const [schoolClass, activeStudents] = await Promise.all([
-    prisma.class.findUnique({
-      where: { id: classId },
-      select: { id: true },
-    }),
-    prisma.student.findMany({
-      where: {
-        id: { in: selectedStudentIds },
-        isActive: true,
-      },
-      select: { id: true },
-    }),
-  ]);
+  const schoolClass = await prisma.class.findUnique({
+    where: { id: classId },
+    select: { id: true },
+  });
 
-  if (!schoolClass || activeStudents.length !== selectedStudentIds.length) {
+  if (!schoolClass || (await hasInvalidStudents(selectedStudentIds, false))) {
     redirect(`/admin/classes/${classId}?error=roster`);
   }
 

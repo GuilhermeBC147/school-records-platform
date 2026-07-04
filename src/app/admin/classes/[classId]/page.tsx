@@ -5,6 +5,7 @@ import {
   updateClassRosterAction,
 } from "@/app/actions/classes";
 import { logoutAction } from "@/app/actions/auth";
+import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -201,34 +202,19 @@ export default async function EditClassPage({
           <h2 id="roster-title">Class roster</h2>
           <form action={updateClassRosterAction} className="admin-form">
             <input name="classId" type="hidden" value={schoolClass.id} />
-            <div className="roster-list">
-              {students.map((student) => {
+            <RosterPicker
+              emptyMessage="No students have been created yet."
+              students={students.map((student) => {
                 const enrollment = schoolClass.enrollments.find(
                   (item) => item.studentId === student.id,
                 );
-                const isEnrolled = enrollment?.status === "ACTIVE";
 
-                return (
-                  <label className="checkbox-label roster-student" key={student.id}>
-                    <input
-                      defaultChecked={isEnrolled}
-                      disabled={!student.isActive && !isEnrolled}
-                      name="studentIds"
-                      type="checkbox"
-                      value={student.id}
-                    />
-                    <span>
-                      {student.fullName}
-                      {student.preferredName ? ` (${student.preferredName})` : ""}
-                      {student.isActive ? "" : " - inactive"}
-                    </span>
-                  </label>
-                );
+                return {
+                  ...student,
+                  isEnrolled: enrollment?.status === "ACTIVE",
+                };
               })}
-            </div>
-            {students.length === 0 ? (
-              <p className="muted-copy">No students have been created yet.</p>
-            ) : null}
+            />
             <div className="record-actions">
               <button className="primary-button" type="submit">
                 Save roster

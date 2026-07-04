@@ -312,6 +312,7 @@ select,
 input[type="email"],
 input[type="number"],
 input[type="password"],
+input[type="search"],
 input[type="text"],
 input[type="date"],
 input[type="time"],
@@ -534,6 +535,14 @@ input[type="time"],
   font-weight: 700;
 }
 
+.form-section-label {
+  color: var(--muted);
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
 .checkbox-label {
   align-items: center;
   display: flex !important;
@@ -549,6 +558,19 @@ input[type="time"],
   border: 1px solid var(--line);
   border-radius: 8px;
   display: grid;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.roster-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.roster-summary {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .roster-student {
