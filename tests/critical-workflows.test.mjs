@@ -165,6 +165,31 @@ test("grading model supports partial evaluations and test grades", async () => {
   assert.match(dataModelDoc, /composition plus written test/);
 });
 
+test("teacher grade entry validates values and class access", async () => {
+  const gradeActions = await readProjectFile("src/app/actions/grades.ts");
+  const classDetail = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/page.tsx",
+  );
+
+  assert.match(gradeActions, /updateClassGradesAction/);
+  assert.match(gradeActions, /getCurrentUser/);
+  assert.match(gradeActions, /redirect\("\/login"\)/);
+  assert.match(gradeActions, /teacherId: currentUser\.id/);
+  assert.match(gradeActions, /partialEvaluationPeriods/);
+  assert.match(gradeActions, /testPeriods/);
+  assert.match(gradeActions, /readScore/);
+  assert.match(gradeActions, /maxScore/);
+  assert.match(gradeActions, /prisma\.\$transaction/);
+  assert.match(gradeActions, /partialEvaluationGrade\.upsert/);
+  assert.match(gradeActions, /testGrade\.upsert/);
+  assert.match(classDetail, /updateClassGradesAction/);
+  assert.match(classDetail, /Save grades/);
+  assert.match(classDetail, /partialEvaluationGrades/);
+  assert.match(classDetail, /testGrades/);
+  assert.match(classDetail, /composition/);
+  assert.match(classDetail, /written/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");
