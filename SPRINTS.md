@@ -21,7 +21,8 @@ Branch naming:
 - `sprint-12-admin-risk-review`
 - `sprint-13-teacher-work-log`
 - `sprint-14-bonus-scheduling`
-- `sprint-15-production-readiness`
+- `sprint-15-consistency-pass`
+- `sprint-16-production-readiness`
 
 Commit style:
 
@@ -436,7 +437,33 @@ Done when:
 - Completed bonus classes appear in teacher monthly work summaries.
 - Teacher-created bonus classes capture the same scheduling details as reception-created bonus classes.
 
-## Sprint 15: Production Readiness
+## Sprint 15: Consistency Pass and Small Adjustments
+
+Goal: smooth out existing workflows before the final production-readiness pass.
+
+Tasks:
+
+- Review admin, teacher, and reception navigation for consistent return paths, labels, and access boundaries.
+- Standardize form wording, validation messages, success messages, and empty states across existing screens.
+- Tighten small usability gaps in existing functions without adding major new product scope.
+- Check that date, time, duration, status, attendance, homework, grade, and work-summary labels use consistent language.
+- Review shared formatting helpers and remove duplicated display logic where it is low-risk.
+- Confirm role-specific dashboards expose the right next actions for admins, teachers, and reception.
+- Audit recent sprint features for stale generated-client, migration, or seed-data assumptions that could confuse local development.
+- Add or update focused tests for any small behavior fixes made during the pass.
+
+Suggested commits:
+
+- `fix: polish workflow consistency`
+- `test: cover consistency fixes`
+
+Done when:
+
+- Existing workflows feel consistent across roles.
+- Small rough edges found during testing are fixed without expanding scope.
+- Tests cover any behavior changes introduced during the pass.
+
+## Sprint 16: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 
