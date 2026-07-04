@@ -5,6 +5,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { Prisma } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,12 @@ type RiskRecord = {
   studentName: string;
   teacherName: string;
   consecutiveMissedClassCount: number;
+};
+
+type RiskResolution = {
+  classId: string;
+  resolvedThroughDate: Date;
+  studentId: string;
 };
 
 function readFilterValue(value: string | undefined) {
@@ -127,11 +134,7 @@ function summarizeRiskRecords(
       studentId: string;
     }[];
   }[],
-  resolutions: {
-    classId: string;
-    resolvedThroughDate: Date;
-    studentId: string;
-  }[],
+  resolutions: RiskResolution[],
 ) {
   const resolutionByStudentClass = new Map(
     resolutions.map((resolution) => [
@@ -229,6 +232,27 @@ function summarizeRiskRecords(
     });
 }
 
+function buildResolutionWhere(filters: {
+  classId?: string;
+  teacherId?: string;
+}) {
+  const conditions = [];
+
+  if (filters.classId) {
+    conditions.push(Prisma.sql`resolution."classId" = ${filters.classId}`);
+  }
+
+  if (filters.teacherId) {
+    conditions.push(Prisma.sql`schoolClass."teacherId" = ${filters.teacherId}`);
+  }
+
+  if (conditions.length === 0) {
+    return Prisma.empty;
+  }
+
+  return Prisma.sql`WHERE ${Prisma.join(conditions, " AND ")}`;
+}
+
 export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
   const currentUser = await getCurrentUser();
 
@@ -317,17 +341,15 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
         },
       },
     }),
-    prisma.studentRiskResolution.findMany({
-      where: {
-        ...(classId ? { classId } : {}),
-        ...(teacherId ? { class: { teacherId } } : {}),
-      },
-      select: {
-        classId: true,
-        resolvedThroughDate: true,
-        studentId: true,
-      },
-    }),
+    prisma.$queryRaw<RiskResolution[]>`
+      SELECT
+        resolution."classId",
+        resolution."resolvedThroughDate",
+        resolution."studentId"
+      FROM "StudentRiskResolution" resolution
+      INNER JOIN "Class" schoolClass ON schoolClass."id" = resolution."classId"
+      ${buildResolutionWhere({ classId, teacherId })}
+    `,
   ]);
 
   const riskRecords = summarizeRiskRecords(lessons, resolutions);

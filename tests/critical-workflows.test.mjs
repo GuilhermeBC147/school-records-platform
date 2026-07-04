@@ -228,7 +228,7 @@ test("admin risk review flags attendance and homework signals", async () => {
   assert.match(riskPage, /homeworkStatus === "INCOMPLETE"/);
   assert.match(riskPage, /consecutiveMissedClassCount/);
   assert.match(riskPage, /longestMissedStreak/);
-  assert.match(riskPage, /studentRiskResolution\.findMany/);
+  assert.match(riskPage, /\$queryRaw<RiskResolution\[\]>/);
   assert.match(riskPage, /resolveRiskRecordAction/);
   assert.match(riskPage, /teacherId/);
   assert.match(riskPage, /classId/);
