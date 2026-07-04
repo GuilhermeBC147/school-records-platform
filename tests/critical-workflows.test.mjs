@@ -138,6 +138,33 @@ test("admin CSV export includes record filters and student rows", async () => {
   assert.match(exportRoute, /homework/);
 });
 
+test("grading model supports partial evaluations and test grades", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260704001000_add_grading_model/migration.sql",
+  );
+
+  assert.match(schema, /enum LetterGrade/);
+  assert.match(schema, /D_MINUS/);
+  assert.match(schema, /A_MINUS/);
+  assert.match(schema, /enum PartialEvaluationPeriod/);
+  assert.match(schema, /CLASS_7/);
+  assert.match(schema, /CLASS_23/);
+  assert.match(schema, /enum TestPeriod/);
+  assert.match(schema, /MID_TERM/);
+  assert.match(schema, /FINAL/);
+  assert.match(schema, /model PartialEvaluationGrade/);
+  assert.match(schema, /@@unique\(\[classId, studentId, period\]\)/);
+  assert.match(schema, /model TestGrade/);
+  assert.match(schema, /compositionScore\s+Decimal\s+@db\.Decimal\(4, 2\)/);
+  assert.match(schema, /writtenTestScore\s+Decimal\s+@db\.Decimal\(4, 2\)/);
+  assert.match(migration, /compositionScore_range/);
+  assert.match(migration, /writtenTestScore_range/);
+  assert.match(dataModelDoc, /there is no `A\+`/);
+  assert.match(dataModelDoc, /composition plus written test/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");

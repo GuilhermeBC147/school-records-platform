@@ -204,6 +204,94 @@ ON CONFLICT ("lessonId", "studentId") DO UPDATE SET
   "notes" = EXCLUDED."notes",
   "updatedAt" = CURRENT_TIMESTAMP;
 
+INSERT INTO "PartialEvaluationGrade" (
+  "id",
+  "period",
+  "grade",
+  "notes",
+  "createdAt",
+  "updatedAt",
+  "classId",
+  "studentId"
+) VALUES
+  (
+    'partial_a2_larissa_7',
+    'CLASS_7',
+    'B_PLUS',
+    'Strong participation and steady homework habits.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'class_evening_a2',
+    'student_larissa'
+  ),
+  (
+    'partial_a2_mateus_7',
+    'CLASS_7',
+    'B',
+    'Good oral work; review written accuracy.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'class_evening_a2',
+    'student_mateus'
+  ),
+  (
+    'partial_a2_sofia_7',
+    'CLASS_7',
+    'C_PLUS',
+    'Needs more consistent attendance.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'class_evening_a2',
+    'student_sofia'
+  )
+ON CONFLICT ("classId", "studentId", "period") DO UPDATE SET
+  "grade" = EXCLUDED."grade",
+  "notes" = EXCLUDED."notes",
+  "updatedAt" = CURRENT_TIMESTAMP;
+
+INSERT INTO "TestGrade" (
+  "id",
+  "period",
+  "oralGrade",
+  "compositionScore",
+  "writtenTestScore",
+  "notes",
+  "createdAt",
+  "updatedAt",
+  "classId",
+  "studentId"
+) VALUES
+  (
+    'test_a2_larissa_mid',
+    'MID_TERM',
+    'A_MINUS',
+    1.75,
+    7.25,
+    'Clear speaking and organized writing.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'class_evening_a2',
+    'student_larissa'
+  ),
+  (
+    'test_a2_mateus_mid',
+    'MID_TERM',
+    'B_PLUS',
+    1.50,
+    6.75,
+    'Good speaking confidence; watch verb forms.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    'class_evening_a2',
+    'student_mateus'
+  )
+ON CONFLICT ("classId", "studentId", "period") DO UPDATE SET
+  "oralGrade" = EXCLUDED."oralGrade",
+  "compositionScore" = EXCLUDED."compositionScore",
+  "writtenTestScore" = EXCLUDED."writtenTestScore",
+  "notes" = EXCLUDED."notes",
+  "updatedAt" = CURRENT_TIMESTAMP;
+
 INSERT INTO "HomeworkRecord" (
   "id",
   "status",

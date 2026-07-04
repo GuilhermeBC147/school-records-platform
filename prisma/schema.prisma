@@ -35,6 +35,30 @@ enum HomeworkStatus {
   NOT_ASSIGNED
 }
 
+enum LetterGrade {
+  D_MINUS
+  D
+  D_PLUS
+  C_MINUS
+  C
+  C_PLUS
+  B_MINUS
+  B
+  B_PLUS
+  A_MINUS
+  A
+}
+
+enum PartialEvaluationPeriod {
+  CLASS_7
+  CLASS_23
+}
+
+enum TestPeriod {
+  MID_TERM
+  FINAL
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -45,17 +69,17 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  classes          Class[]  @relation("TeacherClasses")
+  classes             Class[]              @relation("TeacherClasses")
   passwordResetTokens PasswordResetToken[]
-  submittedLessons Lesson[] @relation("SubmittedBy")
+  submittedLessons    Lesson[]             @relation("SubmittedBy")
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -74,10 +98,12 @@ model Class {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  teacherId   String
-  teacher     User         @relation("TeacherClasses", fields: [teacherId], references: [id])
-  enrollments Enrollment[]
-  lessons     Lesson[]
+  teacherId               String
+  teacher                 User                     @relation("TeacherClasses", fields: [teacherId], references: [id])
+  enrollments             Enrollment[]
+  lessons                 Lesson[]
+  partialEvaluationGrades PartialEvaluationGrade[]
+  testGrades              TestGrade[]
 
   @@index([teacherId])
 }
@@ -89,9 +115,11 @@ model Student {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  enrollments       Enrollment[]
-  attendanceRecords AttendanceRecord[]
-  homeworkRecords   HomeworkRecord[]
+  enrollments             Enrollment[]
+  attendanceRecords       AttendanceRecord[]
+  homeworkRecords         HomeworkRecord[]
+  partialEvaluationGrades PartialEvaluationGrade[]
+  testGrades              TestGrade[]
 }
 
 model Enrollment {
@@ -161,5 +189,41 @@ model HomeworkRecord {
   student   Student @relation(fields: [studentId], references: [id])
 
   @@unique([lessonId, studentId])
+  @@index([studentId])
+}
+
+model PartialEvaluationGrade {
+  id        String                  @id @default(cuid())
+  period    PartialEvaluationPeriod
+  grade     LetterGrade
+  notes     String?
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id])
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  @@unique([classId, studentId, period])
+  @@index([studentId])
+}
+
+model TestGrade {
+  id               String      @id @default(cuid())
+  period           TestPeriod
+  oralGrade        LetterGrade
+  compositionScore Decimal     @db.Decimal(4, 2)
+  writtenTestScore Decimal     @db.Decimal(4, 2)
+  notes            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id])
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  @@unique([classId, studentId, period])
   @@index([studentId])
 }
