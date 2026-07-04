@@ -239,6 +239,13 @@ test("production handoff documents deployment, backups, and smoke tests", async 
   assert.match(productionDoc, /AUTH_SECRET/);
   assert.match(productionDoc, /prisma migrate deploy/);
   assert.match(productionDoc, /automated backups/);
+  assert.match(productionDoc, /grades and risk-review data/);
+  assert.match(productionDoc, /\/admin\/risk/);
   assert.match(productionDoc, /Release Smoke Test/);
   assert.match(backupDoc, /Export CSV/);
+  assert.match(backupDoc, /student full name/);
+  assert.match(backupDoc, /Grades and Risk Review Backups/);
+  assert.match(backupDoc, /partial evaluation grades/);
+  assert.match(backupDoc, /\/admin\/risk/);
+  assert.doesNotMatch(backupDoc, /preferred name/);
 });
