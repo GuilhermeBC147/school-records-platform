@@ -224,6 +224,7 @@ model Lesson {
 model TeacherWorkLog {
   id              String              @id @default(cuid())
   category        TeacherWorkCategory
+  subject         String?
   title           String
   workDate        DateTime
   startTime       String?

@@ -122,6 +122,7 @@ export async function getTeacherWorkSummary({
         durationMinutes: true,
         notes: true,
         startTime: true,
+        subject: true,
         title: true,
         workDate: true,
       },

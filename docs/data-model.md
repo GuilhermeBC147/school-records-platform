@@ -42,7 +42,8 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Substitute lesson records store the primary class teacher separately from the teacher who taught the lesson.
 - Substitute lesson attendance and homework are saved immediately, but substitute hours only count after admin approval.
 - Paid work outside regular submitted lessons is stored as a teacher work log.
-- Teacher work logs store category, title, date, optional start time, duration, notes, counted teacher, and creator.
+- Teacher work logs store category, title, optional subject, date, optional start time, duration, notes, counted teacher, and creator.
+- Bonus class work logs require a subject so monthly summaries show what the class covered.
 - Work log categories are bonus class, extra activity, meeting, and other.
 
 ## Teacher Work Summaries

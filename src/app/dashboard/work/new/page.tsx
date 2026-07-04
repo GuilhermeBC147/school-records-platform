@@ -40,7 +40,7 @@ export default async function NewTeacherActivityPage() {
             Back to dashboard
           </Link>
           <p className="eyebrow">Teacher work</p>
-          <h1 id="activity-title">Add activity</h1>
+          <h1 id="activity-title">Add event</h1>
           <p className="lede">
             Record bonus classes, extra activities, meetings, or other paid
             work that should be counted in your monthly summary.
@@ -63,6 +63,14 @@ export default async function NewTeacherActivityPage() {
             <label>
               <span>Title</span>
               <input name="title" required type="text" />
+            </label>
+            <label>
+              <span>Subject</span>
+              <input
+                name="subject"
+                placeholder="Required for bonus classes"
+                type="text"
+              />
             </label>
             <label>
               <span>Date</span>

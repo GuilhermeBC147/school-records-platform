@@ -67,6 +67,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
     ? requestedRedirect
     : "/dashboard/work";
   const startTime = String(formData.get("startTime") ?? "").trim() || null;
+  const subject = String(formData.get("subject") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
   const workDate = readWorkDate(formData);
 
@@ -76,6 +77,10 @@ export async function createTeacherWorkLogAction(formData: FormData) {
 
   if (!title) {
     throw new Error("Work title is required.");
+  }
+
+  if (category === "BONUS_CLASS" && !subject) {
+    throw new Error("Bonus class subject is required.");
   }
 
   const teacherId =
@@ -103,6 +108,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
       durationMinutes,
       notes,
       startTime,
+      subject,
       teacherId: teacher.id,
       title,
       workDate,

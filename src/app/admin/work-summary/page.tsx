@@ -172,6 +172,7 @@ export default async function AdminWorkSummaryPage({
                   <th>Type</th>
                   <th>Date</th>
                   <th>Description</th>
+                  <th>Subject</th>
                   <th>Minutes</th>
                   <th>Created by</th>
                     </tr>
@@ -188,6 +189,7 @@ export default async function AdminWorkSummaryPage({
                         <td>
                           {lesson.class.name} | {lesson.name ?? "Untitled"}
                         </td>
+                        <td>-</td>
                         <td>{lesson.class.durationMinutes}</td>
                         <td>Class record</td>
                       </tr>
@@ -197,6 +199,7 @@ export default async function AdminWorkSummaryPage({
                         <td>{formatTeacherWorkCategory(workLog.category)}</td>
                         <td>{formatShortDate(workLog.workDate)}</td>
                         <td>{workLog.title}</td>
+                        <td>{workLog.subject ?? "-"}</td>
                         <td>{workLog.durationMinutes}</td>
                         <td>{workLog.createdBy.name}</td>
                       </tr>
@@ -208,6 +211,7 @@ export default async function AdminWorkSummaryPage({
                         <td>
                           {lesson.class.name} | {lesson.name ?? "Untitled"}
                         </td>
+                        <td>-</td>
                         <td>{lesson.class.durationMinutes}</td>
                         <td>Pending admin approval</td>
                       </tr>
@@ -217,7 +221,7 @@ export default async function AdminWorkSummaryPage({
                       summary.pendingSubstituteLessons.length ===
                     0 ? (
                       <tr>
-                        <td colSpan={5}>No counted work for this month.</td>
+                        <td colSpan={6}>No counted work for this month.</td>
                       </tr>
                     ) : null}
                   </tbody>
@@ -257,6 +261,14 @@ export default async function AdminWorkSummaryPage({
             <label>
               <span>Title</span>
               <input name="title" required type="text" />
+            </label>
+            <label>
+              <span>Subject</span>
+              <input
+                name="subject"
+                placeholder="Required for bonus classes"
+                type="text"
+              />
             </label>
             <label>
               <span>Date</span>

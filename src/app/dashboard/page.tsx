@@ -98,7 +98,7 @@ export default async function DashboardPage() {
                 Monthly summary
               </Link>
               <Link className="primary-link" href="/dashboard/work/new">
-                Add activity
+                Add event
               </Link>
               <Link className="primary-link" href="/dashboard/substitutions/new">
                 Substitute lesson

@@ -73,7 +73,7 @@ export default async function TeacherWorkPage({
           </p>
           <div className="action-row">
             <Link className="primary-link" href="/dashboard/work/new">
-              Add activity
+              Add event
             </Link>
           </div>
           <div className="metric-grid">
@@ -173,6 +173,7 @@ export default async function TeacherWorkPage({
                     <th>Date</th>
                     <th>Category</th>
                     <th>Title</th>
+                    <th>Subject</th>
                     <th>Minutes</th>
                   </tr>
                 </thead>
@@ -182,12 +183,13 @@ export default async function TeacherWorkPage({
                       <td>{formatShortDate(workLog.workDate)}</td>
                       <td>{formatTeacherWorkCategory(workLog.category)}</td>
                       <td>{workLog.title}</td>
+                      <td>{workLog.subject ?? "-"}</td>
                       <td>{workLog.durationMinutes}</td>
                     </tr>
                   ))}
                   {summary.workLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>No paid activities this month.</td>
+                      <td colSpan={5}>No paid activities this month.</td>
                     </tr>
                   ) : null}
                 </tbody>

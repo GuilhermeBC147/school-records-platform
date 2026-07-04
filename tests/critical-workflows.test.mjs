@@ -262,6 +262,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(schema, /EXTRA_ACTIVITY/);
   assert.doesNotMatch(schema, /GAME_NIGHT/);
   assert.match(schema, /model TeacherWorkLog/);
+  assert.match(schema, /subject\s+String\?/);
   assert.match(schema, /teacherId\s+String/);
   assert.match(schema, /createdById\s+String/);
   assert.match(schema, /@@index\(\[teacherId, workDate\]\)/);
@@ -270,14 +271,16 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workLib, /status: "SUBMITTED"/);
   assert.match(workLib, /durationMinutes/);
   assert.match(workActions, /createTeacherWorkLogAction/);
+  assert.match(workActions, /category === "BONUS_CLASS" && !subject/);
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
   assert.match(workActions, /teacherWorkLog\.create/);
   assert.match(teacherWorkPage, /Monthly summary/);
   assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
   assert.doesNotMatch(teacherWorkPage, /createTeacherWorkLogAction/);
-  assert.match(newActivityPage, /Add activity/);
+  assert.match(newActivityPage, /Add event/);
   assert.match(newActivityPage, /createTeacherWorkLogAction/);
+  assert.match(newActivityPage, /name="subject"/);
   assert.match(newActivityPage, /teacherWorkCategories/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
   assert.match(adminWorkPage, /Teacher work summaries/);
