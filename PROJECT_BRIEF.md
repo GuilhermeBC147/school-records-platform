@@ -14,6 +14,7 @@ Teachers currently record attendance and homework completion on paper class reco
 
 - Teacher: records attendance and homework completion for assigned classes.
 - Admin: manages teacher accounts, classes, students, rosters, and reviews submitted records.
+- Reception: schedules independent bonus classes and assigns them to available teachers.
 - Future coordinator role: reviews submitted records, if the school needs approval.
 
 ## Goals
@@ -28,8 +29,8 @@ Teachers currently record attendance and homework completion on paper class reco
 
 - External school-system connections.
 - Mobile app store release.
-- Payroll, grading, financial, or CRM features.
-- Complex permissions beyond teacher and admin.
+- Financial billing, invoicing, or CRM features.
+- Complex permissions beyond teacher, admin, and reception.
 - Real-time classroom communication.
 
 ## First Version Scope
@@ -45,6 +46,10 @@ Teachers currently record attendance and homework completion on paper class reco
 - Local database persistence.
 - Admin view for records.
 - Search and filtering for classes, students, and lesson records.
+- Monthly teacher work summaries for payroll counting.
+- Independent bonus class scheduling by reception.
+- Substitute teacher tracking for lessons taught by someone other than the class's primary teacher.
+- Extra activity records for paid school events or activities.
 
 ## Technical Direction
 
@@ -61,6 +66,8 @@ Recommended stack:
 - Teacher accounts and class assignments need careful access control.
 - Password reset needs a production-ready email path before school use.
 - Admin setup screens need enough validation to avoid broken class rosters.
+- Reception scheduling needs conflict checks to avoid assigning one teacher to two sessions at the same time.
+- Payroll counts need to distinguish the teacher who submitted a record from the teacher who should be paid for it.
 - The app needs a clear backup/export strategy before production use.
 
 ## Success Criteria
@@ -71,3 +78,5 @@ Recommended stack:
 - An admin can see submitted records.
 - Submitted records are stored and reviewable in the app.
 - Admins can manage the school data needed for normal class record workflows.
+- Reception can schedule bonus classes without double-booking teachers.
+- Admins can review monthly teacher work counts for lessons, substitutions, bonus classes, and extra activities.

@@ -2,30 +2,29 @@
 
 ## Now
 
-- Remove preferred name from students across schema, forms, lists, rosters, records, exports, seed data, and tests.
-- Remove lesson time from teacher class records.
-- Normalize lesson uniqueness to one record per class per lesson date.
-- Update data-model documentation for date-only lessons.
+- Finish teacher self-service and admin risk review on the current sprint branch.
+- Keep risk-review thresholds easy to adjust.
+- Confirm admin risk report links back to relevant class/student records.
 
 ## Next
 
-- Add grading schema for partial evaluations and Mid-term/Final tests.
-- Add letter-grade scale from `D-` through `A`, with no `A+`.
-- Add teacher grade-entry UI inside class management.
-- Validate composition scores out of 2 and written test scores out of 8.
-- Display composition plus written test as a total out of 10.
+- Add monthly teacher work summaries for payroll support.
+- Count regular submitted lessons by the teacher who actually taught them.
+- Add teacher-created paid activity records for events, game nights, Halloween, meetings, and other work.
+- Add admin review/correction for monthly teacher work totals.
 
 ## Later
 
-- Add teacher change-password page while logged in.
-- Add admin review report for repeated incomplete homework.
-- Add admin review report for many missed classes.
-- Add admin review report for two missed classes in a row.
-- Add filters for admin risk review by class, teacher, and date range.
+- Add reception accounts with limited access.
+- Add independent bonus class scheduling.
+- Prevent double-booking a teacher for bonus classes.
+- Prevent bonus classes from overlapping regular class schedules when schedule data is available.
+- Count completed bonus classes in monthly teacher work summaries.
+- Add substitute teacher support for regular class lessons.
+- Separate lesson submitter/audit history from the teacher counted for payroll.
 - Add admin approval workflow for submitted records.
 - Add record edit history.
 - Add class/student archive workflow.
-- Add substitute teacher support.
 - Add bilingual UI labels if needed.
 - Add broader workflow tests around admin setup.
 
@@ -39,7 +38,14 @@
 - Should admins be able to edit grades, or only view/export them?
 - Should grade reports be exportable to CSV in the first grading sprint?
 - Should an admin approve records before they become final?
-- What should happen when a class has a substitute teacher?
+- Who is allowed to assign a substitute teacher: admins only, the primary teacher, or reception too?
+- Should substitute teachers be able to see the full class page, or only the lesson record they are covering?
+- Should extra activities require admin approval before they count for payroll?
+- What paid activity categories should be fixed options instead of free text?
+- What default duration should a bonus class have?
+- Can a bonus class include more than one student?
+- Should reception be able to edit or cancel bonus classes after the teacher confirms them?
+- Should payroll summaries count by lessons, hours, or both?
 - Does the school need Portuguese, English, or bilingual UI labels?
 - Should password reset emails be sent through the hosting provider, SMTP, or a transactional email service?
 - Should class books be free text or selected from an admin-managed book list?
