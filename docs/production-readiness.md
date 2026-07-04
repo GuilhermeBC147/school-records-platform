@@ -31,15 +31,17 @@ Seed data is for local development only. Do not run `npm.cmd run db:seed` agains
 
 ## Backup and Export Routine
 
-Database backups protect the whole app. CSV exports help the school keep reporting copies of submitted class records.
+Database backups protect the whole app, including grades and risk-review data. CSV exports help the school keep reporting copies of submitted class records.
 
 Recommended routine:
 
 - Keep hosted PostgreSQL automated backups enabled.
 - Export class records from `/admin/records` at the end of each week.
 - Store CSV exports in the school's normal document storage.
+- Treat hosted PostgreSQL backups as the recovery source for grades, class rosters, and `/admin/risk` signals.
 - Before any production migration, confirm there is a recent database backup.
 - After any production migration, open `/admin/records` and export a small filtered CSV as a smoke test.
+- After grade or risk-review changes, open one class grade table and `/admin/risk` as part of the smoke test.
 
 ## Monitoring
 
@@ -65,6 +67,8 @@ After each deployment:
 8. Save a draft class record.
 9. Submit a class record.
 10. Edit the submitted record and confirm the update is visible to the admin.
+11. Open a class grade table and confirm saved grades still load.
+12. Open `/admin/risk` and confirm the report loads for admins only.
 
 ## Recovery Notes
 
@@ -73,5 +77,5 @@ If production data is damaged or missing:
 - stop new record entry while investigating
 - identify the most recent reliable database backup
 - restore into a temporary database first when possible
-- verify teacher dashboards and admin exports before switching traffic back
+- verify teacher dashboards, grade tables, admin risk review, and admin exports before switching traffic back
 - keep the CSV exports as reporting backups, not as a full database replacement

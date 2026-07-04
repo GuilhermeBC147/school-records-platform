@@ -37,6 +37,18 @@ Grades are stored against each student within a class.
 - The written total is calculated as composition plus written test, from 0 to 10.
 - Submitted records stay in the app database and can be reviewed by admins.
 
+## Risk Review
+
+The admin risk review report is computed from submitted class records. It does not store a separate risk table.
+
+Default thresholds are kept in `src/app/admin/risk/page.tsx` so they can be adjusted in one place:
+
+- 3 incomplete homework records.
+- 3 missed classes.
+- 2 missed classes in a row.
+
+Only `ABSENT` attendance records count as missed classes by default. `EXCUSED` and `LATE` records stay visible in class records but do not count toward the risk report thresholds.
+
 ## Future Questions
 
 - Should substitute teachers be supported with a separate assignment table?

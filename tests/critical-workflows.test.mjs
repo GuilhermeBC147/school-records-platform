@@ -190,7 +190,7 @@ test("teacher grade entry validates values and class access", async () => {
   assert.match(classDetail, /written/);
 });
 
-test("teacher account page supports changing own password", async () => {
+test("logged-in account page supports changing own password", async () => {
   const accountActions = await readProjectFile("src/app/actions/accounts.ts");
   const accountPage = await readProjectFile("src/app/dashboard/account/page.tsx");
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
@@ -204,7 +204,31 @@ test("teacher account page supports changing own password", async () => {
   assert.match(accountPage, /currentPassword/);
   assert.match(accountPage, /newPassword/);
   assert.match(accountPage, /confirmPassword/);
+  assert.match(dashboardPage, /currentUser\.role === "ADMIN"/);
   assert.match(dashboardPage, /\/dashboard\/account/);
+});
+
+test("admin risk review flags attendance and homework signals", async () => {
+  const riskPage = await readProjectFile("src/app/admin/risk/page.tsx");
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+
+  assert.match(riskPage, /RISK_THRESHOLDS/);
+  assert.match(riskPage, /incompleteHomework:\s*3/);
+  assert.match(riskPage, /missedClasses:\s*3/);
+  assert.match(riskPage, /consecutiveMissedClasses:\s*2/);
+  assert.match(riskPage, /status: "SUBMITTED"/);
+  assert.match(riskPage, /attendanceRecord\.status === "ABSENT"/);
+  assert.match(riskPage, /homeworkStatus === "INCOMPLETE"/);
+  assert.match(riskPage, /missedStreak >= RISK_THRESHOLDS\.consecutiveMissedClasses/);
+  assert.match(riskPage, /teacherId/);
+  assert.match(riskPage, /classId/);
+  assert.match(riskPage, /dateFrom/);
+  assert.match(riskPage, /dateTo/);
+  assert.match(riskPage, /\/admin\/students\/\$\{record\.studentId\}/);
+  assert.match(riskPage, /\/admin\/records\/\$\{record\.recentLessonId\}/);
+  assert.match(dashboardPage, /\/admin\/risk/);
+  assert.match(dataModelDoc, /Risk Review/);
 });
 
 test("production handoff documents deployment, backups, and smoke tests", async () => {
@@ -215,6 +239,13 @@ test("production handoff documents deployment, backups, and smoke tests", async 
   assert.match(productionDoc, /AUTH_SECRET/);
   assert.match(productionDoc, /prisma migrate deploy/);
   assert.match(productionDoc, /automated backups/);
+  assert.match(productionDoc, /grades and risk-review data/);
+  assert.match(productionDoc, /\/admin\/risk/);
   assert.match(productionDoc, /Release Smoke Test/);
   assert.match(backupDoc, /Export CSV/);
+  assert.match(backupDoc, /student full name/);
+  assert.match(backupDoc, /Grades and Risk Review Backups/);
+  assert.match(backupDoc, /partial evaluation grades/);
+  assert.match(backupDoc, /\/admin\/risk/);
+  assert.doesNotMatch(backupDoc, /preferred name/);
 });
