@@ -32,7 +32,6 @@ enum AttendanceStatus {
 enum HomeworkStatus {
   COMPLETED
   INCOMPLETE
-  NOT_ASSIGNED
 }
 
 enum LetterGrade {
@@ -168,7 +167,7 @@ model Lesson {
   attendanceRecords AttendanceRecord[]
   homeworkRecords   HomeworkRecord[]
 
-  @@unique([classId, lessonDate])
+  @@unique([classId, lessonDate, name])
   @@index([submittedById])
 }
 
@@ -190,7 +189,7 @@ model AttendanceRecord {
 
 model HomeworkRecord {
   id        String         @id @default(cuid())
-  status    HomeworkStatus @default(NOT_ASSIGNED)
+  status    HomeworkStatus @default(INCOMPLETE)
   notes     String?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt

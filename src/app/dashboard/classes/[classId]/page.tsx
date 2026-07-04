@@ -213,7 +213,7 @@ export default async function ClassDetailPage({
             ) : null}
             <div className="action-row">
               <Link className="primary-link" href={`/dashboard/classes/${schoolClass.id}/record`}>
-                New class record
+                Add lesson
               </Link>
             </div>
           </div>

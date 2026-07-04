@@ -167,7 +167,7 @@ export default async function AdminRecordDetailPage({
                     <td>{record.status}</td>
                     <td>
                       {homeworkByStudentId.get(record.student.id) ??
-                        "NOT_ASSIGNED"}
+                        "INCOMPLETE"}
                     </td>
                   </tr>
                 ))}
