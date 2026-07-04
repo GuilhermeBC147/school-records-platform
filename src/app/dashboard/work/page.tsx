@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
 import {
@@ -8,7 +7,6 @@ import {
   formatTeacherWorkCategory,
   getTeacherWorkSummary,
   readMonth,
-  teacherWorkCategories,
 } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
 
@@ -70,9 +68,14 @@ export default async function TeacherWorkPage({
           <p className="eyebrow">Teacher work</p>
           <h1 id="work-title">Monthly summary</h1>
           <p className="lede">
-            Submitted class lessons count automatically. Add paid activities
-            that happen outside regular class records.
+            Submitted class lessons count automatically. Activities logged from
+            the separate activity page are included here.
           </p>
+          <div className="action-row">
+            <Link className="primary-link" href="/dashboard/work/new">
+              Add activity
+            </Link>
+          </div>
           <div className="metric-grid">
             <article className="metric">
               <span>{summary.lessons.length}</span>
@@ -176,56 +179,6 @@ export default async function TeacherWorkPage({
               </table>
             </div>
           </article>
-        </section>
-
-        <section className="intro" aria-labelledby="activity-title">
-          <p className="eyebrow">Teacher work</p>
-          <h1 id="activity-title">Add activity</h1>
-          <p className="lede">
-            Record bonus classes, extra activities, meetings, or other paid
-            work that should be counted this month.
-          </p>
-        </section>
-
-        <section className="panel data-panel" aria-label="Activity form">
-          <form action={createTeacherWorkLogAction} className="admin-form">
-            <input name="redirectTo" type="hidden" value="/dashboard/work" />
-            <label>
-              <span>Category</span>
-              <select name="category" required>
-                {teacherWorkCategories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Title</span>
-              <input name="title" required type="text" />
-            </label>
-            <label>
-              <span>Date</span>
-              <input name="workDate" required type="date" />
-            </label>
-            <label>
-              <span>Start time</span>
-              <input name="startTime" type="time" />
-            </label>
-            <label>
-              <span>Duration minutes</span>
-              <input min="1" max="720" name="durationMinutes" required type="number" />
-            </label>
-            <label>
-              <span>Notes</span>
-              <textarea name="notes" rows={3} />
-            </label>
-            <div className="record-actions">
-              <button className="primary-button" type="submit">
-                Save activity
-              </button>
-            </div>
-          </form>
         </section>
       </div>
     </main>

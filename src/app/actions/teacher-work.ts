@@ -9,7 +9,11 @@ import { teacherWorkCategories } from "@/lib/teacher-work";
 const teacherWorkCategoryValues = teacherWorkCategories.map(
   (category) => category.value,
 );
-const allowedRedirects = new Set(["/admin/work-summary", "/dashboard/work"]);
+const allowedRedirects = new Set([
+  "/admin/work-summary",
+  "/dashboard/work",
+  "/dashboard/work/new",
+]);
 
 function readWorkDate(formData: FormData) {
   const value = String(formData.get("workDate") ?? "");

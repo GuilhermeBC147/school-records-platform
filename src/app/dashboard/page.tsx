@@ -94,6 +94,9 @@ export default async function DashboardPage() {
               <Link className="primary-link" href="/dashboard/work">
                 Monthly summary
               </Link>
+              <Link className="primary-link" href="/dashboard/work/new">
+                Add activity
+              </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account
               </Link>

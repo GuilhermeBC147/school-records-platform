@@ -247,6 +247,9 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
   const teacherWorkPage = await readProjectFile("src/app/dashboard/work/page.tsx");
+  const newActivityPage = await readProjectFile(
+    "src/app/dashboard/work/new/page.tsx",
+  );
   const adminWorkPage = await readProjectFile("src/app/admin/work-summary/page.tsx");
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
   const dataModelDoc = await readProjectFile("docs/data-model.md");
@@ -271,13 +274,17 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workActions, /role: "TEACHER"/);
   assert.match(workActions, /teacherWorkLog\.create/);
   assert.match(teacherWorkPage, /Monthly summary/);
-  assert.match(teacherWorkPage, /Add activity/);
+  assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
+  assert.doesNotMatch(teacherWorkPage, /createTeacherWorkLogAction/);
+  assert.match(newActivityPage, /Add activity/);
+  assert.match(newActivityPage, /createTeacherWorkLogAction/);
+  assert.match(newActivityPage, /teacherWorkCategories/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
-  assert.match(teacherWorkPage, /createTeacherWorkLogAction/);
   assert.match(adminWorkPage, /Teacher work summaries/);
   assert.match(adminWorkPage, /getTeacherWorkSummary/);
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
+  assert.match(dashboardPage, /\/dashboard\/work\/new/);
   assert.match(dashboardPage, /\/admin\/work-summary/);
   assert.match(dataModelDoc, /Teacher Work Summaries/);
   assert.match(dataModelDoc, /class's assigned teacher/);
