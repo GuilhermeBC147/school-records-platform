@@ -40,6 +40,16 @@ INSERT INTO "User" (
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
+  ),
+  (
+    'user_reception_demo',
+    'Reception Demo',
+    'reception@example.com',
+    'pbkdf2_sha256$120000$dev_seed_auth_salt_v1$bvo_8hrvWUEeSseYrGHL0b6gtOps5XcKYzUVKPSbWCU',
+    'RECEPTION',
+    true,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
   )
 ON CONFLICT ("email") DO UPDATE SET
   "name" = EXCLUDED."name",

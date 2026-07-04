@@ -346,6 +346,87 @@ test("substitute teachers can submit lessons pending admin approval", async () =
   assert.match(dataModelDoc, /Approval affects payroll attribution only/);
 });
 
+test("reception can schedule bonus classes for teacher confirmation", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const seed = await readProjectFile("prisma/seed.sql");
+  const bonusActions = await readProjectFile("src/app/actions/bonus-classes.ts");
+  const bonusLib = await readProjectFile("src/lib/bonus-classes.ts");
+  const receptionDashboardPage = await readProjectFile("src/app/reception/page.tsx");
+  const receptionPage = await readProjectFile(
+    "src/app/reception/bonus-classes/page.tsx",
+  );
+  const receptionCalendarPage = await readProjectFile(
+    "src/app/reception/calendar/page.tsx",
+  );
+  const receptionStudentsPage = await readProjectFile(
+    "src/app/reception/students-and-classes/page.tsx",
+  );
+  const receptionEditPage = await readProjectFile(
+    "src/app/reception/bonus-classes/[bonusClassId]/page.tsx",
+  );
+  const globalStyles = await readProjectFile("src/app/globals.css");
+  const teacherBonusPage = await readProjectFile(
+    "src/app/dashboard/bonus-classes/page.tsx",
+  );
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+  const workLib = await readProjectFile("src/lib/teacher-work.ts");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260704160000_add_bonus_class_scheduling/migration.sql",
+  );
+  const attendanceMigration = await readProjectFile(
+    "prisma/migrations/20260704163000_add_bonus_class_attendance/migration.sql",
+  );
+
+  assert.match(schema, /RECEPTION/);
+  assert.match(schema, /enum BonusClassStatus/);
+  assert.match(schema, /enum BonusClassAttendanceStatus/);
+  assert.match(schema, /model BonusClass/);
+  assert.match(schema, /attendanceStatus\s+BonusClassAttendanceStatus/);
+  assert.match(schema, /subject\s+String/);
+  assert.match(schema, /@@index\(\[teacherId, scheduledDate\]\)/);
+  assert.match(seed, /reception@example\.com/);
+  assert.match(migration, /ALTER TYPE "UserRole" ADD VALUE/);
+  assert.match(migration, /CREATE TABLE "BonusClass"/);
+  assert.match(migration, /BonusClass_durationMinutes_check/);
+  assert.match(attendanceMigration, /CREATE TYPE "BonusClassAttendanceStatus"/);
+  assert.match(attendanceMigration, /attendanceConfirmedById/);
+  assert.match(bonusActions, /requireReceptionOrAdmin/);
+  assert.match(bonusActions, /createBonusClassAction/);
+  assert.match(bonusActions, /updateBonusClassAction/);
+  assert.match(bonusActions, /cancelBonusClassAction/);
+  assert.match(bonusActions, /completeBonusClassAction/);
+  assert.match(bonusActions, /readAttendanceStatus/);
+  assert.match(bonusActions, /hasTeacherBonusClassOverlap/);
+  assert.match(bonusLib, /startMinutes < existingEnd/);
+  assert.match(receptionDashboardPage, /\/reception\/calendar/);
+  assert.match(receptionDashboardPage, /\/reception\/students-and-classes/);
+  assert.match(receptionPage, /Schedule bonus class/);
+  assert.match(receptionPage, /studentSearch/);
+  assert.match(receptionCalendarPage, /Daily teacher calendar/);
+  assert.match(receptionCalendarPage, /timeSlots/);
+  assert.match(receptionCalendarPage, /formatTimeFromMinutes/);
+  assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);
+  assert.match(receptionStudentsPage, /Students and classes/);
+  assert.match(receptionStudentsPage, /studentSearch/);
+  assert.match(receptionStudentsPage, /teacherId/);
+  assert.match(receptionStudentsPage, /weekDay/);
+  assert.match(receptionStudentsPage, /lastAttendedLesson/);
+  assert.match(receptionStudentsPage, /absentLessons/);
+  assert.match(receptionStudentsPage, /homeworkNotDone/);
+  assert.match(receptionStudentsPage, /Recent lessons/);
+  assert.match(receptionEditPage, /updateBonusClassAction/);
+  assert.match(receptionEditPage, /completeBonusClassAction/);
+  assert.match(teacherBonusPage, /attendanceStatus/);
+  assert.match(globalStyles, /schedule-table/);
+  assert.match(dashboardPage, /currentUser\.role === "RECEPTION"/);
+  assert.match(dashboardPage, /\/reception/);
+  assert.match(dashboardPage, /\/dashboard\/bonus-classes/);
+  assert.match(workLib, /bonusClasses/);
+  assert.match(workLib, /status: "COMPLETED"/);
+  assert.match(dataModelDoc, /Reception accounts can schedule independent bonus classes/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");

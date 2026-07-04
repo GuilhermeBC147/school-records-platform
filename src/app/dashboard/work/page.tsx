@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
+import { formatStartTime } from "@/lib/bonus-classes";
 import {
   formatHours,
   formatTeacherWorkCategory,
@@ -86,6 +87,10 @@ export default async function TeacherWorkPage({
               <strong>Activities</strong>
             </article>
             <article className="metric">
+              <span>{summary.bonusClasses.length}</span>
+              <strong>Bonus classes</strong>
+            </article>
+            <article className="metric">
               <span>{summary.pendingSubstituteLessons.length}</span>
               <strong>Pending substitutions</strong>
             </article>
@@ -157,6 +162,39 @@ export default async function TeacherWorkPage({
                   {summary.lessons.length === 0 ? (
                     <tr>
                       <td colSpan={5}>No submitted lessons this month.</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article className="panel data-panel">
+            <h2>Completed bonus classes</h2>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Minutes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.bonusClasses.map((bonusClass) => (
+                    <tr key={bonusClass.id}>
+                      <td>{formatShortDate(bonusClass.scheduledDate)}</td>
+                      <td>{formatStartTime(bonusClass.startTime)}</td>
+                      <td>{bonusClass.student.fullName}</td>
+                      <td>{bonusClass.subject}</td>
+                      <td>{bonusClass.durationMinutes}</td>
+                    </tr>
+                  ))}
+                  {summary.bonusClasses.length === 0 ? (
+                    <tr>
+                      <td colSpan={5}>No completed bonus classes this month.</td>
                     </tr>
                   ) : null}
                 </tbody>
