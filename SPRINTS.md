@@ -412,6 +412,9 @@ Tasks:
 - Let reception assign or reassign the teacher before the bonus class happens.
 - Let the assigned teacher record or confirm that the bonus class happened.
 - Keep teacher-created bonus classes from the dashboard Add event flow aligned with reception-created bonus classes, including subject, date, start time, duration, and notes.
+- Add a reception student lookup for parent-facing questions, including last attended lesson, missed lessons, missed-class count, incomplete-homework count, and active class information.
+- Add a reception class lookup so reception can quickly confirm class teacher, schedule, roster, and recent lessons.
+- Show bonus classes in a calendar-style day grid with 30-minute rows and one column per teacher.
 - Count completed bonus classes toward the assigned teacher's monthly paid work.
 
 Suggested commits:
@@ -425,6 +428,8 @@ Done when:
 - Reception can schedule bonus classes and assign teachers.
 - Reception cannot access admin-only or teacher-only management areas.
 - The app blocks teacher double-booking for bonus classes.
+- Reception can answer student and class schedule questions without admin access.
+- Reception can visually scan a teacher-by-time bonus class calendar.
 - Completed bonus classes appear in teacher monthly work summaries.
 - Teacher-created bonus classes capture the same scheduling details as reception-created bonus classes.
 

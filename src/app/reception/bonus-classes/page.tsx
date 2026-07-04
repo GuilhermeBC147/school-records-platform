@@ -10,6 +10,9 @@ import { formatShortDate } from "@/lib/date-format";
 import {
   formatBonusClassStatus,
   formatStartTime,
+  formatTimeFromMinutes,
+  readIsoDate,
+  readTimeMinutes,
 } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -18,10 +21,47 @@ export const dynamic = "force-dynamic";
 
 type ReceptionBonusClassesPageProps = {
   searchParams: Promise<{
+    date?: string;
     error?: string;
     status?: string;
   }>;
 };
+
+function todayDateInputValue() {
+  const date = new Date();
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
+
+  return `${year}-${month}-${day}`;
+}
+
+function safeCalendarDate(value: string | undefined) {
+  const fallback = todayDateInputValue();
+
+  try {
+    const label = value ?? fallback;
+
+    return {
+      date: readIsoDate(label),
+      label,
+    };
+  } catch {
+    return {
+      date: readIsoDate(fallback),
+      label: fallback,
+    };
+  }
+}
+
+function bonusClassStartsInSlot(
+  bonusClass: { startTime: string },
+  slotStartMinutes: number,
+) {
+  const startMinutes = readTimeMinutes(bonusClass.startTime);
+
+  return startMinutes >= slotStartMinutes && startMinutes < slotStartMinutes + 30;
+}
 
 export default async function ReceptionBonusClassesPage({
   searchParams,
@@ -37,7 +77,9 @@ export default async function ReceptionBonusClassesPage({
   }
 
   const query = await searchParams;
-  const [bonusClasses, students, teachers] = await Promise.all([
+  const calendarDate = safeCalendarDate(query.date);
+  const timeSlots = Array.from({ length: 31 }, (_, index) => 7 * 60 + index * 30);
+  const [bonusClasses, calendarBonusClasses, students, teachers] = await Promise.all([
     prisma.bonusClass.findMany({
       orderBy: [{ scheduledDate: "desc" }, { startTime: "asc" }],
       take: 50,
@@ -55,6 +97,26 @@ export default async function ReceptionBonusClassesPage({
         teacher: {
           select: { name: true },
         },
+      },
+    }),
+    prisma.bonusClass.findMany({
+      orderBy: [{ startTime: "asc" }, { teacher: { name: "asc" } }],
+      where: {
+        scheduledDate: calendarDate.date,
+        status: {
+          not: "CANCELED",
+        },
+      },
+      select: {
+        id: true,
+        durationMinutes: true,
+        startTime: true,
+        status: true,
+        subject: true,
+        student: {
+          select: { fullName: true },
+        },
+        teacherId: true,
       },
     }),
     prisma.student.findMany({
@@ -102,6 +164,11 @@ export default async function ReceptionBonusClassesPage({
             Schedule independent bonus classes and assign them to active
             teachers.
           </p>
+          <div className="action-row">
+            <Link className="primary-link" href="/reception/students">
+              Student lookup
+            </Link>
+          </div>
         </section>
 
         {query.status ? (
@@ -167,6 +234,74 @@ export default async function ReceptionBonusClassesPage({
               </button>
             </div>
           </form>
+        </section>
+
+        <section className="panel data-panel" aria-labelledby="calendar-title">
+          <div className="section-heading-row">
+            <div>
+              <h2 id="calendar-title">Daily teacher calendar</h2>
+              <p className="muted-copy">
+                Bonus classes are shown in 30-minute rows by assigned teacher.
+              </p>
+            </div>
+            <form className="filter-form compact-filter-form">
+              <label>
+                <span>Date</span>
+                <input defaultValue={calendarDate.label} name="date" type="date" />
+              </label>
+              <div className="filter-actions">
+                <button className="primary-button" type="submit">
+                  View
+                </button>
+              </div>
+            </form>
+          </div>
+          <div className="table-wrap schedule-wrap">
+            <table className="schedule-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  {teachers.map((teacher) => (
+                    <th key={teacher.id}>{teacher.name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {timeSlots.map((slotStartMinutes) => (
+                  <tr key={slotStartMinutes}>
+                    <th>{formatTimeFromMinutes(slotStartMinutes)}</th>
+                    {teachers.map((teacher) => {
+                      const slotBonusClasses = calendarBonusClasses.filter(
+                        (bonusClass) =>
+                          bonusClass.teacherId === teacher.id &&
+                          bonusClassStartsInSlot(bonusClass, slotStartMinutes),
+                      );
+
+                      return (
+                        <td className="schedule-cell" key={teacher.id}>
+                          {slotBonusClasses.map((bonusClass) => (
+                            <Link
+                              className="schedule-event"
+                              href={`/reception/bonus-classes/${bonusClass.id}`}
+                              key={bonusClass.id}
+                            >
+                              <strong>
+                                {bonusClass.startTime} |{" "}
+                                {formatDuration(bonusClass.durationMinutes)}
+                              </strong>
+                              <span>{bonusClass.student.fullName}</span>
+                              <span>{bonusClass.subject}</span>
+                              <span>{formatBonusClassStatus(bonusClass.status)}</span>
+                            </Link>
+                          ))}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section className="panel data-panel" aria-labelledby="scheduled-title">

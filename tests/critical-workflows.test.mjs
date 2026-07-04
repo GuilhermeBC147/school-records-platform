@@ -354,9 +354,13 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   const receptionPage = await readProjectFile(
     "src/app/reception/bonus-classes/page.tsx",
   );
+  const receptionStudentsPage = await readProjectFile(
+    "src/app/reception/students/page.tsx",
+  );
   const receptionEditPage = await readProjectFile(
     "src/app/reception/bonus-classes/[bonusClassId]/page.tsx",
   );
+  const globalStyles = await readProjectFile("src/app/globals.css");
   const teacherBonusPage = await readProjectFile(
     "src/app/dashboard/bonus-classes/page.tsx",
   );
@@ -384,9 +388,19 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusActions, /hasTeacherBonusClassOverlap/);
   assert.match(bonusLib, /startMinutes < existingEnd/);
   assert.match(receptionPage, /Schedule bonus class/);
+  assert.match(receptionPage, /Daily teacher calendar/);
+  assert.match(receptionPage, /timeSlots/);
+  assert.match(receptionPage, /formatTimeFromMinutes/);
+  assert.match(receptionPage, /\/reception\/students/);
   assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);
+  assert.match(receptionStudentsPage, /Student and class lookup/);
+  assert.match(receptionStudentsPage, /lastAttendedLesson/);
+  assert.match(receptionStudentsPage, /absentLessons/);
+  assert.match(receptionStudentsPage, /homeworkNotDone/);
+  assert.match(receptionStudentsPage, /Recent lessons/);
   assert.match(receptionEditPage, /updateBonusClassAction/);
   assert.match(teacherBonusPage, /Mark complete/);
+  assert.match(globalStyles, /schedule-table/);
   assert.match(dashboardPage, /currentUser\.role === "RECEPTION"/);
   assert.match(dashboardPage, /\/dashboard\/bonus-classes/);
   assert.match(workLib, /bonusClasses/);
