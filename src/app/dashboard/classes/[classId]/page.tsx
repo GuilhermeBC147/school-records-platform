@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Fragment } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import { updateClassGradesAction } from "@/app/actions/grades";
 import { formatShortDate } from "@/lib/date-format";
@@ -303,65 +302,83 @@ export default async function ClassDetailPage({
 
           <form action={updateClassGradesAction} className="grade-form">
             <input name="classId" type="hidden" value={schoolClass.id} />
-            <div className="table-wrap">
-              <table className="grade-table">
-                <thead>
-                  <tr>
-                    <th rowSpan={2}>Student</th>
-                    <th colSpan={partialEvaluationPeriods.length}>
-                      Partial evaluations
-                    </th>
-                    {testPeriods.map((period) => (
-                      <th colSpan={4} key={period.value}>
-                        {period.label}
-                      </th>
-                    ))}
-                  </tr>
-                  <tr>
-                    {partialEvaluationPeriods.map((period) => (
-                      <th key={period.value}>{period.label}</th>
-                    ))}
-                    {testPeriods.map((period) => (
-                      <Fragment key={period.value}>
-                        <th key={`${period.value}:oral`}>Oral</th>
-                        <th key={`${period.value}:composition`}>Comp.</th>
-                        <th key={`${period.value}:written`}>Written</th>
-                        <th key={`${period.value}:total`}>Total</th>
-                      </Fragment>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {schoolClass.enrollments.map((enrollment) => (
-                    <tr key={enrollment.id}>
-                      <td>{enrollment.student.fullName}</td>
+            <div className="grade-section">
+              <div className="grade-section-heading">
+                <h3>Partial evaluations</h3>
+                <p>Letter grades for the 7th and 23rd class.</p>
+              </div>
+              <div className="table-wrap">
+                <table className="grade-table partial-grade-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
                       {partialEvaluationPeriods.map((period) => (
-                        <td key={period.value}>
-                          <select
-                            defaultValue={findPartialGrade(
-                              enrollment.student.partialEvaluationGrades,
-                              period.value,
-                            )}
-                            name={`partial:${enrollment.student.id}:${period.value}`}
-                          >
-                            <option value="">-</option>
-                            {letterGradeOptions.map((grade) => (
-                              <option key={grade.value} value={grade.value}>
-                                {grade.label}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
+                        <th key={period.value}>{period.label}</th>
                       ))}
-                      {testPeriods.map((period) => {
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {schoolClass.enrollments.map((enrollment) => (
+                      <tr key={enrollment.id}>
+                        <td>{enrollment.student.fullName}</td>
+                        {partialEvaluationPeriods.map((period) => (
+                          <td key={period.value}>
+                            <select
+                              defaultValue={findPartialGrade(
+                                enrollment.student.partialEvaluationGrades,
+                                period.value,
+                              )}
+                              name={`partial:${enrollment.student.id}:${period.value}`}
+                            >
+                              <option value="">-</option>
+                              {letterGradeOptions.map((grade) => (
+                                <option key={grade.value} value={grade.value}>
+                                  {grade.label}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                    {schoolClass.enrollments.length === 0 ? (
+                      <tr>
+                        <td colSpan={3}>No active students in this class.</td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {testPeriods.map((period) => (
+              <div className="grade-section" key={period.value}>
+                <div className="grade-section-heading">
+                  <h3>{period.label} test</h3>
+                  <p>Oral grade plus composition and written test scores.</p>
+                </div>
+                <div className="table-wrap">
+                  <table className="grade-table test-grade-table">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Oral</th>
+                        <th>Composition / 2</th>
+                        <th>Written / 8</th>
+                        <th>Total / 10</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {schoolClass.enrollments.map((enrollment) => {
                         const grade = findTestGrade(
                           enrollment.student.testGrades,
                           period.value,
                         );
 
                         return (
-                          <Fragment key={period.value}>
-                            <td key={`${period.value}:oral`}>
+                          <tr key={enrollment.id}>
+                            <td>{enrollment.student.fullName}</td>
+                            <td>
                               <select
                                 defaultValue={grade?.oralGrade ?? ""}
                                 name={`oral:${enrollment.student.id}:${period.value}`}
@@ -377,7 +394,7 @@ export default async function ClassDetailPage({
                                 ))}
                               </select>
                             </td>
-                            <td key={`${period.value}:composition`}>
+                            <td>
                               <input
                                 defaultValue={
                                   grade
@@ -391,7 +408,7 @@ export default async function ClassDetailPage({
                                 type="number"
                               />
                             </td>
-                            <td key={`${period.value}:written`}>
+                            <td>
                               <input
                                 defaultValue={
                                   grade
@@ -405,22 +422,20 @@ export default async function ClassDetailPage({
                                 type="number"
                               />
                             </td>
-                            <td key={`${period.value}:total`}>
-                              {testTotal(grade)}
-                            </td>
-                          </Fragment>
+                            <td className="grade-total">{testTotal(grade)}</td>
+                          </tr>
                         );
                       })}
-                    </tr>
-                  ))}
-                  {schoolClass.enrollments.length === 0 ? (
-                    <tr>
-                      <td colSpan={11}>No active students in this class.</td>
-                    </tr>
-                  ) : null}
-                </tbody>
-              </table>
-            </div>
+                      {schoolClass.enrollments.length === 0 ? (
+                        <tr>
+                          <td colSpan={5}>No active students in this class.</td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
             <div className="grade-scale">
               {letterGradeOptions.map((grade) => (
                 <span key={grade.value}>{formatGradeLabel(grade.value)}</span>
