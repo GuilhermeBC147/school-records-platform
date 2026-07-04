@@ -85,6 +85,9 @@ export default async function DashboardPage() {
               <Link className="primary-link" href="/admin/work-summary">
                 Teacher work summaries
               </Link>
+              <Link className="primary-link" href="/admin/substitutions">
+                Review substitutions
+              </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account
               </Link>
@@ -96,6 +99,9 @@ export default async function DashboardPage() {
               </Link>
               <Link className="primary-link" href="/dashboard/work/new">
                 Add activity
+              </Link>
+              <Link className="primary-link" href="/dashboard/substitutions/new">
+                Substitute lesson
               </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account

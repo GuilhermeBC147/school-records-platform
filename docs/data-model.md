@@ -39,6 +39,8 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - The written total is calculated as composition plus written test, from 0 to 10.
 - Submitted records stay in the app database and can be reviewed by admins.
 - Submitted lessons count toward the class teacher's monthly work summary using the class duration.
+- Substitute lesson records store the primary class teacher separately from the teacher who taught the lesson.
+- Substitute lesson attendance and homework are saved immediately, but substitute hours only count after admin approval.
 - Paid work outside regular submitted lessons is stored as a teacher work log.
 - Teacher work logs store category, title, date, optional start time, duration, notes, counted teacher, and creator.
 - Work log categories are bonus class, extra activity, meeting, and other.
@@ -50,9 +52,20 @@ Teacher monthly work summaries are computed from two sources:
 - Submitted regular lessons during the month.
 - Manual teacher work logs during the month.
 
-Regular lessons count automatically for the class's assigned teacher in this sprint. Substitution-specific counted teachers are planned separately so the class owner, submitter, and paid teacher can be modeled deliberately.
+Regular lessons count automatically for the class's assigned teacher. Approved substitute lessons count for the teacher stored on the lesson as `taughtBy`; pending substitute lessons are visible in summaries but excluded from finalized totals.
 
 Teachers can add their own paid activities. Admins can review all teacher summaries and add activity records for a teacher when corrections are needed.
+
+## Substitute Lessons
+
+Teachers can submit a substitute lesson for another teacher's active class from the dashboard. The lesson stores:
+
+- The primary class teacher through `Class.teacherId`.
+- The teacher who submitted the record through `Lesson.submittedById`.
+- The teacher who taught and may be paid through `Lesson.taughtById`.
+- The payroll approval state through `Lesson.substitutionStatus`.
+
+Substitute records start as `PENDING_APPROVAL`. Admins can approve or reject them from the substitution review page. Approval affects payroll attribution only; attendance and homework records remain saved either way.
 
 ## Risk Review
 

@@ -135,6 +135,9 @@ export default async function AdminWorkSummaryPage({
                   <p className="muted-copy">
                     {summary.lessons.length} lessons and{" "}
                     {summary.workLogs.length} paid activities.
+                    {summary.pendingSubstituteLessons.length > 0
+                      ? ` ${summary.pendingSubstituteLessons.length} substitute lessons pending approval.`
+                      : ""}
                   </p>
                 </div>
                 <div className="metric compact-metric">
@@ -166,17 +169,21 @@ export default async function AdminWorkSummaryPage({
                 <table>
                   <thead>
                     <tr>
-                      <th>Type</th>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Minutes</th>
-                      <th>Created by</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Minutes</th>
+                  <th>Created by</th>
                     </tr>
                   </thead>
                   <tbody>
                     {summary.lessons.map((lesson) => (
                       <tr key={lesson.id}>
-                        <td>Regular lesson</td>
+                        <td>
+                          {lesson.substitutionStatus === "APPROVED"
+                            ? "Approved substitute"
+                            : "Regular lesson"}
+                        </td>
                         <td>{formatShortDate(lesson.lessonDate)}</td>
                         <td>
                           {lesson.class.name} | {lesson.name ?? "Untitled"}
@@ -194,7 +201,21 @@ export default async function AdminWorkSummaryPage({
                         <td>{workLog.createdBy.name}</td>
                       </tr>
                     ))}
-                    {summary.lessons.length + summary.workLogs.length === 0 ? (
+                    {summary.pendingSubstituteLessons.map((lesson) => (
+                      <tr key={lesson.id}>
+                        <td>Pending substitute</td>
+                        <td>{formatShortDate(lesson.lessonDate)}</td>
+                        <td>
+                          {lesson.class.name} | {lesson.name ?? "Untitled"}
+                        </td>
+                        <td>{lesson.class.durationMinutes}</td>
+                        <td>Pending admin approval</td>
+                      </tr>
+                    ))}
+                    {summary.lessons.length +
+                      summary.workLogs.length +
+                      summary.pendingSubstituteLessons.length ===
+                    0 ? (
                       <tr>
                         <td colSpan={5}>No counted work for this month.</td>
                       </tr>

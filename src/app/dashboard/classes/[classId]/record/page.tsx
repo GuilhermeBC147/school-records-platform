@@ -17,6 +17,7 @@ type ClassRecordPageProps = {
   }>;
   searchParams: Promise<{
     lessonId?: string;
+    substitute?: string;
   }>;
 };
 
@@ -48,13 +49,16 @@ export default async function ClassRecordPage({
   }
 
   const { classId } = await params;
-  const { lessonId } = await searchParams;
+  const { lessonId, substitute } = await searchParams;
+  const isSubstituteRecord = currentUser.role === "TEACHER" && substitute === "1";
 
   const schoolClass = await prisma.class.findFirst({
     where: {
       id: classId,
       isActive: true,
-      ...(currentUser.role === "TEACHER" ? { teacherId: currentUser.id } : {}),
+      ...(currentUser.role === "TEACHER" && !isSubstituteRecord
+        ? { teacherId: currentUser.id }
+        : {}),
     },
     select: {
       id: true,
@@ -95,6 +99,8 @@ export default async function ClassRecordPage({
           lessonDate: true,
           notes: true,
           status: true,
+          substitutionNotes: true,
+          substitutionStatus: true,
           attendanceRecords: {
             select: {
               studentId: true,
@@ -123,6 +129,8 @@ export default async function ClassRecordPage({
   }
 
   const isEditingSubmitted = lessonRecord?.status === "SUBMITTED";
+  const isPendingSubstitution =
+    lessonRecord?.substitutionStatus === "PENDING_APPROVAL";
 
   return (
     <main className="app-shell">
@@ -152,15 +160,29 @@ export default async function ClassRecordPage({
               : ""}
           </p>
           <h1 id="record-title">
-            {isEditingSubmitted ? "Edit class record" : "Class record"}
+            {isSubstituteRecord
+              ? "Substitute class record"
+              : isEditingSubmitted
+                ? "Edit class record"
+                : "Class record"}
           </h1>
           <p className="lede">
             {schoolClass.name} with {schoolClass.teacher.name}
           </p>
+          {isSubstituteRecord || isPendingSubstitution ? (
+            <p className="muted-copy">
+              This record will be saved for attendance and homework immediately.
+              Admin approval decides whether the substitute hours count toward
+              payroll.
+            </p>
+          ) : null}
         </section>
 
         <form action={submitClassRecordAction} className="record-form">
           <input name="classId" type="hidden" value={schoolClass.id} />
+          {isSubstituteRecord ? (
+            <input name="isSubstitute" type="hidden" value="1" />
+          ) : null}
           {lessonRecord ? (
             <input name="lessonId" type="hidden" value={lessonRecord.id} />
           ) : null}
@@ -202,6 +224,17 @@ export default async function ClassRecordPage({
                 rows={3}
               />
             </label>
+            {isSubstituteRecord || isPendingSubstitution ? (
+              <label>
+                <span>Substitution notes</span>
+                <textarea
+                  defaultValue={lessonRecord?.substitutionNotes ?? ""}
+                  name="substitutionNotes"
+                  placeholder="Optional note for admin review"
+                  rows={3}
+                />
+              </label>
+            ) : null}
           </section>
 
           <section className="panel data-panel" aria-labelledby="students-title">
@@ -252,7 +285,7 @@ export default async function ClassRecordPage({
           </section>
 
           <div className="record-actions">
-            {isEditingSubmitted ? null : (
+            {isEditingSubmitted || isSubstituteRecord ? null : (
               <button
                 className="secondary-button"
                 formAction={saveDraftClassRecordAction}
@@ -262,7 +295,11 @@ export default async function ClassRecordPage({
               </button>
             )}
             <button className="primary-button" type="submit">
-              {isEditingSubmitted ? "Update submission" : "Submit class record"}
+              {isEditingSubmitted
+                ? "Update submission"
+                : isSubstituteRecord
+                  ? "Submit substitute record"
+                  : "Submit class record"}
             </button>
           </div>
         </form>

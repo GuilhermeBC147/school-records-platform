@@ -290,6 +290,59 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(dataModelDoc, /class's assigned teacher/);
 });
 
+test("substitute teachers can submit lessons pending admin approval", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const recordActions = await readProjectFile("src/app/actions/class-records.ts");
+  const substitutionActions = await readProjectFile(
+    "src/app/actions/substitutions.ts",
+  );
+  const recordPage = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/record/page.tsx",
+  );
+  const substitutionPage = await readProjectFile(
+    "src/app/dashboard/substitutions/new/page.tsx",
+  );
+  const adminSubstitutionsPage = await readProjectFile(
+    "src/app/admin/substitutions/page.tsx",
+  );
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+  const workLib = await readProjectFile("src/lib/teacher-work.ts");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260704150000_add_substitute_lesson_approval/migration.sql",
+  );
+
+  assert.match(schema, /enum SubstitutionStatus/);
+  assert.match(schema, /PENDING_APPROVAL/);
+  assert.match(schema, /APPROVED/);
+  assert.match(schema, /taughtById\s+String\?/);
+  assert.match(schema, /substitutionReviewedById\s+String\?/);
+  assert.match(migration, /CREATE TYPE "SubstitutionStatus"/);
+  assert.match(migration, /SET "taughtById" = "Class"\."teacherId"/);
+  assert.match(recordActions, /isSubstituteRecord/);
+  assert.match(recordActions, /PENDING_APPROVAL/);
+  assert.match(recordActions, /taughtById: currentUser\.id/);
+  assert.match(recordActions, /\/dashboard\/work\?status=substitution-pending/);
+  assert.match(recordPage, /substitute === "1"/);
+  assert.match(recordPage, /Substitute class record/);
+  assert.match(recordPage, /Submit substitute record/);
+  assert.match(recordPage, /substitutionNotes/);
+  assert.match(substitutionPage, /Substitute lesson/);
+  assert.match(substitutionPage, /not: currentUser\.id/);
+  assert.match(substitutionPage, /substitute=1/);
+  assert.match(substitutionActions, /approveSubstitutionAction/);
+  assert.match(substitutionActions, /rejectSubstitutionAction/);
+  assert.match(substitutionActions, /substitutionReviewedById/);
+  assert.match(adminSubstitutionsPage, /approveSubstitutionAction/);
+  assert.match(adminSubstitutionsPage, /rejectSubstitutionAction/);
+  assert.match(dashboardPage, /\/dashboard\/substitutions\/new/);
+  assert.match(dashboardPage, /\/admin\/substitutions/);
+  assert.match(workLib, /substitutionStatus: "APPROVED"/);
+  assert.match(workLib, /pendingSubstituteLessons/);
+  assert.match(dataModelDoc, /Substitute Lessons/);
+  assert.match(dataModelDoc, /Approval affects payroll attribution only/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");

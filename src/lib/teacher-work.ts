@@ -70,19 +70,34 @@ export async function getTeacherWorkSummary({
           lt: end,
         },
         status: "SUBMITTED",
-        class: {
-          teacherId,
-        },
+        OR: [
+          {
+            class: {
+              teacherId,
+            },
+            substitutionStatus: "NONE",
+          },
+          {
+            substitutionStatus: "APPROVED",
+            taughtById: teacherId,
+          },
+        ],
       },
       orderBy: [{ lessonDate: "asc" }, { name: "asc" }],
       select: {
         id: true,
         lessonDate: true,
         name: true,
+        substitutionStatus: true,
         class: {
           select: {
             durationMinutes: true,
             name: true,
+            teacher: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
@@ -112,6 +127,34 @@ export async function getTeacherWorkSummary({
       },
     }),
   ]);
+  const pendingSubstituteLessons = await prisma.lesson.findMany({
+    where: {
+      lessonDate: {
+        gte: start,
+        lt: end,
+      },
+      status: "SUBMITTED",
+      substitutionStatus: "PENDING_APPROVAL",
+      taughtById: teacherId,
+    },
+    orderBy: [{ lessonDate: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      lessonDate: true,
+      name: true,
+      class: {
+        select: {
+          durationMinutes: true,
+          name: true,
+          teacher: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   const lessonMinutes = lessons.reduce(
     (total, lesson) => total + lesson.class.durationMinutes,
@@ -125,6 +168,7 @@ export async function getTeacherWorkSummary({
   return {
     lessonMinutes,
     lessons,
+    pendingSubstituteLessons,
     teacher,
     totalMinutes: lessonMinutes + workLogMinutes,
     workLogMinutes,

@@ -86,6 +86,10 @@ export default async function TeacherWorkPage({
               <strong>Activities</strong>
             </article>
             <article className="metric">
+              <span>{summary.pendingSubstituteLessons.length}</span>
+              <strong>Pending substitutions</strong>
+            </article>
+            <article className="metric">
               <span>{formatHours(summary.lessonMinutes)}</span>
               <strong>Lesson hours</strong>
             </article>
@@ -98,6 +102,11 @@ export default async function TeacherWorkPage({
 
         {query.status === "created" ? (
           <p className="form-success">Paid activity saved.</p>
+        ) : null}
+        {query.status === "substitution-pending" ? (
+          <p className="form-success">
+            Substitute lesson submitted for admin approval.
+          </p>
         ) : null}
 
         <section className="panel" aria-label="Summary filters">
@@ -127,6 +136,7 @@ export default async function TeacherWorkPage({
                     <th>Date</th>
                     <th>Class</th>
                     <th>Lesson</th>
+                    <th>Type</th>
                     <th>Minutes</th>
                   </tr>
                 </thead>
@@ -136,12 +146,17 @@ export default async function TeacherWorkPage({
                       <td>{formatShortDate(lesson.lessonDate)}</td>
                       <td>{lesson.class.name}</td>
                       <td>{lesson.name ?? "-"}</td>
+                      <td>
+                        {lesson.substitutionStatus === "APPROVED"
+                          ? `Approved substitute for ${lesson.class.teacher.name}`
+                          : "Regular lesson"}
+                      </td>
                       <td>{lesson.class.durationMinutes}</td>
                     </tr>
                   ))}
                   {summary.lessons.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>No submitted lessons this month.</td>
+                      <td colSpan={5}>No submitted lessons this month.</td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -180,6 +195,40 @@ export default async function TeacherWorkPage({
             </div>
           </article>
         </section>
+
+        {summary.pendingSubstituteLessons.length > 0 ? (
+          <section className="panel data-panel" aria-labelledby="pending-substitutions-title">
+            <h2 id="pending-substitutions-title">Pending substitute lessons</h2>
+            <p className="muted-copy">
+              These records are saved, but their hours are not included in the
+              finalized total until an admin approves them.
+            </p>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Class</th>
+                    <th>Primary teacher</th>
+                    <th>Lesson</th>
+                    <th>Minutes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.pendingSubstituteLessons.map((lesson) => (
+                    <tr key={lesson.id}>
+                      <td>{formatShortDate(lesson.lessonDate)}</td>
+                      <td>{lesson.class.name}</td>
+                      <td>{lesson.class.teacher.name}</td>
+                      <td>{lesson.name ?? "-"}</td>
+                      <td>{lesson.class.durationMinutes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );
