@@ -5,6 +5,7 @@
 The first data model captures the school's local class-record workflow.
 
 Teachers, classes, students, lessons, attendance, and homework are stored in the app database.
+Grades are stored against each student within a class.
 
 ## Main Tables
 
@@ -15,6 +16,8 @@ Teachers, classes, students, lessons, attendance, and homework are stored in the
 - `Lesson`: one named class session on a specific date.
 - `AttendanceRecord`: one student's attendance status for one lesson.
 - `HomeworkRecord`: one student's homework status for one lesson.
+- `PartialEvaluationGrade`: one student's partial evaluation grade for the 7th or 23rd class.
+- `TestGrade`: one student's Mid-term or Final test grade.
 
 ## Important Rules
 
@@ -25,6 +28,13 @@ Teachers, classes, students, lessons, attendance, and homework are stored in the
 - A class can have only one lesson record for the same date.
 - A student can have only one attendance record per lesson.
 - A student can have only one homework record per lesson.
+- A student can have only one partial evaluation grade per class and partial period.
+- A student can have only one test grade per class and test period.
+- Letter grades use `D-`, `D`, `D+`, `C-`, `C`, `C+`, `B-`, `B`, `B+`, `A-`, and `A`; there is no `A+`.
+- Partial evaluations happen on the 7th and 23rd class.
+- Test grades are split into Mid-term and Final periods.
+- Each test grade has an oral letter grade, a composition score from 0 to 2, and a written test score from 0 to 8.
+- The written total is calculated as composition plus written test, from 0 to 10.
 - Submitted records stay in the app database and can be reviewed by admins.
 
 ## Future Questions
