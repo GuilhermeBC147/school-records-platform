@@ -598,6 +598,12 @@ input[type="time"],
   gap: 10px;
 }
 
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .admin-form {
   display: grid;
   gap: 16px;
@@ -677,6 +683,26 @@ input[type="time"],
 .records-review {
   display: grid;
   gap: 18px;
+}
+
+.risk-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.risk-signal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.risk-signal {
+  border: 1px solid rgba(217, 132, 59, 0.35);
+  border-radius: 6px;
+  background: rgba(217, 132, 59, 0.1);
+  color: #8a4a18;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 7px;
 }
 
 .record-review {

@@ -208,6 +208,29 @@ test("logged-in account page supports changing own password", async () => {
   assert.match(dashboardPage, /\/dashboard\/account/);
 });
 
+test("admin risk review flags attendance and homework signals", async () => {
+  const riskPage = await readProjectFile("src/app/admin/risk/page.tsx");
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+
+  assert.match(riskPage, /RISK_THRESHOLDS/);
+  assert.match(riskPage, /incompleteHomework:\s*3/);
+  assert.match(riskPage, /missedClasses:\s*3/);
+  assert.match(riskPage, /consecutiveMissedClasses:\s*2/);
+  assert.match(riskPage, /status: "SUBMITTED"/);
+  assert.match(riskPage, /attendanceRecord\.status === "ABSENT"/);
+  assert.match(riskPage, /homeworkStatus === "INCOMPLETE"/);
+  assert.match(riskPage, /missedStreak >= RISK_THRESHOLDS\.consecutiveMissedClasses/);
+  assert.match(riskPage, /teacherId/);
+  assert.match(riskPage, /classId/);
+  assert.match(riskPage, /dateFrom/);
+  assert.match(riskPage, /dateTo/);
+  assert.match(riskPage, /\/admin\/students\/\$\{record\.studentId\}/);
+  assert.match(riskPage, /\/admin\/records\/\$\{record\.recentLessonId\}/);
+  assert.match(dashboardPage, /\/admin\/risk/);
+  assert.match(dataModelDoc, /Risk Review/);
+});
+
 test("production handoff documents deployment, backups, and smoke tests", async () => {
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");
