@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
 export const teacherWorkCategories = [
-  { label: "Bonus class", value: "BONUS_CLASS" },
-  { label: "Event", value: "EVENT" },
-  { label: "Game night", value: "GAME_NIGHT" },
-  { label: "Holiday activity", value: "HOLIDAY_ACTIVITY" },
+  { label: "Bonus Class", value: "BONUS_CLASS" },
+  { label: "Extra Activity", value: "EXTRA_ACTIVITY" },
   { label: "Meeting", value: "MEETING" },
   { label: "Other", value: "OTHER" },
 ] as const;

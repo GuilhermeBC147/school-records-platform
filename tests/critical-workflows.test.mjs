@@ -256,7 +256,8 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
 
   assert.match(schema, /enum TeacherWorkCategory/);
   assert.match(schema, /BONUS_CLASS/);
-  assert.match(schema, /GAME_NIGHT/);
+  assert.match(schema, /EXTRA_ACTIVITY/);
+  assert.doesNotMatch(schema, /GAME_NIGHT/);
   assert.match(schema, /model TeacherWorkLog/);
   assert.match(schema, /teacherId\s+String/);
   assert.match(schema, /createdById\s+String/);
@@ -269,6 +270,8 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
   assert.match(workActions, /teacherWorkLog\.create/);
+  assert.match(teacherWorkPage, /Monthly summary/);
+  assert.match(teacherWorkPage, /Add activity/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
   assert.match(teacherWorkPage, /createTeacherWorkLogAction/);
   assert.match(adminWorkPage, /Teacher work summaries/);

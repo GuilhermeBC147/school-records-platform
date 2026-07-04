@@ -60,9 +60,7 @@ enum TestPeriod {
 
 enum TeacherWorkCategory {
   BONUS_CLASS
-  EVENT
-  GAME_NIGHT
-  HOLIDAY_ACTIVITY
+  EXTRA_ACTIVITY
   MEETING
   OTHER
 }

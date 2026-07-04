@@ -68,7 +68,7 @@ export default async function TeacherWorkPage({
             Back to dashboard
           </Link>
           <p className="eyebrow">Teacher work</p>
-          <h1 id="work-title">Monthly work summary</h1>
+          <h1 id="work-title">Monthly summary</h1>
           <p className="lede">
             Submitted class lessons count automatically. Add paid activities
             that happen outside regular class records.
@@ -178,8 +178,16 @@ export default async function TeacherWorkPage({
           </article>
         </section>
 
-        <section className="panel data-panel" aria-labelledby="activity-title">
-          <h2 id="activity-title">Add paid activity</h2>
+        <section className="intro" aria-labelledby="activity-title">
+          <p className="eyebrow">Teacher work</p>
+          <h1 id="activity-title">Add activity</h1>
+          <p className="lede">
+            Record bonus classes, extra activities, meetings, or other paid
+            work that should be counted this month.
+          </p>
+        </section>
+
+        <section className="panel data-panel" aria-label="Activity form">
           <form action={createTeacherWorkLogAction} className="admin-form">
             <input name="redirectTo" type="hidden" value="/dashboard/work" />
             <label>

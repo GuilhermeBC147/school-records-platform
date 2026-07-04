@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { TeacherWorkCategory } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { teacherWorkCategories } from "@/lib/teacher-work";
@@ -93,7 +94,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
 
   await prisma.teacherWorkLog.create({
     data: {
-      category: category as (typeof teacherWorkCategoryValues)[number],
+      category: category as TeacherWorkCategory,
       createdById: currentUser.id,
       durationMinutes,
       notes,

@@ -41,7 +41,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Submitted lessons count toward the class teacher's monthly work summary using the class duration.
 - Paid work outside regular submitted lessons is stored as a teacher work log.
 - Teacher work logs store category, title, date, optional start time, duration, notes, counted teacher, and creator.
-- Work log categories are bonus class, event, game night, holiday activity, meeting, and other.
+- Work log categories are bonus class, extra activity, meeting, and other.
 
 ## Teacher Work Summaries
 

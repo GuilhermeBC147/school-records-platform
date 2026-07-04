@@ -92,7 +92,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="action-row">
               <Link className="primary-link" href="/dashboard/work">
-                Monthly work summary
+                Monthly summary
               </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account
