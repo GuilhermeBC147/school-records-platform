@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { weekdayOptions, type WeekdayValue } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -21,6 +22,32 @@ function readTermNumber(formData: FormData, key: string) {
 
   const numberValue = Number(value);
   return Number.isInteger(numberValue) ? numberValue : null;
+}
+
+function readDurationMinutes(formData: FormData) {
+  const value = String(formData.get("durationMinutes") ?? "").trim();
+
+  if (!value) {
+    return null;
+  }
+
+  const numberValue = Number(value);
+  return Number.isInteger(numberValue) ? numberValue : null;
+}
+
+function readWeekdays(formData: FormData) {
+  const validWeekdays = new Set(weekdayOptions.map((option) => option.value));
+
+  return Array.from(
+    new Set(
+      formData
+        .getAll("weekDays")
+        .map((value) => String(value).trim())
+        .filter((value): value is WeekdayValue =>
+          validWeekdays.has(value as WeekdayValue),
+        ),
+    ),
+  );
 }
 
 function readSelectedStudentIds(formData: FormData) {
@@ -69,12 +96,18 @@ async function readClassForm(formData: FormData) {
   const book = readOptionalString(formData, "book");
   const semester = readTermNumber(formData, "semester");
   const year = readTermNumber(formData, "year");
+  const durationMinutes = readDurationMinutes(formData);
+  const weekDays = readWeekdays(formData);
   const teacherId = readRequiredString(formData, "teacherId");
   const isActive = formData.get("isActive") === "on";
 
   if (
     !name ||
     !teacherId ||
+    durationMinutes === null ||
+    durationMinutes < 1 ||
+    durationMinutes > 600 ||
+    weekDays.length === 0 ||
     (semester !== null && ![1, 2].includes(semester)) ||
     (year !== null && (year < 2000 || year > 2100))
   ) {
@@ -96,10 +129,12 @@ async function readClassForm(formData: FormData) {
 
   return {
     book,
+    durationMinutes,
     isActive,
     name,
     semester,
     teacherId,
+    weekDays,
     year,
   };
 }

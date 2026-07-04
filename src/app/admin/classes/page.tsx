@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
+import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -42,6 +43,8 @@ export default async function AdminClassesPage({
       book: true,
       semester: true,
       year: true,
+      durationMinutes: true,
+      weekDays: true,
       isActive: true,
       teacher: {
         select: {
@@ -105,6 +108,8 @@ export default async function AdminClassesPage({
                   <th>Class</th>
                   <th>Book</th>
                   <th>Term</th>
+                  <th>Schedule</th>
+                  <th>Duration</th>
                   <th>Teacher</th>
                   <th>Status</th>
                   <th>Students</th>
@@ -118,6 +123,8 @@ export default async function AdminClassesPage({
                     <td>{schoolClass.name}</td>
                     <td>{schoolClass.book ?? "-"}</td>
                     <td>{formatTerm(schoolClass.semester, schoolClass.year)}</td>
+                    <td>{formatWeekdays(schoolClass.weekDays)}</td>
+                    <td>{formatDuration(schoolClass.durationMinutes)}</td>
                     <td>{schoolClass.teacher.name}</td>
                     <td>{schoolClass.isActive ? "Active" : "Inactive"}</td>
                     <td>{schoolClass._count.enrollments}</td>

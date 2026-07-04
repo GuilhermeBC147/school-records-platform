@@ -633,6 +633,19 @@ input[type="time"],
   width: 18px;
 }
 
+.weekday-picker {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  padding: 8px;
+}
+
+.weekday-picker .checkbox-label {
+  padding: 8px;
+}
+
 .roster-list {
   border: 1px solid var(--line);
   border-radius: 8px;

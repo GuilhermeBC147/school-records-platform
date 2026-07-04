@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClassAction } from "@/app/actions/classes";
 import { logoutAction } from "@/app/actions/auth";
 import { RosterPicker } from "@/app/admin/classes/roster-picker";
+import { weekdayOptions } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -74,7 +75,7 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
         <section className="panel">
           {params.error === "invalid" ? (
             <p className="form-error">
-              Enter a class name, active teacher, and valid semester/year.
+              Enter a class name, active teacher, duration, weekdays, and valid semester/year.
             </p>
           ) : null}
           <form action={createClassAction} className="admin-form">
@@ -106,6 +107,29 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
               <span>Year</span>
               <input name="year" placeholder="2026" type="number" min="2000" max="2100" />
             </label>
+            <label>
+              <span>Duration</span>
+              <input
+                defaultValue={60}
+                max="600"
+                min="1"
+                name="durationMinutes"
+                required
+                step="1"
+                type="number"
+              />
+            </label>
+            <div>
+              <span className="form-section-label">Weekdays</span>
+              <div className="weekday-picker">
+                {weekdayOptions.map((weekday) => (
+                  <label className="checkbox-label" key={weekday.value}>
+                    <input name="weekDays" type="checkbox" value={weekday.value} />
+                    <span>{weekday.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
             <label>
               <span>Teacher</span>
               <select name="teacherId" required>

@@ -1,0 +1,12 @@
+CREATE TYPE "Weekday" AS ENUM (
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY',
+  'SUNDAY'
+);
+
+ALTER TABLE "Class" ADD COLUMN "durationMinutes" INTEGER NOT NULL DEFAULT 60;
+ALTER TABLE "Class" ADD COLUMN "weekDays" "Weekday"[] NOT NULL DEFAULT ARRAY[]::"Weekday"[];

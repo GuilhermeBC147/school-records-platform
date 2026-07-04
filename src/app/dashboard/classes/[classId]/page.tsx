@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import { updateClassGradesAction } from "@/app/actions/grades";
+import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
   formatGradeLabel,
@@ -85,6 +86,8 @@ export default async function ClassDetailPage({
       book: true,
       semester: true,
       year: true,
+      durationMinutes: true,
+      weekDays: true,
       isActive: true,
       teacher: {
         select: {
@@ -187,6 +190,10 @@ export default async function ClassDetailPage({
             <h1 id="class-title">{schoolClass.name}</h1>
             <p className="lede">
               Teacher: {schoolClass.teacher.name} ({schoolClass.teacher.email})
+            </p>
+            <p className="muted-copy">
+              {formatWeekdays(schoolClass.weekDays)} |{" "}
+              {formatDuration(schoolClass.durationMinutes)}
             </p>
             {schoolClass.isActive ? null : (
               <p className="muted-copy">Inactive</p>
