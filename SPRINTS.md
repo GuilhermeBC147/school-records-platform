@@ -15,7 +15,11 @@ Branch naming:
 - `sprint-6-account-management`
 - `sprint-7-class-management`
 - `sprint-8-student-enrollments`
-- `sprint-9-production-readiness`
+- `sprint-9-record-cleanup`
+- `sprint-10-grading-model`
+- `sprint-11-teacher-grades`
+- `sprint-12-admin-risk-review`
+- `sprint-13-production-readiness`
 
 Commit style:
 
@@ -250,7 +254,122 @@ Done when:
 - An admin can add students to classes.
 - Teachers see the current active roster when submitting a class record.
 
-## Sprint 9: Production Readiness
+## Sprint 9: Student and Lesson Record Cleanup
+
+Goal: simplify class records before adding grades and reporting.
+
+Tasks:
+
+- Remove preferred name from the student schema.
+- Remove preferred name from admin student forms, lists, roster pickers, class pages, record pages, exports, seed data, and tests.
+- Add a migration that drops `Student.preferredName`.
+- Remove lesson time from the teacher class-record form.
+- Store lesson records by class and lesson date only, using one normalized time internally if the database still stores a `DateTime`.
+- Update duplicate-record protection to prevent two records for the same class on the same date.
+- Update data-model documentation to describe lessons as dated class sessions, not date-and-time sessions.
+
+Suggested commits:
+
+- `feat: remove student preferred names`
+- `feat: simplify lesson records to dates`
+
+Done when:
+
+- Admins and teachers only see student full names.
+- Teachers enter lesson date but not lesson time.
+- A class cannot accidentally create duplicate records for the same date.
+- Existing tests and documentation match the simplified model.
+
+## Sprint 10: Grading Data Model
+
+Goal: model the school's partial evaluations and test grades safely.
+
+Tasks:
+
+- Add grade enums for letter grades from `D-`, `D`, `D+` through `A`, with no `A+`.
+- Add partial evaluation records for each student in a class.
+- Track whether a partial evaluation is for the 7th class or the 23rd class.
+- Add test grade records for each student in a class.
+- Track two test periods: Mid-term and Final.
+- Store oral grade as a letter grade.
+- Store composition score as a numeric score from 0 to 2.
+- Store written test score as a numeric score from 0 to 8.
+- Compute written total as composition plus written test, from 0 to 10.
+- Add indexes and uniqueness rules so each student has only one grade record per class, period, and grade type.
+- Seed sample grades if helpful for UI development.
+- Document grading rules in `docs/data-model.md` or a new grading doc.
+
+Suggested commits:
+
+- `feat: add grading schema`
+- `docs: document grading model`
+
+Done when:
+
+- Prisma can validate and generate the new schema.
+- The model prevents duplicate partial, mid-term, and final grades for the same student/class.
+- The model can represent all required grade components without UI workarounds.
+
+## Sprint 11: Teacher Grade Entry
+
+Goal: teachers can enter and maintain grades for their own active classes.
+
+Tasks:
+
+- Add a Grades area to the teacher class-management page.
+- Show enrolled active students in a grade-entry table.
+- Add entry/edit UI for 7th-class and 23rd-class partial evaluations.
+- Add entry/edit UI for Mid-term and Final test grades.
+- Validate letter grades against the allowed scale.
+- Validate composition scores between 0 and 2.
+- Validate written test scores between 0 and 8.
+- Display computed written total out of 10.
+- Save grade drafts or updates without affecting attendance/homework records.
+- Restrict grade access so teachers can only manage grades for their own classes.
+- Add admin read-only visibility for grades if needed for review.
+
+Suggested commits:
+
+- `feat: add teacher grade entry`
+- `test: cover grade access rules`
+
+Done when:
+
+- A teacher can open one of their classes and enter all partial and test grades.
+- Invalid grade values are rejected.
+- Teachers cannot view or edit grades for another teacher's class.
+
+## Sprint 12: Teacher Self-Service and Admin Risk Review
+
+Goal: reduce admin account work and highlight students who need attention.
+
+Tasks:
+
+- Add a logged-in teacher account page.
+- Add a change-password form for teachers.
+- Require current password before changing to a new password.
+- Validate new password length and confirmation.
+- Reuse existing password hashing helpers.
+- Add an admin review report for student risk signals.
+- Flag students with many incomplete homework records.
+- Flag students with many total missed classes.
+- Flag students with two missed classes in a row.
+- Let admins filter the report by class, teacher, and date range.
+- Link report rows back to the student's records or relevant class records.
+- Document the default thresholds and make them easy to change.
+
+Suggested commits:
+
+- `feat: add teacher password change`
+- `feat: add admin student risk report`
+
+Done when:
+
+- Teachers can change their own password while logged in.
+- Admins can see students with repeated homework or attendance issues.
+- Consecutive absences are detected from submitted lesson records in date order.
+
+## Sprint 13: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 
@@ -260,12 +379,14 @@ Tasks:
 - Add hosted PostgreSQL setup notes.
 - Add backup/export routine.
 - Add basic monitoring/logging guidance.
-- Add tests for critical teacher and admin workflows.
+- Add tests for critical teacher, grading, account, and admin review workflows.
+- Confirm exports still include the records the school needs after grading is added.
+- Add backup guidance for grades and risk-review data.
 
 Suggested commits:
 
 - `docs: add production setup checklist`
-- `test: cover critical class record workflows`
+- `test: cover critical school workflows`
 
 Done when:
 

@@ -5,7 +5,7 @@ import {
   submitClassRecordAction,
 } from "@/app/actions/class-records";
 import { logoutAction } from "@/app/actions/auth";
-import { formatShortDateInput, formatShortTimeInput } from "@/lib/date-format";
+import { formatShortDateInput } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -27,14 +27,6 @@ function todayInputValue() {
   const year = String(date.getFullYear()).slice(-2);
 
   return `${day}/${month}/${year}`;
-}
-
-function currentTimeInputValue() {
-  const date = new Date();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${hours}:${minutes}`;
 }
 
 function findStudentStatus<T extends { studentId: string; status: string }>(
@@ -89,7 +81,6 @@ export default async function ClassRecordPage({
             select: {
               id: true,
               fullName: true,
-              preferredName: true,
             },
           },
         },
@@ -203,20 +194,6 @@ export default async function ClassRecordPage({
               />
             </label>
             <label>
-              <span>Lesson time</span>
-              <input
-                className="date-input"
-                defaultValue={
-                  lessonRecord
-                    ? formatShortTimeInput(lessonRecord.lessonDate)
-                    : currentTimeInputValue()
-                }
-                name="lessonTime"
-                required
-                type="time"
-              />
-            </label>
-            <label>
               <span>Notes</span>
               <textarea
                 defaultValue={lessonRecord?.notes ?? ""}
@@ -234,7 +211,6 @@ export default async function ClassRecordPage({
                 <article className="student-record-row" key={enrollment.id}>
                   <div>
                     <strong>{enrollment.student.fullName}</strong>
-                    <span>{enrollment.student.preferredName ?? "No preferred name"}</span>
                   </div>
 
                   <label>

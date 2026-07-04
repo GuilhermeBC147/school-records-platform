@@ -31,7 +31,6 @@ export default async function AdminStudentsPage({
     select: {
       id: true,
       fullName: true,
-      preferredName: true,
       isActive: true,
       _count: {
         select: { enrollments: true },
@@ -85,7 +84,6 @@ export default async function AdminStudentsPage({
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Preferred</th>
                   <th>Status</th>
                   <th>Classes</th>
                   <th>Action</th>
@@ -95,7 +93,6 @@ export default async function AdminStudentsPage({
                 {students.map((student) => (
                   <tr key={student.id}>
                     <td>{student.fullName}</td>
-                    <td>{student.preferredName ?? "-"}</td>
                     <td>{student.isActive ? "Active" : "Inactive"}</td>
                     <td>{student._count.enrollments}</td>
                     <td>

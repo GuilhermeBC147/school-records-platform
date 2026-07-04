@@ -35,7 +35,6 @@ export default async function EditStudentPage({
     select: {
       id: true,
       fullName: true,
-      preferredName: true,
       isActive: true,
     },
   });
@@ -81,14 +80,6 @@ export default async function EditStudentPage({
                 defaultValue={student.fullName}
                 name="fullName"
                 required
-                type="text"
-              />
-            </label>
-            <label>
-              <span>Preferred name</span>
-              <input
-                defaultValue={student.preferredName ?? ""}
-                name="preferredName"
                 type="text"
               />
             </label>

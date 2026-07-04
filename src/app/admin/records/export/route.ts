@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { formatShortDateTime } from "@/lib/date-format";
+import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -96,7 +96,6 @@ export async function GET(request: Request) {
             select: {
               id: true,
               fullName: true,
-              preferredName: true,
             },
           },
         },
@@ -118,7 +117,6 @@ export async function GET(request: Request) {
       "class",
       "teacher",
       "student",
-      "preferred_name",
       "attendance",
       "homework",
       "submitted_by",
@@ -140,11 +138,10 @@ export async function GET(request: Request) {
       rows.push([
         lesson.id,
         lesson.name ?? "",
-        formatShortDateTime(lesson.lessonDate),
+        formatShortDate(lesson.lessonDate),
         lesson.class.name,
         lesson.class.teacher.name,
         attendanceRecord.student.fullName,
-        attendanceRecord.student.preferredName ?? "",
         attendanceRecord.status,
         homeworkByStudentId.get(attendanceRecord.student.id) ?? "NOT_ASSIGNED",
         lesson.submittedBy?.name ?? "",

@@ -93,7 +93,6 @@ ON CONFLICT ("id") DO UPDATE SET
 INSERT INTO "Student" (
   "id",
   "fullName",
-  "preferredName",
   "isActive",
   "createdAt",
   "updatedAt"
@@ -101,7 +100,6 @@ INSERT INTO "Student" (
   (
     'student_larissa',
     'Larissa Almeida',
-    'Larissa',
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
@@ -109,7 +107,6 @@ INSERT INTO "Student" (
   (
     'student_mateus',
     'Mateus Oliveira',
-    'Mateus',
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
@@ -117,7 +114,6 @@ INSERT INTO "Student" (
   (
     'student_sofia',
     'Sofia Ribeiro',
-    'Sofia',
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
@@ -125,7 +121,6 @@ INSERT INTO "Student" (
   (
     'student_rafael',
     'Rafael Santos',
-    'Rafael',
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
@@ -133,14 +128,12 @@ INSERT INTO "Student" (
   (
     'student_beatriz',
     'Beatriz Lima',
-    'Bia',
     true,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
   )
 ON CONFLICT ("id") DO UPDATE SET
   "fullName" = EXCLUDED."fullName",
-  "preferredName" = EXCLUDED."preferredName",
   "isActive" = EXCLUDED."isActive",
   "updatedAt" = CURRENT_TIMESTAMP;
 
@@ -177,7 +170,7 @@ INSERT INTO "Lesson" (
   (
     'lesson_a2_sample',
     'Past simple review',
-    TIMESTAMP '2026-06-24 18:30:00',
+    TIMESTAMP '2026-06-24 00:00:00',
     'SUBMITTED',
     'Sample submitted lesson for attendance and homework review.',
     CURRENT_TIMESTAMP,

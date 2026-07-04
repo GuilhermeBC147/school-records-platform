@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 type RosterStudent = {
   id: string;
   fullName: string;
-  preferredName: string | null;
   isActive: boolean;
   isEnrolled?: boolean;
 };
@@ -14,12 +13,6 @@ type RosterPickerProps = {
   emptyMessage: string;
   students: RosterStudent[];
 };
-
-function studentLabel(student: RosterStudent) {
-  return student.preferredName
-    ? `${student.fullName} (${student.preferredName})`
-    : student.fullName;
-}
 
 export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
   const [query, setQuery] = useState("");
@@ -39,7 +32,7 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
     }
 
     return students.filter((student) =>
-      studentLabel(student).toLowerCase().includes(normalizedQuery),
+      student.fullName.toLowerCase().includes(normalizedQuery),
     );
   }, [normalizedQuery, students]);
 
@@ -91,7 +84,7 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
                 type="checkbox"
               />
               <span>
-                {studentLabel(student)}
+                {student.fullName}
                 {student.isActive ? "" : " - inactive"}
               </span>
             </label>
