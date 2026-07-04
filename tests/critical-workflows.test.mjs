@@ -90,6 +90,12 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classActions, /isActive: true/);
   assert.match(classesPage, /Create class/);
   assert.match(classesPage, /Semester/);
+  assert.match(classesPage, /classStatus/);
+  assert.doesNotMatch(classesPage, /Active and inactive/);
+  assert.match(classesPage, /teacherId/);
+  assert.match(classesPage, /weekDay/);
+  assert.match(classesPage, /hasSome/);
+  assert.match(classesPage, /Search enrolled students/);
   assert.match(newClassPage, /Class roster/);
   assert.match(newClassPage, /RosterPicker/);
   assert.match(rosterPicker, /Search students/);
