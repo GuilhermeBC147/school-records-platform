@@ -82,6 +82,9 @@ export default async function DashboardPage() {
               <Link className="primary-link" href="/admin/records">
                 Review submitted records
               </Link>
+              <Link className="primary-link" href="/dashboard/account">
+                Manage account
+              </Link>
             </div>
           ) : (
             <div className="action-row">

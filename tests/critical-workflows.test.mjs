@@ -190,7 +190,7 @@ test("teacher grade entry validates values and class access", async () => {
   assert.match(classDetail, /written/);
 });
 
-test("teacher account page supports changing own password", async () => {
+test("logged-in account page supports changing own password", async () => {
   const accountActions = await readProjectFile("src/app/actions/accounts.ts");
   const accountPage = await readProjectFile("src/app/dashboard/account/page.tsx");
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
@@ -204,6 +204,7 @@ test("teacher account page supports changing own password", async () => {
   assert.match(accountPage, /currentPassword/);
   assert.match(accountPage, /newPassword/);
   assert.match(accountPage, /confirmPassword/);
+  assert.match(dashboardPage, /currentUser\.role === "ADMIN"/);
   assert.match(dashboardPage, /\/dashboard\/account/);
 });
 
