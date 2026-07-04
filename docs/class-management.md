@@ -13,6 +13,7 @@ Admins can:
 - set the class book, such as `Book 1`, `Book 2`, or `Junior 1`
 - set semester and year
 - assign an active teacher
+- search by student name and add active students while creating a class
 - mark a class active or inactive
 - manage the class roster by checking active students
 

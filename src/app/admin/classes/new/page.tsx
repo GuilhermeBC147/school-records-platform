@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClassAction } from "@/app/actions/classes";
 import { logoutAction } from "@/app/actions/auth";
+import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -22,7 +23,7 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
     redirect("/dashboard");
   }
 
-  const [params, teachers] = await Promise.all([
+  const [params, teachers, students] = await Promise.all([
     searchParams,
     prisma.user.findMany({
       where: {
@@ -33,6 +34,15 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
       select: {
         id: true,
         name: true,
+      },
+    }),
+    prisma.student.findMany({
+      where: { isActive: true },
+      orderBy: { fullName: "asc" },
+      select: {
+        id: true,
+        fullName: true,
+        preferredName: true,
       },
     }),
   ]);
@@ -112,6 +122,16 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
               <input defaultChecked name="isActive" type="checkbox" />
               <span>Active class</span>
             </label>
+            <div>
+              <span className="form-section-label">Class roster</span>
+              <RosterPicker
+                emptyMessage="No active students yet. Create students before assigning the roster."
+                students={students.map((student) => ({
+                  ...student,
+                  isActive: true,
+                }))}
+              />
+            </div>
             <div className="record-actions">
               <Link className="text-link" href="/admin/classes">
                 Cancel

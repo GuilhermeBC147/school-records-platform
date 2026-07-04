@@ -74,7 +74,12 @@ export default async function ClassRecordPage({
         select: { name: true },
       },
       enrollments: {
-        where: { status: "ACTIVE" },
+        where: {
+          status: "ACTIVE",
+          student: {
+            isActive: true,
+          },
+        },
         orderBy: {
           student: { fullName: "asc" },
         },

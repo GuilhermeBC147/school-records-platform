@@ -73,6 +73,10 @@ test("class management supports metadata and active teacher assignment", async (
   const schema = await readProjectFile("prisma/schema.prisma");
   const classActions = await readProjectFile("src/app/actions/classes.ts");
   const classesPage = await readProjectFile("src/app/admin/classes/page.tsx");
+  const newClassPage = await readProjectFile("src/app/admin/classes/new/page.tsx");
+  const rosterPicker = await readProjectFile(
+    "src/app/admin/classes/roster-picker.tsx",
+  );
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
 
   assert.match(schema, /book\s+String\?/);
@@ -80,12 +84,42 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(schema, /year\s+Int\?/);
   assert.match(classActions, /createClassAction/);
   assert.match(classActions, /updateClassAction/);
+  assert.match(classActions, /updateClassRosterAction/);
+  assert.match(classActions, /studentIds/);
   assert.match(classActions, /role: "TEACHER"/);
   assert.match(classActions, /isActive: true/);
   assert.match(classesPage, /Create class/);
   assert.match(classesPage, /Semester/);
+  assert.match(newClassPage, /Class roster/);
+  assert.match(newClassPage, /RosterPicker/);
+  assert.match(rosterPicker, /Search students/);
+  assert.match(rosterPicker, /name="studentIds"/);
   assert.match(dashboardPage, /currentUser\.role === "TEACHER"/);
   assert.match(dashboardPage, /isActive: true/);
+});
+
+test("admin student management supports creating and editing students", async () => {
+  const studentActions = await readProjectFile("src/app/actions/students.ts");
+  const studentsPage = await readProjectFile("src/app/admin/students/page.tsx");
+  const newStudentPage = await readProjectFile("src/app/admin/students/new/page.tsx");
+  const editStudentPage = await readProjectFile(
+    "src/app/admin/students/[studentId]/page.tsx",
+  );
+  const recordForm = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/record/page.tsx",
+  );
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+
+  assert.match(studentActions, /createStudentAction/);
+  assert.match(studentActions, /updateStudentAction/);
+  assert.match(studentActions, /currentUser\.role !== "ADMIN"/);
+  assert.match(studentActions, /fullName/);
+  assert.match(studentActions, /isActive/);
+  assert.match(studentsPage, /Create student/);
+  assert.match(newStudentPage, /createStudentAction/);
+  assert.match(editStudentPage, /updateStudentAction/);
+  assert.match(recordForm, /student:\s*{\s*isActive: true/s);
+  assert.match(dashboardPage, /Manage students/);
 });
 
 test("admin CSV export includes record filters and student rows", async () => {
