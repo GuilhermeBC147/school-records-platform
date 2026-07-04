@@ -226,14 +226,19 @@ test("admin risk review flags attendance and homework signals", async () => {
   assert.match(riskPage, /status: "SUBMITTED"/);
   assert.match(riskPage, /attendanceRecord\.status === "ABSENT"/);
   assert.match(riskPage, /homeworkStatus === "INCOMPLETE"/);
-  assert.match(riskPage, /missedStreak >= RISK_THRESHOLDS\.consecutiveMissedClasses/);
+  assert.match(riskPage, /consecutiveMissedClassCount/);
+  assert.match(riskPage, /longestMissedStreak/);
+  assert.match(riskPage, /studentRiskResolution\.findMany/);
+  assert.match(riskPage, /resolveRiskRecordAction/);
   assert.match(riskPage, /teacherId/);
   assert.match(riskPage, /classId/);
   assert.match(riskPage, /dateFrom/);
   assert.match(riskPage, /dateTo/);
   assert.match(riskPage, /\/admin\/students\/\$\{record\.studentId\}/);
   assert.match(riskPage, /\/admin\/records\/\$\{record\.recentLessonId\}/);
+  assert.match(riskPage, /Resolve/);
   assert.match(dashboardPage, /\/admin\/risk/);
+  assert.match(dataModelDoc, /mark a student\/class risk row as resolved/);
   assert.match(dataModelDoc, /Risk Review/);
 });
 

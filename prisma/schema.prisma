@@ -81,6 +81,7 @@ model User {
   classes             Class[]              @relation("TeacherClasses")
   passwordResetTokens PasswordResetToken[]
   submittedLessons    Lesson[]             @relation("SubmittedBy")
+  resolvedRiskRecords StudentRiskResolution[] @relation("ResolvedRiskRecords")
 }
 
 model PasswordResetToken {
@@ -114,6 +115,7 @@ model Class {
   enrollments             Enrollment[]
   lessons                 Lesson[]
   partialEvaluationGrades PartialEvaluationGrade[]
+  riskResolutions         StudentRiskResolution[]
   testGrades              TestGrade[]
 
   @@index([teacherId])
@@ -130,7 +132,27 @@ model Student {
   attendanceRecords       AttendanceRecord[]
   homeworkRecords         HomeworkRecord[]
   partialEvaluationGrades PartialEvaluationGrade[]
+  riskResolutions         StudentRiskResolution[]
   testGrades              TestGrade[]
+}
+
+model StudentRiskResolution {
+  id                  String   @id @default(cuid())
+  resolvedThroughDate DateTime
+  resolvedAt          DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  classId      String
+  class        Class   @relation(fields: [classId], references: [id])
+  studentId    String
+  student      Student @relation(fields: [studentId], references: [id])
+  resolvedById String
+  resolvedBy   User    @relation("ResolvedRiskRecords", fields: [resolvedById], references: [id])
+
+  @@unique([classId, studentId])
+  @@index([studentId])
+  @@index([resolvedById])
 }
 
 model Enrollment {
