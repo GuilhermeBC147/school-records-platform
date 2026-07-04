@@ -1,15 +1,26 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
+import {
+  formatDuration,
+  formatWeekdays,
+  weekdayOptions,
+} from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import type { Prisma, Weekday } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
 type AdminClassesPageProps = {
   searchParams: Promise<{
+    classStatus?: string;
+    semester?: string;
     status?: string;
+    student?: string;
+    teacherId?: string;
+    weekDay?: string | string[];
+    year?: string;
   }>;
 };
 
@@ -19,6 +30,27 @@ function formatTerm(semester: number | null, year: number | null) {
   }
 
   return `Semester ${semester}/${year}`;
+}
+
+function readFilterValue(value: string | undefined) {
+  return value?.trim() || undefined;
+}
+
+function readNumberFilter(value: string | undefined) {
+  if (!value || !/^\d+$/.test(value)) {
+    return undefined;
+  }
+
+  return Number(value);
+}
+
+function readWeekdayFilters(value: string | string[] | undefined) {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+  const allowedWeekdays = new Set<string>(
+    weekdayOptions.map((option) => option.value),
+  );
+
+  return values.filter((item): item is Weekday => allowedWeekdays.has(item));
 }
 
 export default async function AdminClassesPage({
@@ -35,7 +67,39 @@ export default async function AdminClassesPage({
   }
 
   const params = await searchParams;
+  const classStatus =
+    readFilterValue(params.classStatus) === "inactive" ? "inactive" : "active";
+  const semester = readNumberFilter(params.semester);
+  const studentSearch = readFilterValue(params.student);
+  const teacherId = readFilterValue(params.teacherId);
+  const weekDays = readWeekdayFilters(params.weekDay);
+  const year = readNumberFilter(params.year);
+
+  const classWhere: Prisma.ClassWhereInput = {
+    ...(classStatus === "active" ? { isActive: true } : {}),
+    ...(classStatus === "inactive" ? { isActive: false } : {}),
+    ...(semester ? { semester } : {}),
+    ...(teacherId ? { teacherId } : {}),
+    ...(weekDays.length > 0 ? { weekDays: { hasSome: weekDays } } : {}),
+    ...(year ? { year } : {}),
+    ...(studentSearch
+      ? {
+          enrollments: {
+            some: {
+              student: {
+                fullName: {
+                  contains: studentSearch,
+                  mode: "insensitive" as const,
+                },
+              },
+            },
+          },
+        }
+      : {}),
+  };
+
   const classes = await prisma.class.findMany({
+    where: classWhere,
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
     select: {
       id: true,
@@ -59,6 +123,29 @@ export default async function AdminClassesPage({
       },
     },
   });
+
+  const [teachers, years] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { name: "asc" },
+      where: { role: "TEACHER" },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+    prisma.class.findMany({
+      distinct: ["year"],
+      orderBy: { year: "desc" },
+      where: {
+        year: {
+          not: null,
+        },
+      },
+      select: {
+        year: true,
+      },
+    }),
+  ]);
 
   return (
     <main className="app-shell">
@@ -100,6 +187,83 @@ export default async function AdminClassesPage({
           </p>
         ) : null}
 
+        <section className="panel" aria-label="Class filters">
+          <form className="filter-form class-filter-form">
+            <label>
+              <span>Teacher</span>
+              <select defaultValue={teacherId ?? ""} name="teacherId">
+                <option value="">All teachers</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Student</span>
+              <input
+                defaultValue={studentSearch ?? ""}
+                name="student"
+                placeholder="Search enrolled students"
+                type="search"
+              />
+            </label>
+            <label>
+              <span>Status</span>
+              <select defaultValue={classStatus} name="classStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </label>
+            <label>
+              <span>Year</span>
+              <select defaultValue={year ?? ""} name="year">
+                <option value="">All years</option>
+                {years.map((item) =>
+                  item.year ? (
+                    <option key={item.year} value={item.year}>
+                      {item.year}
+                    </option>
+                  ) : null,
+                )}
+              </select>
+            </label>
+            <label>
+              <span>Semester</span>
+              <select defaultValue={semester ?? ""} name="semester">
+                <option value="">All semesters</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+              </select>
+            </label>
+            <div>
+              <span className="form-section-label">Days</span>
+              <div className="weekday-picker compact-weekday-picker">
+                {weekdayOptions.map((weekday) => (
+                  <label className="checkbox-label" key={weekday.value}>
+                    <input
+                      defaultChecked={weekDays.includes(weekday.value)}
+                      name="weekDay"
+                      type="checkbox"
+                      value={weekday.value}
+                    />
+                    <span>{weekday.shortLabel}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="filter-actions">
+              <button className="primary-button" type="submit">
+                Apply filters
+              </button>
+              <Link className="text-link" href="/admin/classes">
+                Clear
+              </Link>
+            </div>
+          </form>
+        </section>
+
         <section className="panel data-panel" aria-label="Classes">
           <div className="table-wrap">
             <table>
@@ -139,6 +303,11 @@ export default async function AdminClassesPage({
                     </td>
                   </tr>
                 ))}
+                {classes.length === 0 ? (
+                  <tr>
+                    <td colSpan={10}>No classes match the current filters.</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
