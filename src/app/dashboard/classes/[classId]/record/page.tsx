@@ -219,12 +219,14 @@ export default async function ClassRecordPage({
                       defaultValue={findStudentStatus(
                         lessonRecord?.attendanceRecords ?? [],
                         enrollment.student.id,
-                        "PRESENT",
+                        "ABSENT",
                       )}
                       name={`attendance:${enrollment.student.id}`}
                     >
+                      <option hidden value="ABSENT">
+                        Absent
+                      </option>
                       <option value="PRESENT">Present</option>
-                      <option value="ABSENT">Absent</option>
                       <option value="LATE">Late</option>
                       <option value="EXCUSED">Excused</option>
                     </select>
@@ -236,13 +238,12 @@ export default async function ClassRecordPage({
                       defaultValue={findStudentStatus(
                         lessonRecord?.homeworkRecords ?? [],
                         enrollment.student.id,
-                        "NOT_ASSIGNED",
+                        "INCOMPLETE",
                       )}
                       name={`homework:${enrollment.student.id}`}
                     >
-                      <option value="COMPLETED">Completed</option>
-                      <option value="INCOMPLETE">Incomplete</option>
-                      <option value="NOT_ASSIGNED">Not assigned</option>
+                      <option value="COMPLETED">Complete</option>
+                      <option value="INCOMPLETE">Not done</option>
                     </select>
                   </label>
                 </article>

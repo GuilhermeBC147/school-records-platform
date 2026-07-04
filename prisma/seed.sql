@@ -179,7 +179,7 @@ INSERT INTO "Lesson" (
     'class_evening_a2',
     'user_teacher_ana'
   )
-ON CONFLICT ("classId", "lessonDate") DO UPDATE SET
+ON CONFLICT ("id") DO UPDATE SET
   "name" = EXCLUDED."name",
   "status" = EXCLUDED."status",
   "notes" = EXCLUDED."notes",
@@ -303,7 +303,7 @@ INSERT INTO "HomeworkRecord" (
 ) VALUES
   ('homework_a2_larissa', 'COMPLETED', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'lesson_a2_sample', 'student_larissa'),
   ('homework_a2_mateus', 'INCOMPLETE', 'Missing workbook page 12.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'lesson_a2_sample', 'student_mateus'),
-  ('homework_a2_sofia', 'NOT_ASSIGNED', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'lesson_a2_sample', 'student_sofia')
+  ('homework_a2_sofia', 'INCOMPLETE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'lesson_a2_sample', 'student_sofia')
 ON CONFLICT ("lessonId", "studentId") DO UPDATE SET
   "status" = EXCLUDED."status",
   "notes" = EXCLUDED."notes",

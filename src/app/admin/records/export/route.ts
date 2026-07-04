@@ -143,7 +143,7 @@ export async function GET(request: Request) {
         lesson.class.teacher.name,
         attendanceRecord.student.fullName,
         attendanceRecord.status,
-        homeworkByStudentId.get(attendanceRecord.student.id) ?? "NOT_ASSIGNED",
+        homeworkByStudentId.get(attendanceRecord.student.id) ?? "INCOMPLETE",
         lesson.submittedBy?.name ?? "",
         lesson.submittedAt ? formatShortDateTime(lesson.submittedAt) : "",
         lesson.notes ?? "",

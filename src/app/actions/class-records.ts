@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
 const attendanceStatuses = ["PRESENT", "ABSENT", "LATE", "EXCUSED"] as const;
-const homeworkStatuses = ["COMPLETED", "INCOMPLETE", "NOT_ASSIGNED"] as const;
+const homeworkStatuses = ["COMPLETED", "INCOMPLETE"] as const;
 
 function readStatus<T extends readonly string[]>(
   formData: FormData,
@@ -99,16 +99,18 @@ async function persistClassRecord(
           select: {
             id: true,
             lessonDate: true,
+            name: true,
             status: true,
           },
         })
       : await transaction.lesson.findUnique({
           where: {
-            classId_lessonDate: { classId, lessonDate },
+            classId_lessonDate_name: { classId, lessonDate, name: lessonName },
           },
           select: {
             id: true,
             lessonDate: true,
+            name: true,
             status: true,
           },
         });
@@ -124,11 +126,12 @@ async function persistClassRecord(
     if (
       lessonId &&
       existingLesson &&
-      existingLesson.lessonDate.getTime() !== lessonDate.getTime()
+      (existingLesson.lessonDate.getTime() !== lessonDate.getTime() ||
+        existingLesson.name !== lessonName)
     ) {
       const conflictingLesson = await transaction.lesson.findUnique({
         where: {
-          classId_lessonDate: { classId, lessonDate },
+          classId_lessonDate_name: { classId, lessonDate, name: lessonName },
         },
         select: { id: true },
       });
@@ -178,13 +181,13 @@ async function persistClassRecord(
         formData,
         `attendance:${enrollment.studentId}`,
         attendanceStatuses,
-        "PRESENT",
+        "ABSENT",
       );
       const homeworkStatus = readStatus(
         formData,
         `homework:${enrollment.studentId}`,
         homeworkStatuses,
-        "NOT_ASSIGNED",
+        "INCOMPLETE",
       );
 
       await transaction.attendanceRecord.upsert({
