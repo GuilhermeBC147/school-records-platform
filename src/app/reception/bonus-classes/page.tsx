@@ -10,9 +10,6 @@ import { formatShortDate } from "@/lib/date-format";
 import {
   formatBonusClassStatus,
   formatStartTime,
-  formatTimeFromMinutes,
-  readIsoDate,
-  readTimeMinutes,
 } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -21,47 +18,10 @@ export const dynamic = "force-dynamic";
 
 type ReceptionBonusClassesPageProps = {
   searchParams: Promise<{
-    date?: string;
     error?: string;
     status?: string;
   }>;
 };
-
-function todayDateInputValue() {
-  const date = new Date();
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const year = date.getUTCFullYear();
-
-  return `${year}-${month}-${day}`;
-}
-
-function safeCalendarDate(value: string | undefined) {
-  const fallback = todayDateInputValue();
-
-  try {
-    const label = value ?? fallback;
-
-    return {
-      date: readIsoDate(label),
-      label,
-    };
-  } catch {
-    return {
-      date: readIsoDate(fallback),
-      label: fallback,
-    };
-  }
-}
-
-function bonusClassStartsInSlot(
-  bonusClass: { startTime: string },
-  slotStartMinutes: number,
-) {
-  const startMinutes = readTimeMinutes(bonusClass.startTime);
-
-  return startMinutes >= slotStartMinutes && startMinutes < slotStartMinutes + 30;
-}
 
 export default async function ReceptionBonusClassesPage({
   searchParams,
@@ -72,19 +32,18 @@ export default async function ReceptionBonusClassesPage({
     redirect("/login");
   }
 
-  if (currentUser.role !== "RECEPTION") {
+  if (currentUser.role !== "RECEPTION" && currentUser.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
   const query = await searchParams;
-  const calendarDate = safeCalendarDate(query.date);
-  const timeSlots = Array.from({ length: 31 }, (_, index) => 7 * 60 + index * 30);
-  const [bonusClasses, calendarBonusClasses, students, teachers] = await Promise.all([
+  const [bonusClasses, students, teachers] = await Promise.all([
     prisma.bonusClass.findMany({
       orderBy: [{ scheduledDate: "desc" }, { startTime: "asc" }],
       take: 50,
       select: {
         id: true,
+        attendanceStatus: true,
         durationMinutes: true,
         notes: true,
         scheduledDate: true,
@@ -97,26 +56,6 @@ export default async function ReceptionBonusClassesPage({
         teacher: {
           select: { name: true },
         },
-      },
-    }),
-    prisma.bonusClass.findMany({
-      orderBy: [{ startTime: "asc" }, { teacher: { name: "asc" } }],
-      where: {
-        scheduledDate: calendarDate.date,
-        status: {
-          not: "CANCELED",
-        },
-      },
-      select: {
-        id: true,
-        durationMinutes: true,
-        startTime: true,
-        status: true,
-        subject: true,
-        student: {
-          select: { fullName: true },
-        },
-        teacherId: true,
       },
     }),
     prisma.student.findMany({
@@ -158,15 +97,18 @@ export default async function ReceptionBonusClassesPage({
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="bonus-title">
+          <Link className="text-link" href="/reception">
+            Back to reception
+          </Link>
           <p className="eyebrow">Reception</p>
-          <h1 id="bonus-title">Bonus classes</h1>
+          <h1 id="bonus-title">Schedule bonus class</h1>
           <p className="lede">
-            Schedule independent bonus classes and assign them to active
-            teachers.
+            Create an independent bonus class with student, subject, teacher,
+            date, time, duration, and notes.
           </p>
           <div className="action-row">
-            <Link className="primary-link" href="/reception/students">
-              Student lookup
+            <Link className="primary-link" href="/reception/calendar">
+              View calendar
             </Link>
           </div>
         </section>
@@ -184,18 +126,23 @@ export default async function ReceptionBonusClassesPage({
         ) : null}
 
         <section className="panel data-panel" aria-labelledby="new-bonus-title">
-          <h2 id="new-bonus-title">Schedule bonus class</h2>
+          <h2 id="new-bonus-title">Bonus class details</h2>
           <form action={createBonusClassAction} className="admin-form">
             <label>
-              <span>Student</span>
-              <select name="studentId" required>
-                <option value="">Choose a student</option>
+              <span>Student search</span>
+              <input
+                autoComplete="off"
+                list="bonus-students"
+                name="studentSearch"
+                placeholder="Type a student name"
+                required
+                type="search"
+              />
+              <datalist id="bonus-students">
                 {students.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.fullName}
-                  </option>
+                  <option key={student.id} value={student.fullName} />
                 ))}
-              </select>
+              </datalist>
             </label>
             <label>
               <span>Subject</span>
@@ -236,74 +183,6 @@ export default async function ReceptionBonusClassesPage({
           </form>
         </section>
 
-        <section className="panel data-panel" aria-labelledby="calendar-title">
-          <div className="section-heading-row">
-            <div>
-              <h2 id="calendar-title">Daily teacher calendar</h2>
-              <p className="muted-copy">
-                Bonus classes are shown in 30-minute rows by assigned teacher.
-              </p>
-            </div>
-            <form className="filter-form compact-filter-form">
-              <label>
-                <span>Date</span>
-                <input defaultValue={calendarDate.label} name="date" type="date" />
-              </label>
-              <div className="filter-actions">
-                <button className="primary-button" type="submit">
-                  View
-                </button>
-              </div>
-            </form>
-          </div>
-          <div className="table-wrap schedule-wrap">
-            <table className="schedule-table">
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  {teachers.map((teacher) => (
-                    <th key={teacher.id}>{teacher.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {timeSlots.map((slotStartMinutes) => (
-                  <tr key={slotStartMinutes}>
-                    <th>{formatTimeFromMinutes(slotStartMinutes)}</th>
-                    {teachers.map((teacher) => {
-                      const slotBonusClasses = calendarBonusClasses.filter(
-                        (bonusClass) =>
-                          bonusClass.teacherId === teacher.id &&
-                          bonusClassStartsInSlot(bonusClass, slotStartMinutes),
-                      );
-
-                      return (
-                        <td className="schedule-cell" key={teacher.id}>
-                          {slotBonusClasses.map((bonusClass) => (
-                            <Link
-                              className="schedule-event"
-                              href={`/reception/bonus-classes/${bonusClass.id}`}
-                              key={bonusClass.id}
-                            >
-                              <strong>
-                                {bonusClass.startTime} |{" "}
-                                {formatDuration(bonusClass.durationMinutes)}
-                              </strong>
-                              <span>{bonusClass.student.fullName}</span>
-                              <span>{bonusClass.subject}</span>
-                              <span>{formatBonusClassStatus(bonusClass.status)}</span>
-                            </Link>
-                          ))}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
         <section className="panel data-panel" aria-labelledby="scheduled-title">
           <h2 id="scheduled-title">Recent bonus classes</h2>
           <div className="table-wrap">
@@ -317,6 +196,7 @@ export default async function ReceptionBonusClassesPage({
                   <th>Teacher</th>
                   <th>Duration</th>
                   <th>Status</th>
+                  <th>Attendance</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -330,37 +210,34 @@ export default async function ReceptionBonusClassesPage({
                     <td>{bonusClass.teacher.name}</td>
                     <td>{formatDuration(bonusClass.durationMinutes)}</td>
                     <td>{formatBonusClassStatus(bonusClass.status)}</td>
+                    <td>{formatBonusClassStatus(bonusClass.attendanceStatus)}</td>
                     <td>
                       <div className="table-actions">
+                        <Link
+                          className="text-link"
+                          href={`/reception/bonus-classes/${bonusClass.id}`}
+                        >
+                          Open
+                        </Link>
                         {bonusClass.status === "SCHEDULED" ? (
-                          <>
-                            <Link
-                              className="text-link"
-                              href={`/reception/bonus-classes/${bonusClass.id}`}
-                            >
-                              Edit
-                            </Link>
-                            <form action={cancelBonusClassAction}>
-                              <input
-                                name="bonusClassId"
-                                type="hidden"
-                                value={bonusClass.id}
-                              />
-                              <button className="secondary-button" type="submit">
-                                Cancel
-                              </button>
-                            </form>
-                          </>
-                        ) : (
-                          "-"
-                        )}
+                          <form action={cancelBonusClassAction}>
+                            <input
+                              name="bonusClassId"
+                              type="hidden"
+                              value={bonusClass.id}
+                            />
+                            <button className="secondary-button" type="submit">
+                              Cancel
+                            </button>
+                          </form>
+                        ) : null}
                       </div>
                     </td>
                   </tr>
                 ))}
                 {bonusClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={8}>No bonus classes scheduled yet.</td>
+                    <td colSpan={9}>No bonus classes scheduled yet.</td>
                   </tr>
                 ) : null}
               </tbody>

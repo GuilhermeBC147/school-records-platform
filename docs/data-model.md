@@ -50,6 +50,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Scheduled bonus classes cannot overlap another non-canceled bonus class for the same teacher on the same date.
 - Reception accounts can look up active student and class information for parent-facing questions, including last attended lesson, absences, incomplete homework, class teacher, schedule, roster, and recent submitted lessons.
 - Bonus class scheduling includes a day calendar with 30-minute time rows and one column per teacher.
+- Bonus class attendance can be confirmed as present, absent, or excused by the assigned teacher, reception, or admin.
 - Completed scheduled bonus classes count toward the assigned teacher's monthly work summary.
 
 ## Teacher Work Summaries

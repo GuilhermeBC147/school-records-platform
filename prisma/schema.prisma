@@ -79,6 +79,13 @@ enum BonusClassStatus {
   CANCELED
 }
 
+enum BonusClassAttendanceStatus {
+  PENDING
+  PRESENT
+  ABSENT
+  EXCUSED
+}
+
 enum Weekday {
   MONDAY
   TUESDAY
@@ -101,6 +108,7 @@ model User {
 
   classes             Class[]              @relation("TeacherClasses")
   createdBonusClasses BonusClass[]         @relation("CreatedBonusClasses")
+  confirmedBonusClasses BonusClass[]       @relation("ConfirmedBonusClassAttendance")
   createdWorkLogs     TeacherWorkLog[]     @relation("CreatedTeacherWorkLogs")
   passwordResetTokens PasswordResetToken[]
   submittedLessons    Lesson[]             @relation("SubmittedBy")
@@ -259,8 +267,10 @@ model BonusClass {
   startTime       String
   durationMinutes Int
   status          BonusClassStatus @default(SCHEDULED)
+  attendanceStatus BonusClassAttendanceStatus @default(PENDING)
   notes           String?
   completedAt     DateTime?
+  attendanceConfirmedAt DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -270,7 +280,11 @@ model BonusClass {
   teacher     User    @relation("TaughtBonusClasses", fields: [teacherId], references: [id])
   createdById String
   createdBy   User    @relation("CreatedBonusClasses", fields: [createdById], references: [id])
+  attendanceConfirmedById String?
+  attendanceConfirmedBy   User?   @relation("ConfirmedBonusClassAttendance", fields: [attendanceConfirmedById], references: [id])
 
+  @@index([attendanceConfirmedById])
+  @@index([attendanceStatus])
   @@index([createdById])
   @@index([studentId])
   @@index([teacherId, scheduledDate])

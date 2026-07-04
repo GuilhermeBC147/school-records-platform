@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   }
 
   if (currentUser.role === "RECEPTION") {
-    redirect("/reception/bonus-classes");
+    redirect("/reception");
   }
 
   const classes = await prisma.class.findMany({
@@ -91,6 +91,9 @@ export default async function DashboardPage() {
               </Link>
               <Link className="primary-link" href="/admin/substitutions">
                 Review substitutions
+              </Link>
+              <Link className="primary-link" href="/reception">
+                Reception tools
               </Link>
               <Link className="primary-link" href="/dashboard/account">
                 Manage account

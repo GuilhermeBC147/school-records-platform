@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { updateBonusClassAction } from "@/app/actions/bonus-classes";
+import {
+  completeBonusClassAction,
+  updateBonusClassAction,
+} from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
+import { formatBonusClassStatus } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -34,7 +38,11 @@ export default async function EditBonusClassPage({
     redirect("/login");
   }
 
-  if (currentUser.role !== "RECEPTION") {
+  if (
+    currentUser.role !== "RECEPTION" &&
+    currentUser.role !== "ADMIN" &&
+    currentUser.role !== "TEACHER"
+  ) {
     redirect("/dashboard");
   }
 
@@ -44,9 +52,10 @@ export default async function EditBonusClassPage({
     prisma.bonusClass.findFirst({
       where: {
         id: bonusClassId,
-        status: "SCHEDULED",
+        ...(currentUser.role === "TEACHER" ? { teacherId: currentUser.id } : {}),
       },
       select: {
+        attendanceStatus: true,
         id: true,
         durationMinutes: true,
         notes: true,
@@ -55,6 +64,13 @@ export default async function EditBonusClassPage({
         studentId: true,
         subject: true,
         teacherId: true,
+        teacher: {
+          select: { name: true },
+        },
+        student: {
+          select: { fullName: true },
+        },
+        status: true,
       },
     }),
     prisma.student.findMany({
@@ -100,14 +116,17 @@ export default async function EditBonusClassPage({
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="edit-bonus-title">
-          <Link className="text-link" href="/reception/bonus-classes">
-            Back to bonus classes
+          <Link className="text-link" href="/reception/calendar">
+            Back to calendar
           </Link>
-          <p className="eyebrow">Reception</p>
+          <p className="eyebrow">{currentUser.role.toLowerCase()}</p>
           <h1 id="edit-bonus-title">Edit bonus class</h1>
           <p className="lede">
-            Update the student, subject, teacher, or schedule before the class
-            happens.
+            {bonusClass.student.fullName} with {bonusClass.teacher.name}
+          </p>
+          <p className="muted-copy">
+            Status: {formatBonusClassStatus(bonusClass.status)} | Attendance:{" "}
+            {formatBonusClassStatus(bonusClass.attendanceStatus)}
           </p>
         </section>
 
@@ -125,13 +144,21 @@ export default async function EditBonusClassPage({
             <input name="bonusClassId" type="hidden" value={bonusClass.id} />
             <label>
               <span>Student</span>
-              <select defaultValue={bonusClass.studentId} name="studentId" required>
+              <select
+                defaultValue={bonusClass.studentId}
+                disabled={currentUser.role === "TEACHER"}
+                name="studentId"
+                required
+              >
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
                     {student.fullName}
                   </option>
                 ))}
               </select>
+              {currentUser.role === "TEACHER" ? (
+                <input name="studentId" type="hidden" value={bonusClass.studentId} />
+              ) : null}
             </label>
             <label>
               <span>Subject</span>
@@ -139,13 +166,21 @@ export default async function EditBonusClassPage({
             </label>
             <label>
               <span>Teacher</span>
-              <select defaultValue={bonusClass.teacherId} name="teacherId" required>
+              <select
+                defaultValue={bonusClass.teacherId}
+                disabled={currentUser.role === "TEACHER"}
+                name="teacherId"
+                required
+              >
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
                   </option>
                 ))}
               </select>
+              {currentUser.role === "TEACHER" ? (
+                <input name="teacherId" type="hidden" value={bonusClass.teacherId} />
+              ) : null}
             </label>
             <label>
               <span>Date</span>
@@ -187,6 +222,41 @@ export default async function EditBonusClassPage({
             </div>
           </form>
         </section>
+
+        {bonusClass.status !== "CANCELED" ? (
+          <section className="panel data-panel" aria-labelledby="attendance-title">
+            <h2 id="attendance-title">Attendance confirmation</h2>
+            <form action={completeBonusClassAction} className="admin-form">
+              <input name="bonusClassId" type="hidden" value={bonusClass.id} />
+              <input
+                name="redirectTo"
+                type="hidden"
+                value={`/reception/bonus-classes/${bonusClass.id}?status=attendance`}
+              />
+              <label>
+                <span>Attendance</span>
+                <select
+                  defaultValue={
+                    bonusClass.attendanceStatus === "PENDING"
+                      ? "PRESENT"
+                      : bonusClass.attendanceStatus
+                  }
+                  name="attendanceStatus"
+                  required
+                >
+                  <option value="PRESENT">Present</option>
+                  <option value="ABSENT">Absent</option>
+                  <option value="EXCUSED">Excused</option>
+                </select>
+              </label>
+              <div className="record-actions">
+                <button className="primary-button" type="submit">
+                  Confirm attendance
+                </button>
+              </div>
+            </form>
+          </section>
+        ) : null}
       </div>
     </main>
   );

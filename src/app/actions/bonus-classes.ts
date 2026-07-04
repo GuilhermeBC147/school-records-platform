@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { BonusClassAttendanceStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import {
@@ -24,32 +25,46 @@ function isRedirectError(error: unknown) {
   );
 }
 
-async function requireReception() {
+async function requireReceptionOrAdmin() {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
     redirect("/login");
   }
 
-  if (currentUser.role !== "RECEPTION") {
+  if (currentUser.role !== "RECEPTION" && currentUser.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
   return currentUser;
 }
 
-async function requireTeacher() {
+async function requireBonusClassStaff() {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
     redirect("/login");
   }
 
-  if (currentUser.role !== "TEACHER") {
+  if (
+    currentUser.role !== "ADMIN" &&
+    currentUser.role !== "RECEPTION" &&
+    currentUser.role !== "TEACHER"
+  ) {
     redirect("/dashboard");
   }
 
   return currentUser;
+}
+
+function readAttendanceStatus(formData: FormData) {
+  const status = readRequiredString(formData, "attendanceStatus");
+
+  if (!["PRESENT", "ABSENT", "EXCUSED"].includes(status)) {
+    throw new Error("Attendance status is invalid.");
+  }
+
+  return status as BonusClassAttendanceStatus;
 }
 
 async function validateBonusClassForm(formData: FormData) {
@@ -57,21 +72,24 @@ async function validateBonusClassForm(formData: FormData) {
   const notes = readRequiredString(formData, "notes") || null;
   const scheduledDate = readIsoDate(readRequiredString(formData, "scheduledDate"));
   const startTime = readRequiredString(formData, "startTime");
+  const studentSearch = readRequiredString(formData, "studentSearch");
   const studentId = readRequiredString(formData, "studentId");
   const subject = readRequiredString(formData, "subject");
   const teacherId = readRequiredString(formData, "teacherId");
 
   readTimeMinutes(startTime);
 
-  if (!studentId || !subject || !teacherId) {
+  if ((!studentId && !studentSearch) || !subject || !teacherId) {
     throw new Error("Student, subject, and teacher are required.");
   }
 
   const [student, teacher] = await Promise.all([
     prisma.student.findFirst({
       where: {
-        id: studentId,
         isActive: true,
+        ...(studentId
+          ? { id: studentId }
+          : { fullName: { equals: studentSearch, mode: "insensitive" } }),
       },
       select: { id: true },
     }),
@@ -101,7 +119,7 @@ async function validateBonusClassForm(formData: FormData) {
 }
 
 export async function createBonusClassAction(formData: FormData) {
-  const currentUser = await requireReception();
+  const currentUser = await requireReceptionOrAdmin();
 
   try {
     const data = await validateBonusClassForm(formData);
@@ -129,7 +147,7 @@ export async function createBonusClassAction(formData: FormData) {
 }
 
 export async function updateBonusClassAction(formData: FormData) {
-  await requireReception();
+  const currentUser = await requireBonusClassStaff();
 
   const bonusClassId = readRequiredString(formData, "bonusClassId");
 
@@ -137,7 +155,7 @@ export async function updateBonusClassAction(formData: FormData) {
     const existingBonusClass = await prisma.bonusClass.findFirst({
       where: {
         id: bonusClassId,
-        status: "SCHEDULED",
+        ...(currentUser.role === "TEACHER" ? { teacherId: currentUser.id } : {}),
       },
       select: { id: true },
     });
@@ -172,7 +190,7 @@ export async function updateBonusClassAction(formData: FormData) {
 }
 
 export async function cancelBonusClassAction(formData: FormData) {
-  await requireReception();
+  const currentUser = await requireBonusClassStaff();
 
   const bonusClassId = readRequiredString(formData, "bonusClassId");
 
@@ -180,6 +198,7 @@ export async function cancelBonusClassAction(formData: FormData) {
     where: {
       id: bonusClassId,
       status: "SCHEDULED",
+      ...(currentUser.role === "TEACHER" ? { teacherId: currentUser.id } : {}),
     },
     data: {
       status: "CANCELED",
@@ -190,20 +209,26 @@ export async function cancelBonusClassAction(formData: FormData) {
 }
 
 export async function completeBonusClassAction(formData: FormData) {
-  const currentUser = await requireTeacher();
+  const currentUser = await requireBonusClassStaff();
   const bonusClassId = readRequiredString(formData, "bonusClassId");
+  const attendanceStatus = readAttendanceStatus(formData);
 
   await prisma.bonusClass.updateMany({
     where: {
       id: bonusClassId,
       status: "SCHEDULED",
-      teacherId: currentUser.id,
+      ...(currentUser.role === "TEACHER" ? { teacherId: currentUser.id } : {}),
     },
     data: {
+      attendanceConfirmedAt: new Date(),
+      attendanceConfirmedById: currentUser.id,
+      attendanceStatus,
       completedAt: new Date(),
       status: "COMPLETED",
     },
   });
 
-  redirect("/dashboard/bonus-classes?status=completed");
+  const redirectTo = readRequiredString(formData, "redirectTo");
+
+  redirect(redirectTo || "/dashboard/bonus-classes?status=completed");
 }

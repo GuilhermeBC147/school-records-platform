@@ -39,6 +39,7 @@ export default async function TeacherBonusClassesPage({
       teacherId: currentUser.id,
     },
     select: {
+      attendanceStatus: true,
       id: true,
       durationMinutes: true,
       notes: true,
@@ -97,6 +98,7 @@ export default async function TeacherBonusClassesPage({
                   <th>Subject</th>
                   <th>Duration</th>
                   <th>Status</th>
+                  <th>Attendance</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -109,16 +111,34 @@ export default async function TeacherBonusClassesPage({
                     <td>{bonusClass.subject}</td>
                     <td>{formatDuration(bonusClass.durationMinutes)}</td>
                     <td>{formatBonusClassStatus(bonusClass.status)}</td>
+                    <td>{formatBonusClassStatus(bonusClass.attendanceStatus)}</td>
                     <td>
-                      {bonusClass.status === "SCHEDULED" ? (
+                      {bonusClass.status !== "CANCELED" ? (
                         <form action={completeBonusClassAction}>
                           <input
                             name="bonusClassId"
                             type="hidden"
                             value={bonusClass.id}
                           />
+                          <input
+                            name="redirectTo"
+                            type="hidden"
+                            value="/dashboard/bonus-classes?status=completed"
+                          />
+                          <select
+                            defaultValue={
+                              bonusClass.attendanceStatus === "PENDING"
+                                ? "PRESENT"
+                                : bonusClass.attendanceStatus
+                            }
+                            name="attendanceStatus"
+                          >
+                            <option value="PRESENT">Present</option>
+                            <option value="ABSENT">Absent</option>
+                            <option value="EXCUSED">Excused</option>
+                          </select>
                           <button className="primary-button" type="submit">
-                            Mark complete
+                            Confirm
                           </button>
                         </form>
                       ) : (
@@ -129,7 +149,7 @@ export default async function TeacherBonusClassesPage({
                 ))}
                 {bonusClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>No bonus classes assigned.</td>
+                    <td colSpan={8}>No bonus classes assigned.</td>
                   </tr>
                 ) : null}
               </tbody>
