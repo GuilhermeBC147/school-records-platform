@@ -58,6 +58,15 @@ enum TestPeriod {
   FINAL
 }
 
+enum TeacherWorkCategory {
+  BONUS_CLASS
+  EVENT
+  GAME_NIGHT
+  HOLIDAY_ACTIVITY
+  MEETING
+  OTHER
+}
+
 enum Weekday {
   MONDAY
   TUESDAY
@@ -79,9 +88,11 @@ model User {
   updatedAt    DateTime @updatedAt
 
   classes             Class[]              @relation("TeacherClasses")
+  createdWorkLogs     TeacherWorkLog[]     @relation("CreatedTeacherWorkLogs")
   passwordResetTokens PasswordResetToken[]
   submittedLessons    Lesson[]             @relation("SubmittedBy")
   resolvedRiskRecords StudentRiskResolution[] @relation("ResolvedRiskRecords")
+  teacherWorkLogs     TeacherWorkLog[]     @relation("TeacherWorkLogs")
 }
 
 model PasswordResetToken {
@@ -191,6 +202,26 @@ model Lesson {
 
   @@unique([classId, lessonDate, name])
   @@index([submittedById])
+}
+
+model TeacherWorkLog {
+  id              String              @id @default(cuid())
+  category        TeacherWorkCategory
+  title           String
+  workDate        DateTime
+  startTime       String?
+  durationMinutes Int
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  teacherId   String
+  teacher     User   @relation("TeacherWorkLogs", fields: [teacherId], references: [id])
+  createdById String
+  createdBy   User   @relation("CreatedTeacherWorkLogs", fields: [createdById], references: [id])
+
+  @@index([teacherId, workDate])
+  @@index([createdById])
 }
 
 model AttendanceRecord {
