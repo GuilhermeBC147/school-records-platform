@@ -19,7 +19,10 @@ Branch naming:
 - `sprint-10-grading-model`
 - `sprint-11-teacher-grades`
 - `sprint-12-admin-risk-review`
-- `sprint-13-production-readiness`
+- `sprint-13-teacher-work-log`
+- `sprint-14-bonus-scheduling`
+- `sprint-15-substitution-payroll`
+- `sprint-16-production-readiness`
 
 Commit style:
 
@@ -369,7 +372,91 @@ Done when:
 - Admins can see students with repeated homework or attendance issues.
 - Consecutive absences are detected from submitted lesson records in date order.
 
-## Sprint 13: Production Readiness
+## Sprint 13: Teacher Work Log and Monthly Counts
+
+Goal: count the paid work teachers completed each month.
+
+Tasks:
+
+- Add a teacher work-log model for paid non-class work.
+- Define paid work categories such as regular lesson, bonus class, event, game night, holiday activity, meeting, and other.
+- Store date, start time, duration, description, and counted teacher for each paid work item.
+- Count submitted regular class lessons toward the assigned or substitute teacher.
+- Add a teacher monthly summary page showing total counted lessons, extra activities, and paid hours.
+- Add an admin monthly summary page filtered by teacher and date range.
+- Include enough detail for admins to audit which records make up each monthly total.
+- Document which records count automatically and which must be added manually.
+
+Suggested commits:
+
+- `feat: add teacher work log model`
+- `feat: add monthly teacher work summaries`
+
+Done when:
+
+- Teachers and admins can see a monthly count of paid work.
+- Regular lessons and extra activities can both be counted.
+- Admins can trace each total back to the underlying records.
+
+## Sprint 14: Bonus Class and Reception Scheduling
+
+Goal: let reception schedule independent bonus classes without double-booking teachers.
+
+Tasks:
+
+- Add a `RECEPTION` user role.
+- Restrict reception accounts to bonus-class scheduling screens only.
+- Add an independent bonus class/session model separate from regular classes.
+- Store student, assigned teacher, date, start time, duration, status, and notes for each bonus class.
+- Prevent two bonus classes from being scheduled for the same teacher at overlapping times.
+- Prevent bonus classes from overlapping with regular class schedules for the same teacher when schedule data is available.
+- Let reception assign or reassign the teacher before the bonus class happens.
+- Let the assigned teacher record or confirm that the bonus class happened.
+- Count completed bonus classes toward the assigned teacher's monthly paid work.
+
+Suggested commits:
+
+- `feat: add reception accounts`
+- `feat: add bonus class scheduling`
+- `fix: prevent teacher schedule conflicts`
+
+Done when:
+
+- Reception can schedule bonus classes and assign teachers.
+- Reception cannot access admin-only or teacher-only management areas.
+- The app blocks teacher double-booking for bonus classes.
+- Completed bonus classes appear in teacher monthly work summaries.
+
+## Sprint 15: Substitutions and Payroll Accuracy
+
+Goal: make substitutions and extra school activities count for the correct teacher.
+
+Tasks:
+
+- Add per-lesson substitute teacher support for regular classes.
+- Distinguish the class's primary teacher from the teacher who actually taught a specific lesson.
+- Keep `submittedBy` for audit history while storing a separate counted teacher for payroll.
+- Let admins or authorized teachers assign a substitute teacher to a lesson.
+- Show substitute lessons on the substitute teacher's dashboard or work summary.
+- Ensure regular class access rules still prevent unrelated teachers from viewing student data.
+- Let teachers create extra activity records for events such as Halloween, game nights, and school activities.
+- Add admin review or correction controls for extra activity records before payroll is finalized.
+- Export monthly teacher work summaries to CSV.
+
+Suggested commits:
+
+- `feat: add substitute lesson tracking`
+- `feat: add extra activity records`
+- `feat: export teacher payroll summaries`
+
+Done when:
+
+- A substituted lesson can be submitted and counted for the substitute teacher.
+- The original class teacher remains visible on the class record.
+- Extra activities can be recorded and included in monthly totals.
+- Admins can export a teacher's monthly paid work details.
+
+## Sprint 16: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 
@@ -380,8 +467,10 @@ Tasks:
 - Add backup/export routine.
 - Add basic monitoring/logging guidance.
 - Add tests for critical teacher, grading, account, and admin review workflows.
-- Confirm exports still include the records the school needs after grading is added.
-- Add backup guidance for grades and risk-review data.
+- Confirm exports still include the records the school needs after grading, risk review, bonus classes, substitutions, and teacher work summaries are added.
+- Add backup guidance for grades, risk-review data, bonus classes, substitutions, and teacher work summaries.
+- Add tests for reception scheduling permissions and teacher double-booking prevention.
+- Add tests for substitution payroll counts and extra activity approval.
 
 Suggested commits:
 
