@@ -143,6 +143,11 @@ export default async function ReceptionCalendarPage({
             Scan scheduled bonus classes by teacher in 30-minute intervals.
           </p>
           <div className="action-row">
+            {currentUser.role === "ADMIN" ? (
+              <Link className="secondary-link" href="/dashboard">
+                Back to dashboard
+              </Link>
+            ) : null}
             <Link className="primary-link" href="/reception/bonus-classes">
               Schedule bonus class
             </Link>

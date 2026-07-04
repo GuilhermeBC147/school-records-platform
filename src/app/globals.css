@@ -90,7 +90,8 @@ button {
 }
 
 .text-link,
-.primary-link {
+.primary-link,
+.secondary-link {
   align-items: center;
   border-radius: 6px;
   display: inline-flex;
@@ -110,6 +111,13 @@ button {
   background: var(--brand);
   color: #ffffff;
   padding: 12px 18px;
+}
+
+.secondary-link {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--foreground);
+  padding: 11px 16px;
 }
 
 .primary-button,
@@ -134,6 +142,7 @@ button {
 }
 
 .primary-link:hover,
+.secondary-link:hover,
 .text-link:hover {
   text-decoration: underline;
 }

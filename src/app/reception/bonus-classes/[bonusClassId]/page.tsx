@@ -128,6 +128,13 @@ export default async function EditBonusClassPage({
             Status: {formatBonusClassStatus(bonusClass.status)} | Attendance:{" "}
             {formatBonusClassStatus(bonusClass.attendanceStatus)}
           </p>
+          {currentUser.role === "ADMIN" ? (
+            <div className="action-row">
+              <Link className="secondary-link" href="/dashboard">
+                Back to dashboard
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         {query.error === "overlap" ? (
