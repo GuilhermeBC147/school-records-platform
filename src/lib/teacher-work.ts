@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
 export const teacherWorkCategories = [
-  { label: "Bonus class", value: "BONUS_CLASS" },
-  { label: "Event", value: "EVENT" },
-  { label: "Game night", value: "GAME_NIGHT" },
-  { label: "Holiday activity", value: "HOLIDAY_ACTIVITY" },
+  { label: "Bonus Class", value: "BONUS_CLASS" },
+  { label: "Extra Activity", value: "EXTRA_ACTIVITY" },
   { label: "Meeting", value: "MEETING" },
   { label: "Other", value: "OTHER" },
 ] as const;
@@ -72,19 +70,34 @@ export async function getTeacherWorkSummary({
           lt: end,
         },
         status: "SUBMITTED",
-        class: {
-          teacherId,
-        },
+        OR: [
+          {
+            class: {
+              teacherId,
+            },
+            substitutionStatus: "NONE",
+          },
+          {
+            substitutionStatus: "APPROVED",
+            taughtById: teacherId,
+          },
+        ],
       },
       orderBy: [{ lessonDate: "asc" }, { name: "asc" }],
       select: {
         id: true,
         lessonDate: true,
         name: true,
+        substitutionStatus: true,
         class: {
           select: {
             durationMinutes: true,
             name: true,
+            teacher: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
@@ -109,11 +122,40 @@ export async function getTeacherWorkSummary({
         durationMinutes: true,
         notes: true,
         startTime: true,
+        subject: true,
         title: true,
         workDate: true,
       },
     }),
   ]);
+  const pendingSubstituteLessons = await prisma.lesson.findMany({
+    where: {
+      lessonDate: {
+        gte: start,
+        lt: end,
+      },
+      status: "SUBMITTED",
+      substitutionStatus: "PENDING_APPROVAL",
+      taughtById: teacherId,
+    },
+    orderBy: [{ lessonDate: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      lessonDate: true,
+      name: true,
+      class: {
+        select: {
+          durationMinutes: true,
+          name: true,
+          teacher: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   const lessonMinutes = lessons.reduce(
     (total, lesson) => total + lesson.class.durationMinutes,
@@ -127,6 +169,7 @@ export async function getTeacherWorkSummary({
   return {
     lessonMinutes,
     lessons,
+    pendingSubstituteLessons,
     teacher,
     totalMinutes: lessonMinutes + workLogMinutes,
     workLogMinutes,

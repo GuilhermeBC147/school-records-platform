@@ -22,6 +22,13 @@ enum LessonStatus {
   SUBMITTED
 }
 
+enum SubstitutionStatus {
+  NONE
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
 enum AttendanceStatus {
   PRESENT
   ABSENT
@@ -60,9 +67,7 @@ enum TestPeriod {
 
 enum TeacherWorkCategory {
   BONUS_CLASS
-  EVENT
-  GAME_NIGHT
-  HOLIDAY_ACTIVITY
+  EXTRA_ACTIVITY
   MEETING
   OTHER
 }
@@ -92,6 +97,8 @@ model User {
   passwordResetTokens PasswordResetToken[]
   submittedLessons    Lesson[]             @relation("SubmittedBy")
   resolvedRiskRecords StudentRiskResolution[] @relation("ResolvedRiskRecords")
+  reviewedSubstitutions Lesson[]           @relation("ReviewedSubstitutions")
+  taughtLessons       Lesson[]             @relation("TaughtBy")
   teacherWorkLogs     TeacherWorkLog[]     @relation("TeacherWorkLogs")
 }
 
@@ -184,29 +191,40 @@ model Enrollment {
 }
 
 model Lesson {
-  id          String       @id @default(cuid())
-  name        String?
-  lessonDate  DateTime
-  status      LessonStatus @default(DRAFT)
-  notes       String?
-  submittedAt DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id                     String             @id @default(cuid())
+  name                   String?
+  lessonDate             DateTime
+  status                 LessonStatus       @default(DRAFT)
+  substitutionStatus     SubstitutionStatus @default(NONE)
+  substitutionNotes      String?
+  substitutionReviewedAt DateTime?
+  notes                  String?
+  submittedAt            DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
   classId           String
   class             Class              @relation(fields: [classId], references: [id])
   submittedById     String?
   submittedBy       User?              @relation("SubmittedBy", fields: [submittedById], references: [id])
+  taughtById        String?
+  taughtBy          User?              @relation("TaughtBy", fields: [taughtById], references: [id])
+  substitutionReviewedById String?
+  substitutionReviewedBy   User?       @relation("ReviewedSubstitutions", fields: [substitutionReviewedById], references: [id])
   attendanceRecords AttendanceRecord[]
   homeworkRecords   HomeworkRecord[]
 
   @@unique([classId, lessonDate, name])
   @@index([submittedById])
+  @@index([taughtById])
+  @@index([substitutionStatus])
+  @@index([substitutionReviewedById])
 }
 
 model TeacherWorkLog {
   id              String              @id @default(cuid())
   category        TeacherWorkCategory
+  subject         String?
   title           String
   workDate        DateTime
   startTime       String?

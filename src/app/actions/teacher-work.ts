@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { TeacherWorkCategory } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { teacherWorkCategories } from "@/lib/teacher-work";
@@ -8,7 +9,11 @@ import { teacherWorkCategories } from "@/lib/teacher-work";
 const teacherWorkCategoryValues = teacherWorkCategories.map(
   (category) => category.value,
 );
-const allowedRedirects = new Set(["/admin/work-summary", "/dashboard/work"]);
+const allowedRedirects = new Set([
+  "/admin/work-summary",
+  "/dashboard/work",
+  "/dashboard/work/new",
+]);
 
 function readWorkDate(formData: FormData) {
   const value = String(formData.get("workDate") ?? "");
@@ -62,6 +67,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
     ? requestedRedirect
     : "/dashboard/work";
   const startTime = String(formData.get("startTime") ?? "").trim() || null;
+  const subject = String(formData.get("subject") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
   const workDate = readWorkDate(formData);
 
@@ -71,6 +77,10 @@ export async function createTeacherWorkLogAction(formData: FormData) {
 
   if (!title) {
     throw new Error("Work title is required.");
+  }
+
+  if (category === "BONUS_CLASS" && !subject) {
+    throw new Error("Bonus class subject is required.");
   }
 
   const teacherId =
@@ -93,11 +103,12 @@ export async function createTeacherWorkLogAction(formData: FormData) {
 
   await prisma.teacherWorkLog.create({
     data: {
-      category: category as (typeof teacherWorkCategoryValues)[number],
+      category: category as TeacherWorkCategory,
       createdById: currentUser.id,
       durationMinutes,
       notes,
       startTime,
+      subject,
       teacherId: teacher.id,
       title,
       workDate,

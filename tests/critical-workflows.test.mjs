@@ -247,6 +247,9 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
   const teacherWorkPage = await readProjectFile("src/app/dashboard/work/page.tsx");
+  const newActivityPage = await readProjectFile(
+    "src/app/dashboard/work/new/page.tsx",
+  );
   const adminWorkPage = await readProjectFile("src/app/admin/work-summary/page.tsx");
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
   const dataModelDoc = await readProjectFile("docs/data-model.md");
@@ -256,8 +259,10 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
 
   assert.match(schema, /enum TeacherWorkCategory/);
   assert.match(schema, /BONUS_CLASS/);
-  assert.match(schema, /GAME_NIGHT/);
+  assert.match(schema, /EXTRA_ACTIVITY/);
+  assert.doesNotMatch(schema, /GAME_NIGHT/);
   assert.match(schema, /model TeacherWorkLog/);
+  assert.match(schema, /subject\s+String\?/);
   assert.match(schema, /teacherId\s+String/);
   assert.match(schema, /createdById\s+String/);
   assert.match(schema, /@@index\(\[teacherId, workDate\]\)/);
@@ -266,18 +271,79 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workLib, /status: "SUBMITTED"/);
   assert.match(workLib, /durationMinutes/);
   assert.match(workActions, /createTeacherWorkLogAction/);
+  assert.match(workActions, /category === "BONUS_CLASS" && !subject/);
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
   assert.match(workActions, /teacherWorkLog\.create/);
+  assert.match(teacherWorkPage, /Monthly summary/);
+  assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
+  assert.doesNotMatch(teacherWorkPage, /createTeacherWorkLogAction/);
+  assert.match(newActivityPage, /Add event/);
+  assert.match(newActivityPage, /createTeacherWorkLogAction/);
+  assert.match(newActivityPage, /name="subject"/);
+  assert.match(newActivityPage, /teacherWorkCategories/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
-  assert.match(teacherWorkPage, /createTeacherWorkLogAction/);
   assert.match(adminWorkPage, /Teacher work summaries/);
   assert.match(adminWorkPage, /getTeacherWorkSummary/);
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
+  assert.match(dashboardPage, /\/dashboard\/work\/new/);
   assert.match(dashboardPage, /\/admin\/work-summary/);
   assert.match(dataModelDoc, /Teacher Work Summaries/);
   assert.match(dataModelDoc, /class's assigned teacher/);
+});
+
+test("substitute teachers can submit lessons pending admin approval", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const recordActions = await readProjectFile("src/app/actions/class-records.ts");
+  const substitutionActions = await readProjectFile(
+    "src/app/actions/substitutions.ts",
+  );
+  const recordPage = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/record/page.tsx",
+  );
+  const substitutionPage = await readProjectFile(
+    "src/app/dashboard/substitutions/new/page.tsx",
+  );
+  const adminSubstitutionsPage = await readProjectFile(
+    "src/app/admin/substitutions/page.tsx",
+  );
+  const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
+  const workLib = await readProjectFile("src/lib/teacher-work.ts");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260704150000_add_substitute_lesson_approval/migration.sql",
+  );
+
+  assert.match(schema, /enum SubstitutionStatus/);
+  assert.match(schema, /PENDING_APPROVAL/);
+  assert.match(schema, /APPROVED/);
+  assert.match(schema, /taughtById\s+String\?/);
+  assert.match(schema, /substitutionReviewedById\s+String\?/);
+  assert.match(migration, /CREATE TYPE "SubstitutionStatus"/);
+  assert.match(migration, /SET "taughtById" = "Class"\."teacherId"/);
+  assert.match(recordActions, /isSubstituteRecord/);
+  assert.match(recordActions, /PENDING_APPROVAL/);
+  assert.match(recordActions, /taughtById: currentUser\.id/);
+  assert.match(recordActions, /\/dashboard\/work\?status=substitution-pending/);
+  assert.match(recordPage, /substitute === "1"/);
+  assert.match(recordPage, /Substitute class record/);
+  assert.match(recordPage, /Submit substitute record/);
+  assert.match(recordPage, /substitutionNotes/);
+  assert.match(substitutionPage, /Substitute lesson/);
+  assert.match(substitutionPage, /not: currentUser\.id/);
+  assert.match(substitutionPage, /substitute=1/);
+  assert.match(substitutionActions, /approveSubstitutionAction/);
+  assert.match(substitutionActions, /rejectSubstitutionAction/);
+  assert.match(substitutionActions, /substitutionReviewedById/);
+  assert.match(adminSubstitutionsPage, /approveSubstitutionAction/);
+  assert.match(adminSubstitutionsPage, /rejectSubstitutionAction/);
+  assert.match(dashboardPage, /\/dashboard\/substitutions\/new/);
+  assert.match(dashboardPage, /\/admin\/substitutions/);
+  assert.match(workLib, /substitutionStatus: "APPROVED"/);
+  assert.match(workLib, /pendingSubstituteLessons/);
+  assert.match(dataModelDoc, /Substitute Lessons/);
+  assert.match(dataModelDoc, /Approval affects payroll attribution only/);
 });
 
 test("production handoff documents deployment, backups, and smoke tests", async () => {

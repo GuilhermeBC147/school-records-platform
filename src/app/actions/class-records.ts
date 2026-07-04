@@ -60,9 +60,12 @@ async function persistClassRecord(
 
   const classId = String(formData.get("classId") ?? "");
   const lessonId = String(formData.get("lessonId") ?? "");
+  const isSubstituteRecord = String(formData.get("isSubstitute") ?? "") === "1";
   const lessonName = String(formData.get("lessonName") ?? "").trim();
   const lessonDate = readLessonDate(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const substitutionNotes =
+    String(formData.get("substitutionNotes") ?? "").trim() || null;
 
   if (!lessonName) {
     throw new Error("Lesson name is required.");
@@ -72,10 +75,13 @@ async function persistClassRecord(
     where: {
       id: classId,
       isActive: true,
-      ...(currentUser.role === "TEACHER" ? { teacherId: currentUser.id } : {}),
+      ...(currentUser.role === "TEACHER" && !isSubstituteRecord
+        ? { teacherId: currentUser.id }
+        : {}),
     },
     select: {
       id: true,
+      teacherId: true,
       enrollments: {
         where: { status: "ACTIVE" },
         select: {
@@ -101,6 +107,7 @@ async function persistClassRecord(
             lessonDate: true,
             name: true,
             status: true,
+            substitutionStatus: true,
           },
         })
       : await transaction.lesson.findFirst({
@@ -114,6 +121,7 @@ async function persistClassRecord(
             lessonDate: true,
             name: true,
             status: true,
+            substitutionStatus: true,
           },
         });
 
@@ -155,6 +163,25 @@ async function persistClassRecord(
             submittedAt: null,
             submittedById: null,
           };
+    const isTeacherSubstitution =
+      currentUser.role === "TEACHER" &&
+      isSubstituteRecord &&
+      currentUser.id !== schoolClass.teacherId;
+    const attributionFields = isTeacherSubstitution
+      ? {
+          substitutionNotes,
+          substitutionReviewedAt: null,
+          substitutionReviewedById: null,
+          substitutionStatus: "PENDING_APPROVAL" as const,
+          taughtById: currentUser.id,
+        }
+      : {
+          substitutionNotes: null,
+          substitutionReviewedAt: null,
+          substitutionReviewedById: null,
+          substitutionStatus: "NONE" as const,
+          taughtById: schoolClass.teacherId,
+        };
 
     const lesson = existingLesson
       ? await transaction.lesson.update({
@@ -164,6 +191,7 @@ async function persistClassRecord(
             name: lessonName,
             notes,
             status,
+            ...attributionFields,
             ...submissionFields,
           },
           select: { id: true },
@@ -175,6 +203,7 @@ async function persistClassRecord(
             name: lessonName,
             notes,
             status,
+            ...attributionFields,
             ...submissionFields,
           },
           select: { id: true },
@@ -230,7 +259,11 @@ async function persistClassRecord(
     }
   });
 
-  redirect(`/dashboard/classes/${classId}`);
+  redirect(
+    isSubstituteRecord
+      ? "/dashboard/work?status=substitution-pending"
+      : `/dashboard/classes/${classId}`,
+  );
 }
 
 export async function saveDraftClassRecordAction(formData: FormData) {

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
 import {
@@ -8,7 +7,6 @@ import {
   formatTeacherWorkCategory,
   getTeacherWorkSummary,
   readMonth,
-  teacherWorkCategories,
 } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
 
@@ -68,11 +66,16 @@ export default async function TeacherWorkPage({
             Back to dashboard
           </Link>
           <p className="eyebrow">Teacher work</p>
-          <h1 id="work-title">Monthly work summary</h1>
+          <h1 id="work-title">Monthly summary</h1>
           <p className="lede">
-            Submitted class lessons count automatically. Add paid activities
-            that happen outside regular class records.
+            Submitted class lessons count automatically. Activities logged from
+            the separate activity page are included here.
           </p>
+          <div className="action-row">
+            <Link className="primary-link" href="/dashboard/work/new">
+              Add event
+            </Link>
+          </div>
           <div className="metric-grid">
             <article className="metric">
               <span>{summary.lessons.length}</span>
@@ -81,6 +84,10 @@ export default async function TeacherWorkPage({
             <article className="metric">
               <span>{summary.workLogs.length}</span>
               <strong>Activities</strong>
+            </article>
+            <article className="metric">
+              <span>{summary.pendingSubstituteLessons.length}</span>
+              <strong>Pending substitutions</strong>
             </article>
             <article className="metric">
               <span>{formatHours(summary.lessonMinutes)}</span>
@@ -95,6 +102,11 @@ export default async function TeacherWorkPage({
 
         {query.status === "created" ? (
           <p className="form-success">Paid activity saved.</p>
+        ) : null}
+        {query.status === "substitution-pending" ? (
+          <p className="form-success">
+            Substitute lesson submitted for admin approval.
+          </p>
         ) : null}
 
         <section className="panel" aria-label="Summary filters">
@@ -124,6 +136,7 @@ export default async function TeacherWorkPage({
                     <th>Date</th>
                     <th>Class</th>
                     <th>Lesson</th>
+                    <th>Type</th>
                     <th>Minutes</th>
                   </tr>
                 </thead>
@@ -133,12 +146,17 @@ export default async function TeacherWorkPage({
                       <td>{formatShortDate(lesson.lessonDate)}</td>
                       <td>{lesson.class.name}</td>
                       <td>{lesson.name ?? "-"}</td>
+                      <td>
+                        {lesson.substitutionStatus === "APPROVED"
+                          ? `Approved substitute for ${lesson.class.teacher.name}`
+                          : "Regular lesson"}
+                      </td>
                       <td>{lesson.class.durationMinutes}</td>
                     </tr>
                   ))}
                   {summary.lessons.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>No submitted lessons this month.</td>
+                      <td colSpan={5}>No submitted lessons this month.</td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -155,6 +173,7 @@ export default async function TeacherWorkPage({
                     <th>Date</th>
                     <th>Category</th>
                     <th>Title</th>
+                    <th>Subject</th>
                     <th>Minutes</th>
                   </tr>
                 </thead>
@@ -164,12 +183,13 @@ export default async function TeacherWorkPage({
                       <td>{formatShortDate(workLog.workDate)}</td>
                       <td>{formatTeacherWorkCategory(workLog.category)}</td>
                       <td>{workLog.title}</td>
+                      <td>{workLog.subject ?? "-"}</td>
                       <td>{workLog.durationMinutes}</td>
                     </tr>
                   ))}
                   {summary.workLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>No paid activities this month.</td>
+                      <td colSpan={5}>No paid activities this month.</td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -178,47 +198,39 @@ export default async function TeacherWorkPage({
           </article>
         </section>
 
-        <section className="panel data-panel" aria-labelledby="activity-title">
-          <h2 id="activity-title">Add paid activity</h2>
-          <form action={createTeacherWorkLogAction} className="admin-form">
-            <input name="redirectTo" type="hidden" value="/dashboard/work" />
-            <label>
-              <span>Category</span>
-              <select name="category" required>
-                {teacherWorkCategories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Title</span>
-              <input name="title" required type="text" />
-            </label>
-            <label>
-              <span>Date</span>
-              <input name="workDate" required type="date" />
-            </label>
-            <label>
-              <span>Start time</span>
-              <input name="startTime" type="time" />
-            </label>
-            <label>
-              <span>Duration minutes</span>
-              <input min="1" max="720" name="durationMinutes" required type="number" />
-            </label>
-            <label>
-              <span>Notes</span>
-              <textarea name="notes" rows={3} />
-            </label>
-            <div className="record-actions">
-              <button className="primary-button" type="submit">
-                Save activity
-              </button>
+        {summary.pendingSubstituteLessons.length > 0 ? (
+          <section className="panel data-panel" aria-labelledby="pending-substitutions-title">
+            <h2 id="pending-substitutions-title">Pending substitute lessons</h2>
+            <p className="muted-copy">
+              These records are saved, but their hours are not included in the
+              finalized total until an admin approves them.
+            </p>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Class</th>
+                    <th>Primary teacher</th>
+                    <th>Lesson</th>
+                    <th>Minutes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.pendingSubstituteLessons.map((lesson) => (
+                    <tr key={lesson.id}>
+                      <td>{formatShortDate(lesson.lessonDate)}</td>
+                      <td>{lesson.class.name}</td>
+                      <td>{lesson.class.teacher.name}</td>
+                      <td>{lesson.name ?? "-"}</td>
+                      <td>{lesson.class.durationMinutes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </form>
-        </section>
+          </section>
+        ) : null}
       </div>
     </main>
   );
