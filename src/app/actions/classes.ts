@@ -1,7 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { weekdayOptions, type WeekdayValue } from "@/lib/class-schedule";
+import {
+  readDurationMinutes,
+  weekdayOptions,
+  type WeekdayValue,
+} from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -15,17 +19,6 @@ function readOptionalString(formData: FormData, key: string) {
 
 function readTermNumber(formData: FormData, key: string) {
   const value = String(formData.get(key) ?? "").trim();
-
-  if (!value) {
-    return null;
-  }
-
-  const numberValue = Number(value);
-  return Number.isInteger(numberValue) ? numberValue : null;
-}
-
-function readDurationMinutes(formData: FormData) {
-  const value = String(formData.get("durationMinutes") ?? "").trim();
 
   if (!value) {
     return null;
@@ -96,7 +89,7 @@ async function readClassForm(formData: FormData) {
   const book = readOptionalString(formData, "book");
   const semester = readTermNumber(formData, "semester");
   const year = readTermNumber(formData, "year");
-  const durationMinutes = readDurationMinutes(formData);
+  const durationMinutes = readDurationMinutes(formData.get("durationMinutes"));
   const weekDays = readWeekdays(formData);
   const teacherId = readRequiredString(formData, "teacherId");
   const isActive = formData.get("isActive") === "on";

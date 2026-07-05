@@ -29,13 +29,24 @@ export function formatDuration(minutes: number | null) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
-  if (hours === 0) {
-    return `${remainingMinutes} min`;
+  return `${String(hours).padStart(2, "0")}:${String(remainingMinutes).padStart(
+    2,
+    "0",
+  )}`;
+}
+
+export function readDurationMinutes(value: FormDataEntryValue | null) {
+  const duration = String(value ?? "").trim();
+
+  if (/^\d+$/.test(duration)) {
+    return Number(duration);
   }
 
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
+  if (!/^\d{1,2}:[0-5]\d$/.test(duration)) {
+    return null;
   }
 
-  return `${hours}h ${remainingMinutes} min`;
+  const [hours, minutes] = duration.split(":").map(Number);
+
+  return hours * 60 + minutes;
 }

@@ -6,6 +6,7 @@ import {
 } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
+import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import {
   formatBonusClassErrorMessage,
@@ -210,14 +211,11 @@ export default async function EditBonusClassPage({
               />
             </label>
             <label>
-              <span>Duration minutes</span>
-              <input
-                defaultValue={bonusClass.durationMinutes}
-                min="1"
-                max="720"
+              <span>Duration</span>
+              <DurationInput
                 name="durationMinutes"
                 required
-                type="number"
+                valueMinutes={bonusClass.durationMinutes}
               />
             </label>
             <label>

@@ -6,6 +6,7 @@ import {
 } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
+import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
@@ -174,8 +175,8 @@ export default async function ReceptionBonusClassesPage({
               <TimeInput name="startTime" required />
             </label>
             <label>
-              <span>Duration minutes</span>
-              <input min="1" max="720" name="durationMinutes" required type="number" />
+              <span>Duration</span>
+              <DurationInput name="durationMinutes" required />
             </label>
             <label>
               <span>Notes</span>

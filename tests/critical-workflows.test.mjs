@@ -123,6 +123,8 @@ test("date filters display account format while submitting ISO dates", async () 
   assert.match(dateFormat, /formatIsoDateInput/);
   assert.match(dateInput, /"use client"/);
   assert.match(dateInput, /type="hidden"/);
+  assert.match(dateInput, /type="date"/);
+  assert.match(dateInput, /date-picker-input/);
   assert.match(dateInput, /name=\{name\}/);
   assert.match(dateInput, /parseDateInputToIso\(displayValue, dateFormat\)/);
 
@@ -139,7 +141,6 @@ test("date filters display account format while submitting ISO dates", async () 
   ]) {
     assert.match(source, /DateInput/);
     assert.match(source, /dateFormat=\{currentUser\.dateFormat\}/);
-    assert.doesNotMatch(source, /type="date"/);
   }
 });
 
@@ -148,6 +149,9 @@ test("class management supports metadata and active teacher assignment", async (
   const classActions = await readProjectFile("src/app/actions/classes.ts");
   const classesPage = await readProjectFile("src/app/admin/classes/page.tsx");
   const newClassPage = await readProjectFile("src/app/admin/classes/new/page.tsx");
+  const durationInput = await readProjectFile(
+    "src/app/components/duration-input.tsx",
+  );
   const rosterPicker = await readProjectFile(
     "src/app/admin/classes/roster-picker.tsx",
   );
@@ -159,6 +163,7 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classActions, /createClassAction/);
   assert.match(classActions, /updateClassAction/);
   assert.match(classActions, /updateClassRosterAction/);
+  assert.match(classActions, /readDurationMinutes\(formData\.get\("durationMinutes"\)\)/);
   assert.match(classActions, /studentIds/);
   assert.match(classActions, /role: "TEACHER"/);
   assert.match(classActions, /isActive: true/);
@@ -173,7 +178,10 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classesPage, /Class results/);
   assert.match(classesPage, /class-result-card/);
   assert.match(newClassPage, /Class roster/);
+  assert.match(newClassPage, /DurationInput/);
   assert.match(newClassPage, /RosterPicker/);
+  assert.match(durationInput, /placeholder="HH:MM"/);
+  assert.match(durationInput, /formatDuration\(valueMinutes\)/);
   assert.match(rosterPicker, /Search students/);
   assert.match(rosterPicker, /name="studentIds"/);
   assert.match(dashboardPage, /currentUser\.role === "TEACHER"/);
@@ -351,6 +359,9 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
   const timeInput = await readProjectFile("src/app/components/time-input.tsx");
+  const durationInput = await readProjectFile(
+    "src/app/components/duration-input.tsx",
+  );
   const teacherWorkPage = await readProjectFile("src/app/dashboard/work/page.tsx");
   const newActivityPage = await readProjectFile(
     "src/app/dashboard/work/new/page.tsx",
@@ -378,6 +389,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workActions, /createTeacherWorkLogAction/);
   assert.match(workActions, /createTeacherMeetingAction/);
   assert.match(workActions, /readOptionalStartTime/);
+  assert.match(workActions, /readDurationInputMinutes/);
   assert.match(workActions, /category === "BONUS_CLASS" && !subject/);
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
@@ -389,18 +401,25 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(newActivityPage, /createTeacherWorkLogAction/);
   assert.match(newActivityPage, /name="subject"/);
   assert.match(newActivityPage, /TimeInput/);
+  assert.match(newActivityPage, /DurationInput/);
   assert.doesNotMatch(newActivityPage, /type="time"/);
+  assert.doesNotMatch(newActivityPage, /type="number"/);
   assert.match(newActivityPage, /teacherWorkCategories/);
   assert.match(newActivityPage, /category\.value !== "MEETING"/);
   assert.match(timeInput, /placeholder="HH:MM"/);
   assert.match(timeInput, /type="text"/);
   assert.match(timeInput, /pattern="\(\?:\[01\]\\d\|2\[0-3\]\):\[0-5\]\\d"/);
+  assert.match(durationInput, /placeholder="HH:MM"/);
+  assert.match(durationInput, /name=\{name\}/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
+  assert.match(teacherWorkPage, /formatDuration/);
   assert.match(adminWorkPage, /Teacher work summaries/);
   assert.match(adminWorkPage, /getTeacherWorkSummary/);
   assert.match(adminWorkPage, /createTeacherMeetingAction/);
   assert.match(adminWorkPage, /TimeInput/);
+  assert.match(adminWorkPage, /DurationInput/);
   assert.doesNotMatch(adminWorkPage, /type="time"/);
+  assert.doesNotMatch(adminWorkPage, /type="number"/);
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
   assert.match(dashboardPage, /\/dashboard\/work\/new/);
@@ -470,6 +489,9 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   const bonusActions = await readProjectFile("src/app/actions/bonus-classes.ts");
   const bonusLib = await readProjectFile("src/lib/bonus-classes.ts");
   const timeInput = await readProjectFile("src/app/components/time-input.tsx");
+  const durationInput = await readProjectFile(
+    "src/app/components/duration-input.tsx",
+  );
   const receptionDashboardPage = await readProjectFile("src/app/reception/page.tsx");
   const receptionPage = await readProjectFile(
     "src/app/reception/bonus-classes/page.tsx",
@@ -526,6 +548,7 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusActions, /completeBonusClassAction/);
   assert.match(bonusActions, /readAttendanceStatus/);
   assert.match(bonusActions, /normalizeStartTime/);
+  assert.match(bonusActions, /readDurationMinutes\(formData\.get\("durationMinutes"\)\)/);
   assert.match(bonusActions, /hasTeacherBonusClassOverlap/);
   assert.match(bonusLib, /formatBonusClassResultMessage/);
   assert.match(bonusLib, /formatBonusClassErrorMessage/);
@@ -547,9 +570,13 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionCalendarPage, /formatStartTime/);
   assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);
   assert.match(receptionPage, /TimeInput/);
+  assert.match(receptionPage, /DurationInput/);
   assert.doesNotMatch(receptionPage, /type="time"/);
+  assert.doesNotMatch(receptionPage, /type="number"/);
   assert.match(timeInput, /placeholder="HH:MM"/);
   assert.match(timeInput, /type="text"/);
+  assert.match(durationInput, /placeholder="HH:MM"/);
+  assert.match(durationInput, /type="text"/);
   assert.match(receptionCombinedRedirectPage, /redirect\("\/reception\/students"\)/);
   assert.match(receptionStudentsPage, /Students/);
   assert.match(receptionStudentsPage, /studentSearch/);
@@ -585,7 +612,9 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionEditPage, /completeBonusClassAction/);
   assert.match(receptionEditPage, /status\?: string/);
   assert.match(receptionEditPage, /TimeInput/);
+  assert.match(receptionEditPage, /DurationInput/);
   assert.doesNotMatch(receptionEditPage, /type="time"/);
+  assert.doesNotMatch(receptionEditPage, /type="number"/);
   assert.match(receptionEditPage, /formatBonusClassResultMessage/);
   assert.match(teacherBonusPage, /attendanceStatus/);
   assert.match(teacherBonusPage, /bonus-calendar/);

@@ -35,9 +35,10 @@ export function DateInput({
   const [displayValue, setDisplayValue] = useState(initialDisplayValue);
   const isoValue = parseDateInputToIso(displayValue, dateFormat);
   const hasInvalidValue = Boolean(displayValue.trim()) && !isoValue;
+  const submittedIsoValue = hasInvalidValue ? "" : isoValue;
 
   return (
-    <>
+    <span className="date-input-group">
       <input
         aria-describedby={`${name}-date-format`}
         autoComplete="off"
@@ -55,10 +56,19 @@ export function DateInput({
         type="text"
         value={displayValue}
       />
-      <input name={name} type="hidden" value={hasInvalidValue ? "" : isoValue} />
+      <input
+        aria-label="Choose date from calendar"
+        className="date-picker-input"
+        onChange={(event) =>
+          setDisplayValue(formatIsoDateInput(event.target.value, dateFormat))
+        }
+        type="date"
+        value={submittedIsoValue}
+      />
+      <input name={name} type="hidden" value={submittedIsoValue} />
       <small className="field-hint" id={`${name}-date-format`}>
         {inputLabels[dateFormat]}
       </small>
-    </>
+    </span>
   );
 }

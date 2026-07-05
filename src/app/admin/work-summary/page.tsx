@@ -6,8 +6,10 @@ import {
 } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
+import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import { formatStartTime } from "@/lib/bonus-classes";
+import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import {
@@ -192,7 +194,7 @@ export default async function AdminWorkSummaryPage({
                   <th>Date</th>
                   <th>Description</th>
                   <th>Subject</th>
-                  <th>Minutes</th>
+                  <th>Duration</th>
                   <th>Created by</th>
                     </tr>
                   </thead>
@@ -211,7 +213,7 @@ export default async function AdminWorkSummaryPage({
                           {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
                         <td>-</td>
-                        <td>{lesson.class.durationMinutes}</td>
+                        <td>{formatDuration(lesson.class.durationMinutes)}</td>
                         <td>Class record</td>
                       </tr>
                     ))}
@@ -229,7 +231,7 @@ export default async function AdminWorkSummaryPage({
                           {formatStartTime(bonusClass.startTime)}
                         </td>
                         <td>{bonusClass.subject}</td>
-                        <td>{bonusClass.durationMinutes}</td>
+                        <td>{formatDuration(bonusClass.durationMinutes)}</td>
                         <td>Reception schedule</td>
                       </tr>
                     ))}
@@ -241,7 +243,7 @@ export default async function AdminWorkSummaryPage({
                         </td>
                         <td>{workLog.title}</td>
                         <td>{workLog.subject ?? "-"}</td>
-                        <td>{workLog.durationMinutes}</td>
+                        <td>{formatDuration(workLog.durationMinutes)}</td>
                         <td>{workLog.createdBy.name}</td>
                       </tr>
                     ))}
@@ -255,7 +257,7 @@ export default async function AdminWorkSummaryPage({
                           {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
                         <td>-</td>
-                        <td>{lesson.class.durationMinutes}</td>
+                        <td>{formatDuration(lesson.class.durationMinutes)}</td>
                         <td>Pending admin approval</td>
                       </tr>
                     ))}
@@ -327,8 +329,8 @@ export default async function AdminWorkSummaryPage({
               <TimeInput name="startTime" />
             </label>
             <label>
-              <span>Duration minutes</span>
-              <input min="1" max="720" name="durationMinutes" required type="number" />
+              <span>Duration</span>
+              <DurationInput name="durationMinutes" required />
             </label>
             <label>
               <span>Notes</span>
@@ -375,8 +377,8 @@ export default async function AdminWorkSummaryPage({
               <TimeInput name="startTime" />
             </label>
             <label>
-              <span>Duration minutes</span>
-              <input min="1" max="720" name="durationMinutes" required type="number" />
+              <span>Duration</span>
+              <DurationInput name="durationMinutes" required />
             </label>
             <label>
               <span>Notes</span>

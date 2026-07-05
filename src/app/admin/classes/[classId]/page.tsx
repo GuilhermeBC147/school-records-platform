@@ -6,6 +6,7 @@ import {
 } from "@/app/actions/classes";
 import { logoutAction } from "@/app/actions/auth";
 import { RosterPicker } from "@/app/admin/classes/roster-picker";
+import { DurationInput } from "@/app/components/duration-input";
 import { weekdayOptions } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -169,14 +170,11 @@ export default async function EditClassPage({
             </label>
             <label>
               <span>Duration</span>
-              <input
-                defaultValue={schoolClass.durationMinutes}
-                max="600"
-                min="1"
+              <DurationInput
+                maxMinutes={600}
                 name="durationMinutes"
                 required
-                step="1"
-                type="number"
+                valueMinutes={schoolClass.durationMinutes}
               />
             </label>
             <div>

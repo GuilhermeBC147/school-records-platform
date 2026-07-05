@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { TeacherWorkCategory } from "@/generated/prisma/enums";
 import { readOptionalStartTime } from "@/lib/bonus-classes";
+import { readDurationMinutes as readDurationInputMinutes } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { teacherWorkCategories } from "@/lib/teacher-work";
@@ -38,10 +39,10 @@ function readWorkDate(formData: FormData) {
 }
 
 function readDurationMinutes(formData: FormData) {
-  const durationMinutes = Number(formData.get("durationMinutes"));
+  const durationMinutes = readDurationInputMinutes(formData.get("durationMinutes"));
 
   if (
-    !Number.isInteger(durationMinutes) ||
+    durationMinutes === null ||
     durationMinutes <= 0 ||
     durationMinutes > 720
   ) {

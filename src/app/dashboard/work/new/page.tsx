@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
+import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import { teacherWorkCategories } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
@@ -91,8 +92,8 @@ export default async function NewTeacherActivityPage() {
               <TimeInput name="startTime" />
             </label>
             <label>
-              <span>Duration minutes</span>
-              <input min="1" max="720" name="durationMinutes" required type="number" />
+              <span>Duration</span>
+              <DurationInput name="durationMinutes" required />
             </label>
             <label>
               <span>Notes</span>
