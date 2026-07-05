@@ -49,6 +49,10 @@ export default async function ClassRecordPage({
     redirect("/login");
   }
 
+  if (currentUser.role !== "ADMIN" && currentUser.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+
   const { classId } = await params;
   const { lessonId, substitute } = await searchParams;
   const isSubstituteRecord = currentUser.role === "TEACHER" && substitute === "1";
