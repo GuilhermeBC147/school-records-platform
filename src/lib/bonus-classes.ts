@@ -39,7 +39,15 @@ export function formatBonusClassErrorMessage(error: string | undefined) {
 }
 
 export function formatStartTime(startTime: string | null) {
-  return startTime || "-";
+  if (!startTime) {
+    return "-";
+  }
+
+  try {
+    return normalizeStartTime(startTime);
+  } catch {
+    return startTime;
+  }
 }
 
 export function formatTimeFromMinutes(totalMinutes: number) {
@@ -69,17 +77,26 @@ export function readIsoDate(value: string) {
 }
 
 export function readTimeMinutes(value: string) {
-  if (!/^\d{2}:\d{2}$/.test(value)) {
-    throw new Error("Start time is required.");
-  }
+  const normalizedTime = normalizeStartTime(value);
+  const [hours, minutes] = normalizedTime.split(":").map(Number);
 
-  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
 
-  if (hours > 23 || minutes > 59) {
+export function normalizeStartTime(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(trimmedValue)) {
     throw new Error("Start time is invalid.");
   }
 
-  return hours * 60 + minutes;
+  return trimmedValue;
+}
+
+export function readOptionalStartTime(value: FormDataEntryValue | null) {
+  const startTime = String(value ?? "").trim();
+
+  return startTime ? normalizeStartTime(startTime) : null;
 }
 
 export function readDurationMinutes(value: FormDataEntryValue | null) {

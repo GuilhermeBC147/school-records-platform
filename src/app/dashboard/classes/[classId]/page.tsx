@@ -271,7 +271,9 @@ export default async function ClassDetailPage({
                   {schoolClass.lessons.map((lesson) => (
                     <tr key={lesson.id}>
                       <td>{lesson.name ?? "-"}</td>
-                      <td>{formatShortDate(lesson.lessonDate)}</td>
+                      <td>
+                        {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                      </td>
                       <td>{lesson.status}</td>
                       <td>{lesson._count.attendanceRecords}</td>
                       <td>{lesson._count.homeworkRecords}</td>

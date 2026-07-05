@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { readIsoDate } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -20,32 +21,7 @@ function readStatus<T extends readonly string[]>(
 function readLessonDate(formData: FormData) {
   const dateValue = String(formData.get("lessonDate") ?? "");
 
-  if (!dateValue) {
-    throw new Error("Lesson date is required.");
-  }
-
-  const dateMatch = dateValue.match(/^(\d{2})\/(\d{2})\/(\d{2}|\d{4})$/);
-
-  if (!dateMatch) {
-    throw new Error("Lesson date must use DD/MM/YY format.");
-  }
-
-  const [, dayValue, monthValue, yearValue] = dateMatch;
-  const day = Number(dayValue);
-  const month = Number(monthValue);
-  const year =
-    yearValue.length === 2 ? Number(`20${yearValue}`) : Number(yearValue);
-  const lessonDate = new Date(Date.UTC(year, month - 1, day));
-
-  if (
-    lessonDate.getUTCFullYear() !== year ||
-    lessonDate.getUTCMonth() !== month - 1 ||
-    lessonDate.getUTCDate() !== day
-  ) {
-    throw new Error("Lesson date is invalid.");
-  }
-
-  return lessonDate;
+  return readIsoDate(dateValue);
 }
 
 async function persistClassRecord(

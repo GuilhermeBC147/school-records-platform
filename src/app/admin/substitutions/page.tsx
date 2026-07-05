@@ -109,13 +109,18 @@ export default async function AdminSubstitutionsPage() {
                   <p className="eyebrow">{lesson.substitutionStatus}</p>
                   <h2>{lesson.class.name}</h2>
                   <p>Lesson: {lesson.name ?? "Untitled lesson"}</p>
-                  <p>Date: {formatShortDate(lesson.lessonDate)}</p>
+                  <p>
+                    Date: {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                  </p>
                   <p>Primary teacher: {lesson.class.teacher.name}</p>
                   <p>Substitute teacher: {lesson.taughtBy?.name ?? "Unknown"}</p>
                   <p>
                     Submitted by {lesson.submittedBy?.name ?? "Unknown"}
                     {lesson.submittedAt
-                      ? ` on ${formatShortDateTime(lesson.submittedAt)}`
+                      ? ` on ${formatShortDateTime(
+                          lesson.submittedAt,
+                          currentUser.dateFormat,
+                        )}`
                       : ""}
                   </p>
                   {lesson.substitutionReviewedBy ? (
@@ -123,8 +128,9 @@ export default async function AdminSubstitutionsPage() {
                       Reviewed by {lesson.substitutionReviewedBy.name}
                       {lesson.substitutionReviewedAt
                         ? ` on ${formatShortDateTime(
-                            lesson.substitutionReviewedAt,
-                          )}`
+                          lesson.substitutionReviewedAt,
+                          currentUser.dateFormat,
+                        )}`
                         : ""}
                     </p>
                   ) : null}

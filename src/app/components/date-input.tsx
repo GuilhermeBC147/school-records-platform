@@ -7,7 +7,8 @@ import {
 } from "@/lib/date-format";
 import { useMemo, useState } from "react";
 
-type DateFilterInputProps = {
+type DateInputProps = {
+  className?: string;
   dateFormat: AccountDateFormat;
   defaultValue?: string;
   name: string;
@@ -20,12 +21,13 @@ const inputLabels: Record<AccountDateFormat, string> = {
   YYYY_MM_DD: "YYYY-MM-DD",
 };
 
-export function DateFilterInput({
+export function DateInput({
+  className,
   dateFormat,
   defaultValue = "",
   name,
   required = false,
-}: DateFilterInputProps) {
+}: DateInputProps) {
   const initialDisplayValue = useMemo(
     () => formatIsoDateInput(defaultValue, dateFormat),
     [dateFormat, defaultValue],
@@ -39,6 +41,7 @@ export function DateFilterInput({
       <input
         aria-describedby={`${name}-date-format`}
         autoComplete="off"
+        className={className}
         inputMode="numeric"
         onChange={(event) => setDisplayValue(event.target.value)}
         pattern={

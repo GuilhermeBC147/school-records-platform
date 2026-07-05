@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
+import { DateInput } from "@/app/components/date-input";
+import { TimeInput } from "@/app/components/time-input";
 import { teacherWorkCategories } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
 
@@ -78,11 +80,15 @@ export default async function NewTeacherActivityPage() {
             </label>
             <label>
               <span>Date</span>
-              <input name="workDate" required type="date" />
+              <DateInput
+                dateFormat={currentUser.dateFormat}
+                name="workDate"
+                required
+              />
             </label>
             <label>
               <span>Start time</span>
-              <input name="startTime" type="time" />
+              <TimeInput name="startTime" />
             </label>
             <label>
               <span>Duration minutes</span>

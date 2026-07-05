@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { completeBonusClassAction } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
-import { DateFilterInput } from "@/app/components/date-filter-input";
+import { DateInput } from "@/app/components/date-input";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
@@ -147,7 +147,7 @@ export default async function TeacherBonusClassesPage({
           <form className="filter-form compact-filter-form">
             <label>
               <span>From</span>
-              <DateFilterInput
+              <DateInput
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateFrom}
                 name="dateFrom"
@@ -155,7 +155,7 @@ export default async function TeacherBonusClassesPage({
             </label>
             <label>
               <span>To</span>
-              <DateFilterInput
+              <DateInput
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateTo}
                 name="dateTo"

@@ -315,7 +315,12 @@ export default async function ReceptionClassesPage({
                 <div className="student-event-list">
                   {selectedClass.lessons.map((lesson) => (
                     <article className="student-event-row" key={lesson.id}>
-                      <span>{formatShortDate(lesson.lessonDate)}</span>
+                      <span>
+                        {formatShortDate(
+                          lesson.lessonDate,
+                          currentUser.dateFormat,
+                        )}
+                      </span>
                       <strong>{lesson.name ?? "Untitled lesson"}</strong>
                     </article>
                   ))}

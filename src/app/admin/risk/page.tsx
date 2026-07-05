@@ -4,7 +4,7 @@ import {
   undoRiskResolutionAction,
 } from "@/app/actions/risk";
 import { redirect } from "next/navigation";
-import { DateFilterInput } from "@/app/components/date-filter-input";
+import { DateInput } from "@/app/components/date-input";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -643,7 +643,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
             </label>
             <label>
               <span>From</span>
-              <DateFilterInput
+              <DateInput
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateFrom ?? ""}
                 name="dateFrom"
@@ -651,7 +651,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
             </label>
             <label>
               <span>To</span>
-              <DateFilterInput
+              <DateInput
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateTo ?? ""}
                 name="dateTo"
