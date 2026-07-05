@@ -74,6 +74,10 @@ export async function updateClassGradesAction(formData: FormData) {
     redirect("/login");
   }
 
+  if (currentUser.role !== "ADMIN" && currentUser.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+
   const classId = readRequiredString(formData, "classId");
 
   const schoolClass = await prisma.class.findFirst({

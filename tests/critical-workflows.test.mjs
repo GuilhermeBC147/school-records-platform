@@ -22,8 +22,16 @@ test("teacher class pages restrict class access to assigned teachers", async () 
   assert.match(dashboard, /Teacher workflows/);
   assert.match(dashboard, /teacher-class-card/);
   assert.match(classDetail, /currentUser\.role === "TEACHER"/);
+  assert.match(
+    classDetail,
+    /currentUser\.role !== "ADMIN" && currentUser\.role !== "TEACHER"/,
+  );
   assert.match(classDetail, /teacherId: currentUser\.id/);
   assert.match(recordForm, /currentUser\.role === "TEACHER"/);
+  assert.match(
+    recordForm,
+    /currentUser\.role !== "ADMIN" && currentUser\.role !== "TEACHER"/,
+  );
   assert.match(recordForm, /teacherId: currentUser\.id/);
 });
 
@@ -33,6 +41,10 @@ test("class record submission protects duplicate and unauthorized writes", async
   assert.match(action, /getCurrentUser/);
   assert.match(action, /readIsoDate/);
   assert.match(action, /redirect\("\/login"\)/);
+  assert.match(
+    action,
+    /currentUser\.role !== "ADMIN" && currentUser\.role !== "TEACHER"/,
+  );
   assert.match(action, /teacherId: currentUser\.id/);
   assert.match(action, /lessonName/);
   assert.doesNotMatch(action, /lessonTime/);
@@ -282,6 +294,10 @@ test("teacher grade entry validates values and class access", async () => {
   assert.match(gradeActions, /updateClassGradesAction/);
   assert.match(gradeActions, /getCurrentUser/);
   assert.match(gradeActions, /redirect\("\/login"\)/);
+  assert.match(
+    gradeActions,
+    /currentUser\.role !== "ADMIN" && currentUser\.role !== "TEACHER"/,
+  );
   assert.match(gradeActions, /teacherId: currentUser\.id/);
   assert.match(gradeActions, /partialEvaluationPeriods/);
   assert.match(gradeActions, /testPeriods/);

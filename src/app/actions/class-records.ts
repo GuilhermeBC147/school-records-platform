@@ -34,6 +34,10 @@ async function persistClassRecord(
     redirect("/login");
   }
 
+  if (currentUser.role !== "ADMIN" && currentUser.role !== "TEACHER") {
+    redirect("/dashboard");
+  }
+
   const classId = String(formData.get("classId") ?? "");
   const lessonId = String(formData.get("lessonId") ?? "");
   const isSubstituteRecord = String(formData.get("isSubstitute") ?? "") === "1";
