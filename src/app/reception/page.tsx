@@ -138,13 +138,15 @@ export default async function ReceptionDashboardPage() {
             <strong>Teacher availability</strong>
             <small>Daily grid by teacher and time slot.</small>
           </Link>
-          <Link
-            className="dashboard-action-card"
-            href="/reception/students-and-classes"
-          >
+          <Link className="dashboard-action-card" href="/reception/students">
             <span>Lookup</span>
-            <strong>Students and classes</strong>
-            <small>Attendance, homework, roster, teacher, and recent lessons.</small>
+            <strong>Students</strong>
+            <small>Attendance, grades, active class, and recent class context.</small>
+          </Link>
+          <Link className="dashboard-action-card" href="/reception/classes">
+            <span>Lookup</span>
+            <strong>Classes</strong>
+            <small>Roster, teacher, schedule, and recent submitted lessons.</small>
           </Link>
         </section>
 

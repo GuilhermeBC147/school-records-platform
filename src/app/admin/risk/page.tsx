@@ -14,6 +14,8 @@ export const dynamic = "force-dynamic";
 
 const RISK_THRESHOLDS = {
   incompleteHomework: 4,
+  lowOralGradeMaximum: "C",
+  lowTestTotalScore: 7,
   missedClasses: 4,
   consecutiveMissedClasses: 2,
 } as const;
@@ -33,8 +35,10 @@ type RiskRecord = {
   className: string;
   incompleteHomeworkCount: number;
   latestSignalDate: Date;
+  lowOralGradeCount: number;
+  lowTestTotalCount: number;
   missedClassCount: number;
-  recentLessonId: string;
+  recentLessonId?: string;
   studentId: string;
   studentName: string;
   teacherName: string;
@@ -47,6 +51,8 @@ type RiskResolution = {
   resolvedThroughDate: Date;
   studentId: string;
 };
+
+const lowOralGrades = new Set(["D_MINUS", "D", "D_PLUS", "C_MINUS", "C"]);
 
 function readFilterValue(value: string | undefined) {
   return value?.trim() || undefined;
@@ -100,6 +106,14 @@ function getRiskLabels(record: RiskRecord) {
 
   if (record.incompleteHomeworkCount >= RISK_THRESHOLDS.incompleteHomework) {
     labels.push(`${record.incompleteHomeworkCount} incomplete homework`);
+  }
+
+  if (record.lowTestTotalCount > 0) {
+    labels.push(`${record.lowTestTotalCount} test total below 7`);
+  }
+
+  if (record.lowOralGradeCount > 0) {
+    labels.push(`${record.lowOralGradeCount} oral grade C or below`);
   }
 
   if (record.missedClassCount >= RISK_THRESHOLDS.missedClasses) {
@@ -183,6 +197,8 @@ function summarizeRiskRecords(
           consecutiveMissedClassCount: 0,
           incompleteHomeworkCount: 0,
           latestSignalDate: lesson.lessonDate,
+          lowOralGradeCount: 0,
+          lowTestTotalCount: 0,
           missedClassCount: 0,
           recentLessonId: lesson.id,
           studentId: attendanceRecord.student.id,
@@ -237,6 +253,114 @@ function summarizeRiskRecords(
     });
 }
 
+function mergeRiskRecords(records: RiskRecord[]) {
+  const recordsByStudentClass = new Map<string, RiskRecord>();
+
+  for (const record of records) {
+    const key = `${record.classId}:${record.studentId}`;
+    const existing = recordsByStudentClass.get(key);
+
+    if (!existing) {
+      recordsByStudentClass.set(key, { ...record });
+      continue;
+    }
+
+    existing.incompleteHomeworkCount += record.incompleteHomeworkCount;
+    existing.lowOralGradeCount += record.lowOralGradeCount;
+    existing.lowTestTotalCount += record.lowTestTotalCount;
+    existing.missedClassCount += record.missedClassCount;
+    existing.consecutiveMissedClassCount = Math.max(
+      existing.consecutiveMissedClassCount,
+      record.consecutiveMissedClassCount,
+    );
+
+    if (record.latestSignalDate > existing.latestSignalDate) {
+      existing.latestSignalDate = record.latestSignalDate;
+      existing.recentLessonId = record.recentLessonId ?? existing.recentLessonId;
+    }
+  }
+
+  return Array.from(recordsByStudentClass.values())
+    .filter((record) => getRiskLabels(record).length > 0)
+    .sort((first, second) => {
+      const firstSignalCount = getRiskLabels(first).length;
+      const secondSignalCount = getRiskLabels(second).length;
+
+      if (firstSignalCount !== secondSignalCount) {
+        return secondSignalCount - firstSignalCount;
+      }
+
+      return second.latestSignalDate.getTime() - first.latestSignalDate.getTime();
+    });
+}
+
+function summarizeGradeRiskRecords(
+  testGrades: {
+    compositionScore: { toString: () => string };
+    oralGrade: string;
+    updatedAt: Date;
+    writtenTestScore: { toString: () => string };
+    class: {
+      id: string;
+      name: string;
+      teacher: {
+        name: string;
+      };
+      lessons: {
+        id: string;
+      }[];
+    };
+    student: {
+      id: string;
+      fullName: string;
+    };
+  }[],
+  resolutions: RiskResolution[],
+) {
+  const resolutionByStudentClass = new Map(
+    resolutions.map((resolution) => [
+      `${resolution.classId}:${resolution.studentId}`,
+      resolution.resolvedThroughDate,
+    ]),
+  );
+  const records: RiskRecord[] = [];
+
+  for (const grade of testGrades) {
+    const key = `${grade.class.id}:${grade.student.id}`;
+    const resolvedThroughDate = resolutionByStudentClass.get(key);
+
+    if (resolvedThroughDate && grade.updatedAt <= resolvedThroughDate) {
+      continue;
+    }
+
+    const testTotal =
+      Number(grade.compositionScore) + Number(grade.writtenTestScore);
+    const hasLowTestTotal = testTotal < RISK_THRESHOLDS.lowTestTotalScore;
+    const hasLowOral = lowOralGrades.has(grade.oralGrade);
+
+    if (!hasLowTestTotal && !hasLowOral) {
+      continue;
+    }
+
+    records.push({
+      classId: grade.class.id,
+      className: grade.class.name,
+      consecutiveMissedClassCount: 0,
+      incompleteHomeworkCount: 0,
+      latestSignalDate: grade.updatedAt,
+      lowOralGradeCount: hasLowOral ? 1 : 0,
+      lowTestTotalCount: hasLowTestTotal ? 1 : 0,
+      missedClassCount: 0,
+      recentLessonId: grade.class.lessons[0]?.id,
+      studentId: grade.student.id,
+      studentName: grade.student.fullName,
+      teacherName: grade.class.teacher.name,
+    });
+  }
+
+  return mergeRiskRecords(records);
+}
+
 function buildResolutionWhere(filters: {
   classId?: string;
   teacherId?: string;
@@ -283,7 +407,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
   const dateStart = readFilterDate(dateFrom, "start");
   const dateEnd = readFilterDate(dateTo, "end");
 
-  const [classes, teachers, lessons, resolutions] = await Promise.all([
+  const [classes, teachers, lessons, testGrades, resolutions] = await Promise.all([
     prisma.class.findMany({
       orderBy: { name: "asc" },
       select: {
@@ -352,6 +476,52 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
         },
       },
     }),
+    prisma.testGrade.findMany({
+      where: {
+        student: { isActive: true },
+        ...(classId ? { classId } : {}),
+        ...(teacherId ? { class: { teacherId } } : {}),
+        ...(dateStart || dateEnd
+          ? {
+              updatedAt: {
+                ...(dateStart ? { gte: dateStart } : {}),
+                ...(dateEnd ? { lt: dateEnd } : {}),
+              },
+            }
+          : {}),
+      },
+      select: {
+        compositionScore: true,
+        oralGrade: true,
+        updatedAt: true,
+        writtenTestScore: true,
+        class: {
+          select: {
+            id: true,
+            name: true,
+            teacher: {
+              select: {
+                name: true,
+              },
+            },
+            lessons: {
+              orderBy: [{ lessonDate: "desc" }, { updatedAt: "desc" }],
+              take: 1,
+              where: { status: "SUBMITTED" },
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+        student: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
+      },
+    }),
     prisma.$queryRaw<RiskResolution[]>`
       SELECT
         resolution."classId",
@@ -363,7 +533,10 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
     `,
   ]);
 
-  const unresolvedRiskRecords = summarizeRiskRecords(lessons, resolutions);
+  const unresolvedRiskRecords = mergeRiskRecords([
+    ...summarizeRiskRecords(lessons, resolutions),
+    ...summarizeGradeRiskRecords(testGrades, resolutions),
+  ]);
   const resolutionByStudentClass = new Map(
     resolutions.map((resolution) => [
       `${resolution.classId}:${resolution.studentId}`,
@@ -372,7 +545,10 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
   );
   const resolvedRiskRecords: RiskRecord[] = [];
 
-  for (const record of summarizeRiskRecords(lessons, [])) {
+  for (const record of mergeRiskRecords([
+    ...summarizeRiskRecords(lessons, []),
+    ...summarizeGradeRiskRecords(testGrades, []),
+  ])) {
     const resolvedThroughDate = resolutionByStudentClass.get(
       `${record.classId}:${record.studentId}`,
     );
@@ -434,6 +610,10 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
             <article className="metric">
               <span>{RISK_THRESHOLDS.incompleteHomework}</span>
               <strong>Homework threshold</strong>
+            </article>
+            <article className="metric">
+              <span>{"< 7"}</span>
+              <strong>Test total threshold</strong>
             </article>
             <article className="metric">
               <span>{RISK_THRESHOLDS.missedClasses}</span>
@@ -546,12 +726,14 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                         >
                           Records
                         </Link>
-                        <Link
-                          className="text-link compact-link"
-                          href={`/admin/records/${record.recentLessonId}`}
-                        >
-                          Latest
-                        </Link>
+                        {record.recentLessonId ? (
+                          <Link
+                            className="text-link compact-link"
+                            href={`/admin/records/${record.recentLessonId}`}
+                          >
+                            Latest
+                          </Link>
+                        ) : null}
                         {"resolvedThroughDate" in record &&
                         record.resolvedThroughDate ? (
                           <form action={undoRiskResolutionAction}>
@@ -644,7 +826,9 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
           <p className="muted-copy">
             The report flags active students with at least{" "}
             {RISK_THRESHOLDS.incompleteHomework} incomplete homework records, at
-            least {RISK_THRESHOLDS.missedClasses} absent records, or{" "}
+            least {RISK_THRESHOLDS.missedClasses} absent records, test totals
+            below {RISK_THRESHOLDS.lowTestTotalScore}, oral grades of{" "}
+            {RISK_THRESHOLDS.lowOralGradeMaximum} or below, or{" "}
             {RISK_THRESHOLDS.consecutiveMissedClasses} or more absent records in
             a row. Resolving a row clears signals through the latest signal date;
             future submitted records can flag the student again. Excused

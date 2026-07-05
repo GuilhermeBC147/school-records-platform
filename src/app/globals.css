@@ -752,7 +752,7 @@ input[type="time"],
 }
 
 .risk-metrics {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 .risk-signal-list {
@@ -954,6 +954,139 @@ input[type="time"],
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.student-profile-grid {
+  margin-top: 18px;
+}
+
+.student-profile-summary {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin: 0 0 18px;
+}
+
+.student-profile-summary .metric span {
+  font-size: clamp(22px, 3vw, 32px);
+}
+
+.student-profile-section {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  padding-top: 18px;
+}
+
+.student-profile-section h3,
+.student-grade-group h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.student-class-card-list,
+.student-grade-card-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.student-class-card,
+.student-grade-card,
+.student-test-card,
+.student-event-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+}
+
+.student-class-card strong,
+.student-event-row strong {
+  color: var(--brand);
+  font-size: 15px;
+}
+
+.student-class-card span,
+.student-class-card small,
+.student-event-row span,
+.student-event-row small,
+.student-grade-card span,
+.student-test-card span,
+.student-test-card small {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.student-event-list,
+.student-grade-cards,
+.student-grade-group {
+  display: grid;
+  gap: 14px;
+}
+
+.student-grade-cards {
+  margin-top: 16px;
+}
+
+.student-grade-card strong,
+.student-test-card strong {
+  color: var(--brand);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.student-test-card {
+  align-items: stretch;
+  grid-template-columns: minmax(110px, 0.25fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.student-test-total {
+  border: 1px solid var(--brand-line);
+  border-right: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--brand-soft);
+  display: grid;
+  gap: 5px;
+  place-items: center;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.student-test-total strong {
+  color: var(--brand);
+  font-size: 34px;
+  line-height: 1;
+}
+
+.student-test-breakdown {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.student-score-item {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.student-score-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.student-score-item strong {
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .data-panel {
   min-width: 0;
 }
@@ -1101,6 +1234,15 @@ th {
 
   .bonus-calendar-event {
     grid-template-columns: 1fr;
+  }
+
+  .student-test-card,
+  .student-test-breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .student-test-total {
+    border-right: 1px solid var(--brand-line);
   }
 
   h1 {
