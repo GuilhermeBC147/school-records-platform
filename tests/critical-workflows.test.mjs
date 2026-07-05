@@ -122,11 +122,10 @@ test("date filters display account format while submitting ISO dates", async () 
   assert.match(dateFormat, /parseDateInputToIso/);
   assert.match(dateFormat, /formatIsoDateInput/);
   assert.match(dateInput, /"use client"/);
-  assert.match(dateInput, /type="hidden"/);
   assert.match(dateInput, /type="date"/);
-  assert.match(dateInput, /date-picker-input/);
   assert.match(dateInput, /name=\{name\}/);
-  assert.match(dateInput, /parseDateInputToIso\(displayValue, dateFormat\)/);
+  assert.match(dateInput, /defaultValue=\{submittedIsoValue\}/);
+  assert.match(dateInput, /parseDateInputToIso/);
 
   for (const source of [
     adminRecordsPage,
