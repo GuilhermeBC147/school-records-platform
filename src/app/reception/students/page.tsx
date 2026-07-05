@@ -41,15 +41,7 @@ export default async function ReceptionStudentsPage({
     take: 60,
     select: { id: true, fullName: true },
   });
-  const selectedStudentId =
-    query.studentId ??
-    (studentSearch
-      ? students.find(
-          (student) =>
-            student.fullName.toLocaleLowerCase() ===
-            studentSearch.toLocaleLowerCase(),
-        )?.id
-      : undefined);
+  const selectedStudentId = query.studentId;
 
   return (
     <main className="app-shell">
@@ -114,35 +106,34 @@ export default async function ReceptionStudentsPage({
           </form>
         </section>
 
-        {studentSearch && students.length > 0 ? (
-          <section className="panel data-panel" aria-label="Student results">
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Student</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id}>
-                      <td>{student.fullName}</td>
-                      <td>
-                        <Link
-                          className="text-link compact-link"
-                          href={`/reception/students?studentId=${student.id}`}
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <section className="panel data-panel" aria-labelledby="student-results-title">
+          <div className="section-heading-row">
+            <div>
+              <h2 id="student-results-title">Student results</h2>
+              <p className="muted-copy">
+                {students.length} active {students.length === 1 ? "student" : "students"} found.
+              </p>
             </div>
-          </section>
-        ) : null}
+          </div>
+          <div className="student-result-grid">
+            {students.map((student) => (
+              <Link
+                className={`student-result-card${
+                  selectedStudentId === student.id ? " selected" : ""
+                }`}
+                href={`/reception/students?studentId=${student.id}`}
+                key={student.id}
+              >
+                <span>Student</span>
+                <strong>{student.fullName}</strong>
+                <small>View class, attendance, and grade details</small>
+              </Link>
+            ))}
+            {students.length === 0 ? (
+              <p className="muted-copy">No active students match the current filters.</p>
+            ) : null}
+          </div>
+        </section>
 
         {selectedStudentId ? (
           <StudentProfilePanel

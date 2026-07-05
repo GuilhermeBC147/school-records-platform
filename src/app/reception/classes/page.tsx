@@ -100,7 +100,7 @@ export default async function ReceptionClassesPage({
           orderBy: { student: { fullName: "asc" } },
           select: {
             id: true,
-            student: { select: { fullName: true } },
+            student: { select: { fullName: true, id: true } },
           },
         },
         lessons: {
@@ -296,9 +296,14 @@ export default async function ReceptionClassesPage({
                 <h2>Roster</h2>
                 <div className="student-event-list">
                   {selectedClass.enrollments.map((enrollment) => (
-                    <article className="student-event-row" key={enrollment.id}>
+                    <Link
+                      className="student-event-row linked"
+                      href={`/reception/students?studentId=${enrollment.student.id}`}
+                      key={enrollment.id}
+                    >
                       <strong>{enrollment.student.fullName}</strong>
-                    </article>
+                      <small>View student details</small>
+                    </Link>
                   ))}
                   {selectedClass.enrollments.length === 0 ? (
                     <p className="muted-copy">No active students.</p>

@@ -470,7 +470,11 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionStudentsPage, /Students/);
   assert.match(receptionStudentsPage, /studentSearch/);
   assert.match(receptionStudentsPage, /datalist id="reception-students"/);
+  assert.match(receptionStudentsPage, /Student results/);
+  assert.match(receptionStudentsPage, /student-result-card/);
+  assert.match(receptionStudentsPage, /const selectedStudentId = query\.studentId/);
   assert.doesNotMatch(receptionStudentsPage, /name="studentId">\s*<option value="">Choose a student/s);
+  assert.doesNotMatch(receptionStudentsPage, /studentSearch\s*\?\s*students\.find/s);
   assert.match(receptionStudentsPage, /StudentProfilePanel/);
   assert.match(receptionStudentsPage, /studentId=\$\{student\.id\}/);
   assert.match(studentProfilePanel, /absentLessons/);
@@ -487,6 +491,8 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionClassesPage, /class-result-card/);
   assert.match(receptionClassesPage, /classes\.length} active/);
   assert.match(receptionClassesPage, /buildClassHref/);
+  assert.match(receptionClassesPage, /student:\s*{\s*select:\s*{\s*fullName: true,\s*id: true/s);
+  assert.match(receptionClassesPage, /\/reception\/students\?studentId=\$\{enrollment\.student\.id\}/);
   assert.doesNotMatch(receptionClassesPage, /classSearch && classes\.length/);
   assert.doesNotMatch(receptionClassesPage, /Choose a class/);
   assert.match(receptionClassesPage, /Recent lessons/);
