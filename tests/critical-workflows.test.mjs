@@ -96,7 +96,6 @@ test("date filters display account format while submitting ISO dates", async () 
   const prismaClient = await readProjectFile("src/lib/prisma.ts");
   const session = await readProjectFile("src/lib/session.ts");
   const adminRecordsPage = await readProjectFile("src/app/admin/records/page.tsx");
-  const adminWorkPage = await readProjectFile("src/app/admin/work-summary/page.tsx");
   const classRecordPage = await readProjectFile(
     "src/app/dashboard/classes/[classId]/record/page.tsx",
   );
@@ -122,14 +121,15 @@ test("date filters display account format while submitting ISO dates", async () 
   assert.match(dateFormat, /parseDateInputToIso/);
   assert.match(dateFormat, /formatIsoDateInput/);
   assert.match(dateInput, /"use client"/);
+  assert.match(dateInput, /type="text"/);
+  assert.match(dateInput, /type="hidden"/);
   assert.match(dateInput, /type="date"/);
+  assert.match(dateInput, /date-calendar-input/);
   assert.match(dateInput, /name=\{name\}/);
-  assert.match(dateInput, /defaultValue=\{submittedIsoValue\}/);
-  assert.match(dateInput, /parseDateInputToIso/);
+  assert.match(dateInput, /parseDateInputToIso\(displayValue, dateFormat\)/);
 
   for (const source of [
     adminRecordsPage,
-    adminWorkPage,
     classRecordPage,
     newActivityPage,
     riskPage,
@@ -361,6 +361,12 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const durationInput = await readProjectFile(
     "src/app/components/duration-input.tsx",
   );
+  const adminActivityPage = await readProjectFile(
+    "src/app/admin/work-summary/new-activity/page.tsx",
+  );
+  const adminMeetingPage = await readProjectFile(
+    "src/app/admin/work-summary/new-meeting/page.tsx",
+  );
   const teacherWorkPage = await readProjectFile("src/app/dashboard/work/page.tsx");
   const newActivityPage = await readProjectFile(
     "src/app/dashboard/work/new/page.tsx",
@@ -371,6 +377,9 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const migration = await readProjectFile(
     "prisma/migrations/20260704140000_add_teacher_work_logs/migration.sql",
   );
+  const studentMigration = await readProjectFile(
+    "prisma/migrations/20260705160000_add_teacher_work_log_students/migration.sql",
+  );
 
   assert.match(schema, /enum TeacherWorkCategory/);
   assert.match(schema, /BONUS_CLASS/);
@@ -380,15 +389,24 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(schema, /subject\s+String\?/);
   assert.match(schema, /teacherId\s+String/);
   assert.match(schema, /createdById\s+String/);
+  assert.match(schema, /model TeacherWorkLogStudent/);
+  assert.match(schema, /students\s+TeacherWorkLogStudent\[\]/);
+  assert.match(schema, /teacherWorkLogs\s+TeacherWorkLogStudent\[\]/);
   assert.match(schema, /@@index\(\[teacherId, workDate\]\)/);
   assert.match(migration, /TeacherWorkLog_durationMinutes_check/);
+  assert.match(studentMigration, /CREATE TABLE "TeacherWorkLogStudent"/);
+  assert.match(studentMigration, /teacherWorkLogId_studentId/);
   assert.match(workLib, /getTeacherWorkSummary/);
   assert.match(workLib, /status: "SUBMITTED"/);
   assert.match(workLib, /durationMinutes/);
+  assert.match(workLib, /students:\s*{/);
   assert.match(workActions, /createTeacherWorkLogAction/);
   assert.match(workActions, /createTeacherMeetingAction/);
   assert.match(workActions, /readOptionalStartTime/);
   assert.match(workActions, /readDurationInputMinutes/);
+  assert.match(workActions, /readSelectedStudentIds/);
+  assert.match(workActions, /selectedStudentIds/);
+  assert.match(workActions, /studentId/);
   assert.match(workActions, /category === "BONUS_CLASS" && !subject/);
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
@@ -401,6 +419,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(newActivityPage, /name="subject"/);
   assert.match(newActivityPage, /TimeInput/);
   assert.match(newActivityPage, /DurationInput/);
+  assert.match(newActivityPage, /RosterPicker/);
   assert.doesNotMatch(newActivityPage, /type="time"/);
   assert.doesNotMatch(newActivityPage, /type="number"/);
   assert.match(newActivityPage, /teacherWorkCategories/);
@@ -412,17 +431,23 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(durationInput, /name=\{name\}/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
   assert.match(teacherWorkPage, /formatDuration/);
+  assert.match(teacherWorkPage, /workLog\.students/);
   assert.match(adminWorkPage, /Teacher work summaries/);
   assert.match(adminWorkPage, /getTeacherWorkSummary/);
-  assert.match(adminWorkPage, /createTeacherMeetingAction/);
-  assert.match(adminWorkPage, /TimeInput/);
-  assert.match(adminWorkPage, /DurationInput/);
+  assert.doesNotMatch(adminWorkPage, /createTeacherWorkLogAction/);
+  assert.doesNotMatch(adminWorkPage, /createTeacherMeetingAction/);
+  assert.match(adminWorkPage, /workLog\.students/);
+  assert.match(adminActivityPage, /createTeacherWorkLogAction/);
+  assert.match(adminActivityPage, /RosterPicker/);
+  assert.match(adminMeetingPage, /createTeacherMeetingAction/);
   assert.doesNotMatch(adminWorkPage, /type="time"/);
   assert.doesNotMatch(adminWorkPage, /type="number"/);
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
   assert.match(dashboardPage, /\/dashboard\/work\/new/);
   assert.match(dashboardPage, /\/admin\/work-summary/);
+  assert.match(dashboardPage, /\/admin\/work-summary\/new-activity/);
+  assert.match(dashboardPage, /\/admin\/work-summary\/new-meeting/);
   assert.match(dataModelDoc, /Teacher Work Summaries/);
   assert.match(dataModelDoc, /class's assigned teacher/);
 });

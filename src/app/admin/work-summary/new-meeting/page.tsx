@@ -1,38 +1,32 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
+import { createTeacherMeetingAction } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
-import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import { prisma } from "@/lib/prisma";
-import { teacherWorkCategories } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewTeacherActivityPage() {
+export default async function NewAdminMeetingPage() {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
     redirect("/login");
   }
 
-  if (currentUser.role !== "TEACHER") {
-    redirect("/admin/work-summary");
+  if (currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 
-  const teacherCreatedCategories = teacherWorkCategories.filter(
-    (category) => category.value !== "MEETING",
-  );
-  const students = await prisma.student.findMany({
-    orderBy: { fullName: "asc" },
-    where: { isActive: true },
+  const teachers = await prisma.user.findMany({
+    orderBy: { name: "asc" },
+    where: { isActive: true, role: "TEACHER" },
     select: {
-      fullName: true,
       id: true,
-      isActive: true,
+      name: true,
     },
   });
 
@@ -53,42 +47,33 @@ export default async function NewTeacherActivityPage() {
       </header>
 
       <div className="main data-page">
-        <section className="intro" aria-labelledby="activity-title">
+        <section className="intro" aria-labelledby="admin-meeting-title">
           <Link className="text-link" href="/dashboard">
             Back to dashboard
           </Link>
-          <p className="eyebrow">Teacher work</p>
-          <h1 id="activity-title">Add event</h1>
+          <p className="eyebrow">Admin work</p>
+          <h1 id="admin-meeting-title">Create meeting</h1>
           <p className="lede">
-            Record bonus classes, extra activities, or other paid work that
-            should be counted in your monthly summary.
+            Count one meeting toward each selected teacher's monthly hours.
           </p>
         </section>
 
-        <section className="panel data-panel" aria-label="Activity form">
-          <form action={createTeacherWorkLogAction} className="admin-form">
-            <input name="redirectTo" type="hidden" value="/dashboard/work" />
+        <section className="panel data-panel" aria-label="Meeting form">
+          <form action={createTeacherMeetingAction} className="admin-form">
             <label>
-              <span>Category</span>
-              <select name="category" required>
-                {teacherCreatedCategories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
+              <span>Teachers</span>
+              <div className="roster-list compact-roster-list">
+                {teachers.map((teacher) => (
+                  <label className="checkbox-label roster-student" key={teacher.id}>
+                    <input name="teacherIds" type="checkbox" value={teacher.id} />
+                    <span>{teacher.name}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </label>
             <label>
               <span>Title</span>
               <input name="title" required type="text" />
-            </label>
-            <label>
-              <span>Subject</span>
-              <input
-                name="subject"
-                placeholder="Required for bonus classes"
-                type="text"
-              />
             </label>
             <label>
               <span>Date</span>
@@ -106,23 +91,16 @@ export default async function NewTeacherActivityPage() {
               <span>Duration</span>
               <DurationInput name="durationMinutes" required />
             </label>
-            <div>
-              <span className="form-section-label">Students</span>
-              <RosterPicker
-                emptyMessage="No active students yet."
-                students={students}
-              />
-            </div>
             <label>
               <span>Notes</span>
               <textarea name="notes" rows={3} />
             </label>
             <div className="record-actions">
-              <Link className="text-link" href="/dashboard/work">
-                View summary
+              <Link className="text-link" href="/admin/work-summary">
+                Cancel
               </Link>
               <button className="primary-button" type="submit">
-                Save activity
+                Save meeting
               </button>
             </div>
           </form>

@@ -1,13 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  createTeacherMeetingAction,
-  createTeacherWorkLogAction,
-} from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
-import { DateInput } from "@/app/components/date-input";
-import { DurationInput } from "@/app/components/duration-input";
-import { TimeInput } from "@/app/components/time-input";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
@@ -17,7 +10,6 @@ import {
   formatTeacherWorkCategory,
   getTeacherWorkSummary,
   readMonth,
-  teacherWorkCategories,
 } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
 
@@ -194,6 +186,7 @@ export default async function AdminWorkSummaryPage({
                   <th>Date</th>
                   <th>Description</th>
                   <th>Subject</th>
+                  <th>Students</th>
                   <th>Duration</th>
                   <th>Created by</th>
                     </tr>
@@ -213,6 +206,7 @@ export default async function AdminWorkSummaryPage({
                           {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
                         <td>-</td>
+                        <td>-</td>
                         <td>{formatDuration(lesson.class.durationMinutes)}</td>
                         <td>Class record</td>
                       </tr>
@@ -231,6 +225,7 @@ export default async function AdminWorkSummaryPage({
                           {formatStartTime(bonusClass.startTime)}
                         </td>
                         <td>{bonusClass.subject}</td>
+                        <td>{bonusClass.student.fullName}</td>
                         <td>{formatDuration(bonusClass.durationMinutes)}</td>
                         <td>Reception schedule</td>
                       </tr>
@@ -243,6 +238,13 @@ export default async function AdminWorkSummaryPage({
                         </td>
                         <td>{workLog.title}</td>
                         <td>{workLog.subject ?? "-"}</td>
+                        <td>
+                          {workLog.students.length > 0
+                            ? workLog.students
+                                .map((item) => item.student.fullName)
+                                .join(", ")
+                            : "-"}
+                        </td>
                         <td>{formatDuration(workLog.durationMinutes)}</td>
                         <td>{workLog.createdBy.name}</td>
                       </tr>
@@ -257,6 +259,7 @@ export default async function AdminWorkSummaryPage({
                           {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
                         <td>-</td>
+                        <td>-</td>
                         <td>{formatDuration(lesson.class.durationMinutes)}</td>
                         <td>Pending admin approval</td>
                       </tr>
@@ -267,7 +270,7 @@ export default async function AdminWorkSummaryPage({
                       summary.pendingSubstituteLessons.length ===
                     0 ? (
                       <tr>
-                        <td colSpan={6}>No counted work for this month.</td>
+                        <td colSpan={7}>No counted work for this month.</td>
                       </tr>
                     ) : null}
                   </tbody>
@@ -277,120 +280,6 @@ export default async function AdminWorkSummaryPage({
           ))}
         </section>
 
-        <section className="panel data-panel" aria-labelledby="admin-activity-title">
-          <h2 id="admin-activity-title">Add activity for a teacher</h2>
-          <form action={createTeacherWorkLogAction} className="admin-form">
-            <input name="redirectTo" type="hidden" value="/admin/work-summary" />
-            <label>
-              <span>Teacher</span>
-              <select name="teacherId" required>
-                <option value="">Choose a teacher</option>
-                {teachers
-                  .filter((teacher) => teacher.isActive)
-                  .map((teacher) => (
-                    <option key={teacher.id} value={teacher.id}>
-                      {teacher.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label>
-              <span>Category</span>
-              <select name="category" required>
-                {teacherWorkCategories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Title</span>
-              <input name="title" required type="text" />
-            </label>
-            <label>
-              <span>Subject</span>
-              <input
-                name="subject"
-                placeholder="Required for bonus classes"
-                type="text"
-              />
-            </label>
-            <label>
-              <span>Date</span>
-              <DateInput
-                dateFormat={currentUser.dateFormat}
-                name="workDate"
-                required
-              />
-            </label>
-            <label>
-              <span>Start time</span>
-              <TimeInput name="startTime" />
-            </label>
-            <label>
-              <span>Duration</span>
-              <DurationInput name="durationMinutes" required />
-            </label>
-            <label>
-              <span>Notes</span>
-              <textarea name="notes" rows={3} />
-            </label>
-            <div className="record-actions">
-              <button className="primary-button" type="submit">
-                Save activity
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <section className="panel data-panel" aria-labelledby="admin-meeting-title">
-          <h2 id="admin-meeting-title">Create meeting</h2>
-          <form action={createTeacherMeetingAction} className="admin-form">
-            <label>
-              <span>Teachers</span>
-              <div className="roster-list compact-roster-list">
-                {teachers
-                  .filter((teacher) => teacher.isActive)
-                  .map((teacher) => (
-                    <label className="checkbox-label roster-student" key={teacher.id}>
-                      <input name="teacherIds" type="checkbox" value={teacher.id} />
-                      <span>{teacher.name}</span>
-                    </label>
-                  ))}
-              </div>
-            </label>
-            <label>
-              <span>Title</span>
-              <input name="title" required type="text" />
-            </label>
-            <label>
-              <span>Date</span>
-              <DateInput
-                dateFormat={currentUser.dateFormat}
-                name="workDate"
-                required
-              />
-            </label>
-            <label>
-              <span>Start time</span>
-              <TimeInput name="startTime" />
-            </label>
-            <label>
-              <span>Duration</span>
-              <DurationInput name="durationMinutes" required />
-            </label>
-            <label>
-              <span>Notes</span>
-              <textarea name="notes" rows={3} />
-            </label>
-            <div className="record-actions">
-              <button className="primary-button" type="submit">
-                Save meeting
-              </button>
-            </div>
-          </form>
-        </section>
       </div>
     </main>
   );

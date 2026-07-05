@@ -220,6 +220,7 @@ export default async function TeacherWorkPage({
                     <th>Category</th>
                     <th>Title</th>
                     <th>Subject</th>
+                    <th>Students</th>
                     <th>Duration</th>
                   </tr>
                 </thead>
@@ -232,12 +233,19 @@ export default async function TeacherWorkPage({
                       <td>{formatTeacherWorkCategory(workLog.category)}</td>
                       <td>{workLog.title}</td>
                       <td>{workLog.subject ?? "-"}</td>
+                      <td>
+                        {workLog.students.length > 0
+                          ? workLog.students
+                              .map((item) => item.student.fullName)
+                              .join(", ")
+                          : "-"}
+                      </td>
                       <td>{formatDuration(workLog.durationMinutes)}</td>
                     </tr>
                   ))}
                   {summary.workLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={5}>No paid activities this month.</td>
+                      <td colSpan={6}>No paid activities this month.</td>
                     </tr>
                   ) : null}
                 </tbody>

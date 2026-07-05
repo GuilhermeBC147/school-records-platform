@@ -177,6 +177,7 @@ model Student {
   partialEvaluationGrades PartialEvaluationGrade[]
   riskResolutions         StudentRiskResolution[]
   testGrades              TestGrade[]
+  teacherWorkLogs         TeacherWorkLogStudent[]
 }
 
 model StudentRiskResolution {
@@ -262,9 +263,23 @@ model TeacherWorkLog {
   teacher     User   @relation("TeacherWorkLogs", fields: [teacherId], references: [id])
   createdById String
   createdBy   User   @relation("CreatedTeacherWorkLogs", fields: [createdById], references: [id])
+  students    TeacherWorkLogStudent[]
 
   @@index([teacherId, workDate])
   @@index([createdById])
+}
+
+model TeacherWorkLogStudent {
+  id               String         @id @default(cuid())
+  createdAt        DateTime       @default(now())
+
+  teacherWorkLogId String
+  teacherWorkLog   TeacherWorkLog @relation(fields: [teacherWorkLogId], references: [id], onDelete: Cascade)
+  studentId        String
+  student          Student        @relation(fields: [studentId], references: [id])
+
+  @@unique([teacherWorkLogId, studentId])
+  @@index([studentId])
 }
 
 model BonusClass {

@@ -7,34 +7,41 @@ import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import { prisma } from "@/lib/prisma";
-import { teacherWorkCategories } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
+import { teacherWorkCategories } from "@/lib/teacher-work";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewTeacherActivityPage() {
+export default async function NewAdminActivityPage() {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
     redirect("/login");
   }
 
-  if (currentUser.role !== "TEACHER") {
-    redirect("/admin/work-summary");
+  if (currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 
-  const teacherCreatedCategories = teacherWorkCategories.filter(
-    (category) => category.value !== "MEETING",
-  );
-  const students = await prisma.student.findMany({
-    orderBy: { fullName: "asc" },
-    where: { isActive: true },
-    select: {
-      fullName: true,
-      id: true,
-      isActive: true,
-    },
-  });
+  const [teachers, students] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { name: "asc" },
+      where: { isActive: true, role: "TEACHER" },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+    prisma.student.findMany({
+      orderBy: { fullName: "asc" },
+      where: { isActive: true },
+      select: {
+        fullName: true,
+        id: true,
+        isActive: true,
+      },
+    }),
+  ]);
 
   return (
     <main className="app-shell">
@@ -53,25 +60,36 @@ export default async function NewTeacherActivityPage() {
       </header>
 
       <div className="main data-page">
-        <section className="intro" aria-labelledby="activity-title">
+        <section className="intro" aria-labelledby="admin-activity-title">
           <Link className="text-link" href="/dashboard">
             Back to dashboard
           </Link>
-          <p className="eyebrow">Teacher work</p>
-          <h1 id="activity-title">Add event</h1>
+          <p className="eyebrow">Admin work</p>
+          <h1 id="admin-activity-title">Add activity</h1>
           <p className="lede">
-            Record bonus classes, extra activities, or other paid work that
-            should be counted in your monthly summary.
+            Record a paid activity for one teacher and optionally connect it to
+            one or more students.
           </p>
         </section>
 
         <section className="panel data-panel" aria-label="Activity form">
           <form action={createTeacherWorkLogAction} className="admin-form">
-            <input name="redirectTo" type="hidden" value="/dashboard/work" />
+            <input name="redirectTo" type="hidden" value="/admin/work-summary" />
+            <label>
+              <span>Teacher</span>
+              <select name="teacherId" required>
+                <option value="">Choose a teacher</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.name}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label>
               <span>Category</span>
               <select name="category" required>
-                {teacherCreatedCategories.map((category) => (
+                {teacherWorkCategories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
@@ -118,8 +136,8 @@ export default async function NewTeacherActivityPage() {
               <textarea name="notes" rows={3} />
             </label>
             <div className="record-actions">
-              <Link className="text-link" href="/dashboard/work">
-                View summary
+              <Link className="text-link" href="/admin/work-summary">
+                Cancel
               </Link>
               <button className="primary-button" type="submit">
                 Save activity
