@@ -138,6 +138,7 @@ export default async function ReceptionStudentsPage({
         {selectedStudentId ? (
           <StudentProfilePanel
             basePath="/reception/students"
+            dateFormat={currentUser.dateFormat}
             selectedClassId={query.gradeClassId}
             studentId={selectedStudentId}
           />

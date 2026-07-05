@@ -31,6 +31,7 @@ test("class record submission protects duplicate and unauthorized writes", async
   const action = await readProjectFile("src/app/actions/class-records.ts");
 
   assert.match(action, /getCurrentUser/);
+  assert.match(action, /readIsoDate/);
   assert.match(action, /redirect\("\/login"\)/);
   assert.match(action, /teacherId: currentUser\.id/);
   assert.match(action, /lessonName/);
@@ -48,11 +49,14 @@ test("admin records and export routes require admin sessions", async () => {
   const exportRoute = await readProjectFile(
     "src/app/admin/records/export/route.ts",
   );
+  const dateFormat = await readProjectFile("src/lib/date-format.ts");
 
   for (const source of [listPage, detailPage, exportRoute]) {
     assert.match(source, /getCurrentUser/);
     assert.match(source, /currentUser\.role !== "ADMIN"/);
   }
+  assert.match(dateFormat, /hour12:\s*false/);
+  assert.match(dateFormat, /hourCycle:\s*"h23"/);
 });
 
 test("account management supports reset tokens and admin staff setup", async () => {
@@ -61,22 +65,82 @@ test("account management supports reset tokens and admin staff setup", async () 
   const accountsPage = await readProjectFile(
     "src/app/admin/manage-accounts/page.tsx",
   );
+  const accountPage = await readProjectFile("src/app/dashboard/account/page.tsx");
   const newAccountPage = await readProjectFile(
     "src/app/admin/manage-accounts/new/page.tsx",
   );
 
+  assert.match(schema, /enum AccountDateFormat/);
+  assert.match(schema, /dateFormat\s+AccountDateFormat\s+@default\(DD_MM_YY\)/);
   assert.match(schema, /model PasswordResetToken/);
   assert.match(schema, /tokenHash\s+String\s+@unique/);
   assert.match(accountActions, /requestPasswordResetAction/);
   assert.match(accountActions, /resetPasswordAction/);
+  assert.match(accountActions, /updateOwnDateFormatAction/);
+  assert.match(accountActions, /normalizeAccountDateFormat/);
   assert.match(accountActions, /createAccountAction/);
   assert.match(accountActions, /updateAccountAction/);
   assert.match(accountActions, /role !== "TEACHER" && role !== "RECEPTION"/);
   assert.match(accountActions, /isActive/);
+  assert.match(accountPage, /accountDateFormatOptions/);
+  assert.match(accountPage, /name="dateFormat"/);
   assert.match(accountsPage, /Manage accounts/);
   assert.match(accountsPage, /formatAccountRole/);
   assert.match(newAccountPage, /Create account/);
   assert.match(newAccountPage, /value="RECEPTION"/);
+});
+
+test("date filters display account format while submitting ISO dates", async () => {
+  const dateFormat = await readProjectFile("src/lib/date-format.ts");
+  const dateInput = await readProjectFile("src/app/components/date-input.tsx");
+  const prismaClient = await readProjectFile("src/lib/prisma.ts");
+  const session = await readProjectFile("src/lib/session.ts");
+  const adminRecordsPage = await readProjectFile("src/app/admin/records/page.tsx");
+  const adminWorkPage = await readProjectFile("src/app/admin/work-summary/page.tsx");
+  const classRecordPage = await readProjectFile(
+    "src/app/dashboard/classes/[classId]/record/page.tsx",
+  );
+  const newActivityPage = await readProjectFile(
+    "src/app/dashboard/work/new/page.tsx",
+  );
+  const riskPage = await readProjectFile("src/app/admin/risk/page.tsx");
+  const teacherBonusPage = await readProjectFile(
+    "src/app/dashboard/bonus-classes/page.tsx",
+  );
+  const receptionBonusPage = await readProjectFile(
+    "src/app/reception/bonus-classes/page.tsx",
+  );
+  const receptionEditPage = await readProjectFile(
+    "src/app/reception/bonus-classes/[bonusClassId]/page.tsx",
+  );
+  const receptionCalendarPage = await readProjectFile(
+    "src/app/reception/calendar/page.tsx",
+  );
+
+  assert.match(session, /dateFormat: true/);
+  assert.match(prismaClient, /add_account_date_format_client_refresh/);
+  assert.match(dateFormat, /parseDateInputToIso/);
+  assert.match(dateFormat, /formatIsoDateInput/);
+  assert.match(dateInput, /"use client"/);
+  assert.match(dateInput, /type="hidden"/);
+  assert.match(dateInput, /name=\{name\}/);
+  assert.match(dateInput, /parseDateInputToIso\(displayValue, dateFormat\)/);
+
+  for (const source of [
+    adminRecordsPage,
+    adminWorkPage,
+    classRecordPage,
+    newActivityPage,
+    riskPage,
+    teacherBonusPage,
+    receptionBonusPage,
+    receptionEditPage,
+    receptionCalendarPage,
+  ]) {
+    assert.match(source, /DateInput/);
+    assert.match(source, /dateFormat=\{currentUser\.dateFormat\}/);
+    assert.doesNotMatch(source, /type="date"/);
+  }
 });
 
 test("class management supports metadata and active teacher assignment", async () => {

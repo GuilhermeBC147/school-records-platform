@@ -5,6 +5,7 @@ import {
   createBonusClassAction,
 } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
+import { DateInput } from "@/app/components/date-input";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
@@ -161,7 +162,11 @@ export default async function ReceptionBonusClassesPage({
             </label>
             <label>
               <span>Date</span>
-              <input name="scheduledDate" required type="date" />
+              <DateInput
+                dateFormat={currentUser.dateFormat}
+                name="scheduledDate"
+                required
+              />
             </label>
             <label>
               <span>Start time</span>

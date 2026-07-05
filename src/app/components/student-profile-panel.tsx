@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
-import { formatShortDate } from "@/lib/date-format";
+import {
+  AccountDateFormat,
+  defaultAccountDateFormat,
+  formatShortDate,
+} from "@/lib/date-format";
 import {
   formatGradeLabel,
   partialEvaluationPeriods,
@@ -10,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 
 type StudentProfilePanelProps = {
   basePath: string;
+  dateFormat?: AccountDateFormat;
   selectedClassId?: string;
   studentId: string;
 };
@@ -20,8 +25,11 @@ type LessonSummary = {
   name: string | null;
 };
 
-function lessonLabel(lesson: LessonSummary) {
-  return `${formatShortDate(lesson.lessonDate)} | ${
+function lessonLabel(
+  lesson: LessonSummary,
+  dateFormat: AccountDateFormat = defaultAccountDateFormat,
+) {
+  return `${formatShortDate(lesson.lessonDate, dateFormat)} | ${
     lesson.name ?? "Untitled lesson"
   }`;
 }
@@ -65,6 +73,7 @@ function findTestGrade<
 
 export async function StudentProfilePanel({
   basePath,
+  dateFormat = defaultAccountDateFormat,
   selectedClassId,
   studentId,
 }: StudentProfilePanelProps) {
@@ -173,7 +182,11 @@ export async function StudentProfilePanel({
           <strong>Absences</strong>
         </article>
         <article className="metric">
-          <span>{latestActiveClassLesson ? formatShortDate(latestActiveClassLesson.lessonDate) : "-"}</span>
+          <span>
+            {latestActiveClassLesson
+              ? formatShortDate(latestActiveClassLesson.lessonDate, dateFormat)
+              : "-"}
+          </span>
           <strong>Last class lesson</strong>
         </article>
       </div>
@@ -193,7 +206,8 @@ export async function StudentProfilePanel({
                   {formatDuration(schoolClass.durationMinutes)}
                 </small>
                 <small>
-                  Last lesson: {lesson ? lessonLabel(lesson) : "No submitted lessons"}
+                  Last lesson:{" "}
+                  {lesson ? lessonLabel(lesson, dateFormat) : "No submitted lessons"}
                 </small>
               </article>
             );
@@ -215,7 +229,9 @@ export async function StudentProfilePanel({
           <div className="student-event-list">
             {absentLessons.map((record) => (
               <article className="student-event-row" key={record.lesson.id}>
-                <span>{formatShortDate(record.lesson.lessonDate)}</span>
+                <span>
+                  {formatShortDate(record.lesson.lessonDate, dateFormat)}
+                </span>
                 <strong>{record.lesson.class.name}</strong>
                 <small>{record.lesson.name ?? "Untitled lesson"}</small>
               </article>

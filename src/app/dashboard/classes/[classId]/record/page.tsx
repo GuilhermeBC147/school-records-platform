@@ -5,6 +5,7 @@ import {
   submitClassRecordAction,
 } from "@/app/actions/class-records";
 import { logoutAction } from "@/app/actions/auth";
+import { DateInput } from "@/app/components/date-input";
 import { formatShortDateInput } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -23,11 +24,11 @@ type ClassRecordPageProps = {
 
 function todayInputValue() {
   const date = new Date();
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(-2);
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
 
-  return `${day}/${month}/${year}`;
+  return `${year}-${month}-${day}`;
 }
 
 function findStudentStatus<T extends { studentId: string; status: string }>(
@@ -200,19 +201,16 @@ export default async function ClassRecordPage({
             </label>
             <label>
               <span>Lesson date</span>
-              <input
+              <DateInput
                 className="date-input"
+                dateFormat={currentUser.dateFormat}
                 defaultValue={
                   lessonRecord
-                    ? formatShortDateInput(lessonRecord.lessonDate)
+                    ? formatShortDateInput(lessonRecord.lessonDate, "YYYY_MM_DD")
                     : todayInputValue()
                 }
-                inputMode="numeric"
                 name="lessonDate"
-                pattern="[0-9]{2}/[0-9]{2}/[0-9]{2,4}"
-                placeholder="DD/MM/YY"
                 required
-                type="text"
               />
             </label>
             <label>

@@ -5,6 +5,7 @@ import {
   createTeacherWorkLogAction,
 } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
+import { DateInput } from "@/app/components/date-input";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -314,7 +315,11 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>Date</span>
-              <input name="workDate" required type="date" />
+              <DateInput
+                dateFormat={currentUser.dateFormat}
+                name="workDate"
+                required
+              />
             </label>
             <label>
               <span>Start time</span>
@@ -367,7 +372,11 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>Date</span>
-              <input name="workDate" required type="date" />
+              <DateInput
+                dateFormat={currentUser.dateFormat}
+                name="workDate"
+                required
+              />
             </label>
             <label>
               <span>Start time</span>

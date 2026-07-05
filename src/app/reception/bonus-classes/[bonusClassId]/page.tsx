@@ -5,6 +5,7 @@ import {
   updateBonusClassAction,
 } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
+import { DateInput } from "@/app/components/date-input";
 import {
   formatBonusClassErrorMessage,
   formatBonusClassResultMessage,
@@ -192,20 +193,26 @@ export default async function EditBonusClassPage({
             </label>
             <label>
               <span>Date</span>
-              <input
+              <DateInput
+                dateFormat={currentUser.dateFormat}
                 defaultValue={dateInputValue(bonusClass.scheduledDate)}
                 name="scheduledDate"
                 required
-                type="date"
               />
             </label>
             <label>
               <span>Start time</span>
               <input
                 defaultValue={bonusClass.startTime}
+                autoComplete="off"
+                inputMode="numeric"
+                maxLength={5}
                 name="startTime"
+                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+                placeholder="HH:MM"
                 required
-                type="time"
+                title="Use 24-hour time, for example 14:30."
+                type="text"
               />
             </label>
             <label>

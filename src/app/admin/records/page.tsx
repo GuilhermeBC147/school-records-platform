@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { DateFilterInput } from "@/app/components/date-filter-input";
+import { DateInput } from "@/app/components/date-input";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -231,7 +231,7 @@ export default async function AdminRecordsPage({
             </label>
             <label>
               <span>Date</span>
-              <DateFilterInput
+              <DateInput
                 dateFormat={currentUser.dateFormat}
                 defaultValue={filters.date ?? ""}
                 name="date"

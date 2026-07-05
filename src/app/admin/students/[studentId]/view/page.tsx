@@ -73,6 +73,7 @@ export default async function ViewStudentPage({
 
         <StudentProfilePanel
           basePath={`/admin/students/${studentId}/view`}
+          dateFormat={currentUser.dateFormat}
           selectedClassId={query.gradeClassId}
           studentId={studentId}
         />

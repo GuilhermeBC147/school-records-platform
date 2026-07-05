@@ -123,7 +123,7 @@ export default async function AdminRecordDetailPage({
             <dl className="detail-list">
               <div>
                 <dt>Date</dt>
-                <dd>{formatShortDate(lesson.lessonDate)}</dd>
+                <dd>{formatShortDate(lesson.lessonDate, currentUser.dateFormat)}</dd>
               </div>
               <div>
                 <dt>Teacher</dt>
@@ -136,7 +136,10 @@ export default async function AdminRecordDetailPage({
                 <dd>
                   {lesson.submittedBy?.name ?? "Unknown"}
                   {lesson.submittedAt
-                    ? ` on ${formatShortDateTime(lesson.submittedAt)}`
+                    ? ` on ${formatShortDateTime(
+                        lesson.submittedAt,
+                        currentUser.dateFormat,
+                      )}`
                     : ""}
                 </dd>
               </div>

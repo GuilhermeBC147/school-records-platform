@@ -311,7 +311,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     key={bonusClass.id}
                   >
                     <strong>
-                      {formatShortDate(bonusClass.scheduledDate)} |{" "}
+                      {formatShortDate(
+                        bonusClass.scheduledDate,
+                        currentUser.dateFormat,
+                      )} |{" "}
                       {formatStartTime(bonusClass.startTime)}
                     </strong>
                     <span>

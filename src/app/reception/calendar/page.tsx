@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { DateFilterInput } from "@/app/components/date-filter-input";
+import { DateInput } from "@/app/components/date-input";
 import { formatDuration } from "@/lib/class-schedule";
 import {
   formatBonusClassStatus,
@@ -159,7 +159,7 @@ export default async function ReceptionCalendarPage({
           <form className="filter-form compact-filter-form">
             <label>
               <span>Date</span>
-              <DateFilterInput
+              <DateInput
                 dateFormat={currentUser.dateFormat}
                 defaultValue={calendarDate.label}
                 name="date"
