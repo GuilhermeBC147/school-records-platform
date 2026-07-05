@@ -5,6 +5,7 @@ import { logoutAction } from "@/app/actions/auth";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
+  formatBonusClassResultMessage,
   formatBonusClassStatus,
   formatStartTime,
 } from "@/lib/bonus-classes";
@@ -15,9 +16,41 @@ export const dynamic = "force-dynamic";
 
 type TeacherBonusClassesPageProps = {
   searchParams: Promise<{
+    dateFrom?: string;
+    dateTo?: string;
     status?: string;
   }>;
 };
+
+function readDateFilter(value: string | undefined, boundary: "start" | "end") {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return undefined;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (boundary === "end") {
+    date.setUTCDate(date.getUTCDate() + 1);
+  }
+
+  return date;
+}
+
+function getDefaultDateRange() {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
+
+  return {
+    dateFrom: start.toISOString().slice(0, 10),
+    dateTo: end.toISOString().slice(0, 10),
+  };
+}
+
+function dateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
 
 export default async function TeacherBonusClassesPage({
   searchParams,
@@ -33,10 +66,24 @@ export default async function TeacherBonusClassesPage({
   }
 
   const query = await searchParams;
+  const defaultRange = getDefaultDateRange();
+  const dateFrom = query.dateFrom ?? defaultRange.dateFrom;
+  const dateTo = query.dateTo ?? defaultRange.dateTo;
+  const dateStart = readDateFilter(dateFrom, "start");
+  const dateEnd = readDateFilter(dateTo, "end");
+  const successMessage = formatBonusClassResultMessage(query.status);
   const bonusClasses = await prisma.bonusClass.findMany({
-    orderBy: [{ scheduledDate: "desc" }, { startTime: "asc" }],
+    orderBy: [{ scheduledDate: "asc" }, { startTime: "asc" }],
     where: {
       teacherId: currentUser.id,
+      ...(dateStart || dateEnd
+        ? {
+            scheduledDate: {
+              ...(dateStart ? { gte: dateStart } : {}),
+              ...(dateEnd ? { lt: dateEnd } : {}),
+            },
+          }
+        : {}),
     },
     select: {
       attendanceStatus: true,
@@ -52,6 +99,17 @@ export default async function TeacherBonusClassesPage({
       },
     },
   });
+  const bonusClassesByDate = new Map<string, typeof bonusClasses>();
+
+  for (const bonusClass of bonusClasses) {
+    const key = dateKey(bonusClass.scheduledDate);
+    bonusClassesByDate.set(key, [
+      ...(bonusClassesByDate.get(key) ?? []),
+      bonusClass,
+    ]);
+  }
+
+  const calendarDates = Array.from(bonusClassesByDate.keys()).sort();
 
   return (
     <main className="app-shell">
@@ -82,78 +140,93 @@ export default async function TeacherBonusClassesPage({
           </p>
         </section>
 
-        {query.status === "completed" ? (
-          <p className="form-success">Bonus class completed.</p>
-        ) : null}
+        {successMessage ? <p className="form-success">{successMessage}</p> : null}
+
+        <section className="panel" aria-label="Bonus class filters">
+          <form className="filter-form compact-filter-form">
+            <label>
+              <span>From</span>
+              <input defaultValue={dateFrom} name="dateFrom" type="date" />
+            </label>
+            <label>
+              <span>To</span>
+              <input defaultValue={dateTo} name="dateTo" type="date" />
+            </label>
+            <div className="filter-actions">
+              <button className="primary-button" type="submit">
+                Apply
+              </button>
+              <Link className="text-link" href="/dashboard/bonus-classes">
+                Current month
+              </Link>
+            </div>
+          </form>
+        </section>
 
         <section className="panel data-panel" aria-labelledby="assigned-bonus-title">
           <h2 id="assigned-bonus-title">Assigned bonus classes</h2>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Student</th>
-                  <th>Subject</th>
-                  <th>Duration</th>
-                  <th>Status</th>
-                  <th>Attendance</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bonusClasses.map((bonusClass) => (
-                  <tr key={bonusClass.id}>
-                    <td>{formatShortDate(bonusClass.scheduledDate)}</td>
-                    <td>{formatStartTime(bonusClass.startTime)}</td>
-                    <td>{bonusClass.student.fullName}</td>
-                    <td>{bonusClass.subject}</td>
-                    <td>{formatDuration(bonusClass.durationMinutes)}</td>
-                    <td>{formatBonusClassStatus(bonusClass.status)}</td>
-                    <td>{formatBonusClassStatus(bonusClass.attendanceStatus)}</td>
-                    <td>
-                      {bonusClass.status !== "CANCELED" ? (
-                        <form action={completeBonusClassAction}>
-                          <input
-                            name="bonusClassId"
-                            type="hidden"
-                            value={bonusClass.id}
-                          />
-                          <input
-                            name="redirectTo"
-                            type="hidden"
-                            value="/dashboard/bonus-classes?status=completed"
-                          />
-                          <select
-                            defaultValue={
-                              bonusClass.attendanceStatus === "PENDING"
-                                ? "PRESENT"
-                                : bonusClass.attendanceStatus
-                            }
-                            name="attendanceStatus"
-                          >
-                            <option value="PRESENT">Present</option>
-                            <option value="ABSENT">Absent</option>
-                            <option value="EXCUSED">Excused</option>
-                          </select>
-                          <button className="primary-button" type="submit">
-                            Confirm
-                          </button>
-                        </form>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {bonusClasses.length === 0 ? (
-                  <tr>
-                    <td colSpan={8}>No bonus classes assigned.</td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
+          <div className="bonus-calendar">
+            {calendarDates.map((key) => {
+              const dayClasses = bonusClassesByDate.get(key) ?? [];
+
+              return (
+                <article className="bonus-calendar-day" key={key}>
+                  <h3>{formatShortDate(dayClasses[0].scheduledDate)}</h3>
+                  <div className="bonus-calendar-events">
+                    {dayClasses.map((bonusClass) => (
+                      <div className="bonus-calendar-event" key={bonusClass.id}>
+                        <div>
+                          <strong>
+                            {formatStartTime(bonusClass.startTime)} |{" "}
+                            {bonusClass.student.fullName}
+                          </strong>
+                          <span>
+                            {bonusClass.subject} |{" "}
+                            {formatDuration(bonusClass.durationMinutes)}
+                          </span>
+                          <span>
+                            {formatBonusClassStatus(bonusClass.status)} |{" "}
+                            {formatBonusClassStatus(bonusClass.attendanceStatus)}
+                          </span>
+                        </div>
+                        {bonusClass.status !== "CANCELED" ? (
+                          <form action={completeBonusClassAction}>
+                            <input
+                              name="bonusClassId"
+                              type="hidden"
+                              value={bonusClass.id}
+                            />
+                            <input
+                              name="redirectTo"
+                              type="hidden"
+                              value={`/dashboard/bonus-classes?dateFrom=${dateFrom}&dateTo=${dateTo}&status=completed`}
+                            />
+                            <select
+                              defaultValue={
+                                bonusClass.attendanceStatus === "PENDING"
+                                  ? "PRESENT"
+                                  : bonusClass.attendanceStatus
+                              }
+                              name="attendanceStatus"
+                            >
+                              <option value="PRESENT">Present</option>
+                              <option value="ABSENT">Absent</option>
+                              <option value="EXCUSED">Excused</option>
+                            </select>
+                            <button className="primary-button" type="submit">
+                              Confirm
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
+            {bonusClasses.length === 0 ? (
+              <p className="muted-copy">No bonus classes assigned for this date range.</p>
+            ) : null}
           </div>
         </section>
       </div>

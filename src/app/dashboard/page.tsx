@@ -1,13 +1,45 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
-import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
+import {
+  formatDuration,
+  formatWeekdays,
+  weekdayOptions,
+} from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import type { Weekday } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams: Promise<{
+    day?: string;
+  }>;
+};
+
+function getCurrentWeekday() {
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+  })
+    .format(new Date())
+    .toUpperCase();
+
+  return weekdayOptions.some((option) => option.value === weekday)
+    ? (weekday as Weekday)
+    : undefined;
+}
+
+function readWeekday(value: string | undefined) {
+  if (weekdayOptions.some((option) => option.value === value)) {
+    return value as Weekday;
+  }
+
+  return undefined;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -18,35 +50,57 @@ export default async function DashboardPage() {
     redirect("/reception");
   }
 
-  const classes = await prisma.class.findMany({
-    where:
-      currentUser.role === "TEACHER"
-        ? {
+  const params = await searchParams;
+  const selectedDay =
+    currentUser.role === "TEACHER"
+      ? params.day === "all"
+        ? undefined
+        : readWeekday(params.day) ?? getCurrentWeekday()
+      : undefined;
+  const dashboardTitle =
+    currentUser.role === "ADMIN" ? "Admin dashboard" : currentUser.name;
+  const dashboardLede =
+    currentUser.role === "ADMIN"
+      ? "Manage school records, staff accounts, reception tools, risk review, and teacher work summaries from one place."
+      : "Open class records, review assigned bonus classes, and manage your monthly work summary.";
+
+  const classes =
+    currentUser.role === "TEACHER"
+      ? await prisma.class.findMany({
+          where: {
             teacherId: currentUser.id,
             isActive: true,
-          }
-        : {},
-    orderBy: { name: "asc" },
-    select: {
-      id: true,
-      name: true,
-      book: true,
-      semester: true,
-      year: true,
-      durationMinutes: true,
-      weekDays: true,
-      isActive: true,
-      teacher: {
-        select: { name: true },
-      },
-      _count: {
-        select: {
-          enrollments: true,
-          lessons: true,
-        },
-      },
-    },
-  });
+            ...(selectedDay ? { weekDays: { has: selectedDay } } : {}),
+          },
+          orderBy: { name: "asc" },
+          select: {
+            id: true,
+            name: true,
+            book: true,
+            semester: true,
+            year: true,
+            durationMinutes: true,
+            weekDays: true,
+            isActive: true,
+            teacher: {
+              select: { name: true },
+            },
+            _count: {
+              select: {
+                enrollments: true,
+                lessons: true,
+              },
+            },
+          },
+        })
+      : [];
+  const allClassesHref = "/dashboard?day=all";
+  const dayFilterValue = params.day === "all" ? "all" : selectedDay ?? "";
+  const visibleClassesLabel =
+    dayFilterValue === "all"
+      ? "All classes"
+      : weekdayOptions.find((option) => option.value === selectedDay)?.label ??
+        "Today";
 
   return (
     <main className="app-shell">
@@ -67,15 +121,12 @@ export default async function DashboardPage() {
       <div className="main data-page">
         <section className="intro" aria-labelledby="dashboard-title">
           <p className="eyebrow">{currentUser.role.toLowerCase()} dashboard</p>
-          <h1 id="dashboard-title">Your classes</h1>
-          <p className="lede">
-            This is the first protected page. It already uses your login session
-            to decide which classes you can see.
-          </p>
+          <h1 id="dashboard-title">{dashboardTitle}</h1>
+          <p className="lede">{dashboardLede}</p>
           {currentUser.role === "ADMIN" ? (
             <div className="action-row">
-              <Link className="primary-link" href="/admin/teachers">
-                Manage teachers
+              <Link className="primary-link" href="/admin/manage-accounts">
+                Manage accounts
               </Link>
               <Link className="primary-link" href="/admin/classes">
                 Manage classes
@@ -96,7 +147,7 @@ export default async function DashboardPage() {
                 Reception tools
               </Link>
               <Link className="primary-link" href="/dashboard/account">
-                Manage account
+                Account settings
               </Link>
             </div>
           ) : (
@@ -114,48 +165,83 @@ export default async function DashboardPage() {
                 Substitute lesson
               </Link>
               <Link className="primary-link" href="/dashboard/account">
-                Manage account
+                Account settings
               </Link>
             </div>
           )}
         </section>
 
-        <section className="class-grid" aria-label="Assigned classes">
-          {classes.map((schoolClass) => (
-            <article className="panel class-card" key={schoolClass.id}>
-              <div>
-                <p className="eyebrow">
-                  {schoolClass.book ?? "Class"}
-                  {schoolClass.semester && schoolClass.year
-                    ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
-                    : ""}
-                </p>
-                <h2>{schoolClass.name}</h2>
-                <p>{schoolClass.teacher.name}</p>
-                <p>
-                  {formatWeekdays(schoolClass.weekDays)} |{" "}
-                  {formatDuration(schoolClass.durationMinutes)}
-                </p>
-                {currentUser.role === "ADMIN" ? (
-                  <p>{schoolClass.isActive ? "Active" : "Inactive"}</p>
-                ) : null}
-              </div>
-              <dl>
-                <div>
-                  <dt>Students</dt>
-                  <dd>{schoolClass._count.enrollments}</dd>
+        {currentUser.role === "TEACHER" ? (
+          <>
+            <section className="panel" aria-label="Class filters">
+              <form className="filter-form compact-filter-form">
+                <label>
+                  <span>Day</span>
+                  <select defaultValue={dayFilterValue} name="day">
+                    <option value="all">All days</option>
+                    {weekdayOptions.map((weekday) => (
+                      <option key={weekday.value} value={weekday.value}>
+                        {weekday.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="filter-actions">
+                  <button className="primary-button" type="submit">
+                    Apply
+                  </button>
+                  <Link className="text-link" href={allClassesHref}>
+                    Show all
+                  </Link>
                 </div>
-                <div>
-                  <dt>Lessons</dt>
-                  <dd>{schoolClass._count.lessons}</dd>
-                </div>
-              </dl>
-              <Link className="text-link" href={`/dashboard/classes/${schoolClass.id}`}>
-                Open class
-              </Link>
-            </article>
-          ))}
-        </section>
+              </form>
+            </section>
+
+            <section className="class-grid" aria-label={visibleClassesLabel}>
+              {classes.map((schoolClass) => (
+                <article className="panel class-card" key={schoolClass.id}>
+                  <div>
+                    <p className="eyebrow">
+                      {schoolClass.book ?? "Class"}
+                      {schoolClass.semester && schoolClass.year
+                        ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+                        : ""}
+                    </p>
+                    <h2>{schoolClass.name}</h2>
+                    <p>
+                      {formatWeekdays(schoolClass.weekDays)} |{" "}
+                      {formatDuration(schoolClass.durationMinutes)}
+                    </p>
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>Students</dt>
+                      <dd>{schoolClass._count.enrollments}</dd>
+                    </div>
+                    <div>
+                      <dt>Lessons</dt>
+                      <dd>{schoolClass._count.lessons}</dd>
+                    </div>
+                  </dl>
+                  <Link
+                    className="text-link"
+                    href={`/dashboard/classes/${schoolClass.id}`}
+                  >
+                    Open class
+                  </Link>
+                </article>
+              ))}
+              {classes.length === 0 ? (
+                <article className="panel class-card">
+                  <h2>No classes for {visibleClassesLabel.toLowerCase()}</h2>
+                  <Link className="text-link" href={allClassesHref}>
+                    Show all classes
+                  </Link>
+                </article>
+              ) : null}
+            </section>
+          </>
+        ) : null}
       </div>
     </main>
   );

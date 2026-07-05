@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
   approveSubstitutionAction,
   rejectSubstitutionAction,
+  undoSubstitutionApprovalAction,
 } from "@/app/actions/substitutions";
 import { logoutAction } from "@/app/actions/auth";
 import { formatDuration } from "@/lib/class-schedule";
@@ -150,6 +151,16 @@ export default async function AdminSubstitutionsPage() {
                     <input name="lessonId" type="hidden" value={lesson.id} />
                     <button className="secondary-button" type="submit">
                       Reject
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+              {lesson.substitutionStatus === "APPROVED" ? (
+                <div className="table-actions">
+                  <form action={undoSubstitutionApprovalAction}>
+                    <input name="lessonId" type="hidden" value={lesson.id} />
+                    <button className="secondary-button" type="submit">
+                      Undo approval
                     </button>
                   </form>
                 </div>

@@ -59,11 +59,17 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
       <label>
         <span>Search students</span>
         <input
+          list="roster-student-options"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Type a student name"
           type="search"
           value={query}
         />
+        <datalist id="roster-student-options">
+          {students.map((student) => (
+            <option key={student.id} value={student.fullName} />
+          ))}
+        </datalist>
       </label>
 
       <div className="roster-summary">
