@@ -4,6 +4,7 @@ import {
   undoRiskResolutionAction,
 } from "@/app/actions/risk";
 import { redirect } from "next/navigation";
+import { DateFilterInput } from "@/app/components/date-filter-input";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -75,8 +76,6 @@ function readFilterDate(value: string | undefined, boundary: "start" | "end") {
 
 function buildRecordsHref(filters: {
   classId?: string;
-  dateFrom?: string;
-  dateTo?: string;
   studentId: string;
   teacherId?: string;
 }) {
@@ -88,14 +87,6 @@ function buildRecordsHref(filters: {
 
   if (filters.teacherId) {
     params.set("teacherId", filters.teacherId);
-  }
-
-  if (filters.dateFrom) {
-    params.set("dateFrom", filters.dateFrom);
-  }
-
-  if (filters.dateTo) {
-    params.set("dateTo", filters.dateTo);
   }
 
   return `/admin/records?${params.toString()}`;
@@ -652,11 +643,19 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
             </label>
             <label>
               <span>From</span>
-              <input defaultValue={dateFrom ?? ""} name="dateFrom" type="date" />
+              <DateFilterInput
+                dateFormat={currentUser.dateFormat}
+                defaultValue={dateFrom ?? ""}
+                name="dateFrom"
+              />
             </label>
             <label>
               <span>To</span>
-              <input defaultValue={dateTo ?? ""} name="dateTo" type="date" />
+              <DateFilterInput
+                dateFormat={currentUser.dateFormat}
+                defaultValue={dateTo ?? ""}
+                name="dateTo"
+              />
             </label>
             <label>
               <span>Situation</span>
@@ -705,7 +704,12 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                         ))}
                       </div>
                     </td>
-                    <td>{formatShortDate(record.latestSignalDate)}</td>
+                    <td>
+                      {formatShortDate(
+                        record.latestSignalDate,
+                        currentUser.dateFormat,
+                      )}
+                    </td>
                     <td>
                       <div className="table-actions">
                         <Link
@@ -718,8 +722,6 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                           className="text-link compact-link"
                           href={buildRecordsHref({
                             classId: record.classId,
-                            dateFrom,
-                            dateTo,
                             studentId: record.studentId,
                             teacherId,
                           })}

@@ -202,7 +202,9 @@ export default async function AdminWorkSummaryPage({
                             ? "Approved substitute"
                             : "Regular lesson"}
                         </td>
-                        <td>{formatShortDate(lesson.lessonDate)}</td>
+                        <td>
+                          {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                        </td>
                         <td>
                           {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
@@ -214,7 +216,12 @@ export default async function AdminWorkSummaryPage({
                     {summary.bonusClasses.map((bonusClass) => (
                       <tr key={bonusClass.id}>
                         <td>Completed bonus class</td>
-                        <td>{formatShortDate(bonusClass.scheduledDate)}</td>
+                        <td>
+                          {formatShortDate(
+                            bonusClass.scheduledDate,
+                            currentUser.dateFormat,
+                          )}
+                        </td>
                         <td>
                           {bonusClass.student.fullName} | {bonusClass.subject} |{" "}
                           {formatStartTime(bonusClass.startTime)}
@@ -227,7 +234,9 @@ export default async function AdminWorkSummaryPage({
                     {summary.workLogs.map((workLog) => (
                       <tr key={workLog.id}>
                         <td>{formatTeacherWorkCategory(workLog.category)}</td>
-                        <td>{formatShortDate(workLog.workDate)}</td>
+                        <td>
+                          {formatShortDate(workLog.workDate, currentUser.dateFormat)}
+                        </td>
                         <td>{workLog.title}</td>
                         <td>{workLog.subject ?? "-"}</td>
                         <td>{workLog.durationMinutes}</td>
@@ -237,7 +246,9 @@ export default async function AdminWorkSummaryPage({
                     {summary.pendingSubstituteLessons.map((lesson) => (
                       <tr key={lesson.id}>
                         <td>Pending substitute</td>
-                        <td>{formatShortDate(lesson.lessonDate)}</td>
+                        <td>
+                          {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                        </td>
                         <td>
                           {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
@@ -307,7 +318,16 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>Start time</span>
-              <input name="startTime" type="time" />
+              <input
+                autoComplete="off"
+                inputMode="numeric"
+                maxLength={5}
+                name="startTime"
+                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+                placeholder="HH:MM"
+                title="Use 24-hour time, for example 14:30."
+                type="text"
+              />
             </label>
             <label>
               <span>Duration minutes</span>
@@ -351,7 +371,16 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>Start time</span>
-              <input name="startTime" type="time" />
+              <input
+                autoComplete="off"
+                inputMode="numeric"
+                maxLength={5}
+                name="startTime"
+                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+                placeholder="HH:MM"
+                title="Use 24-hour time, for example 14:30."
+                type="text"
+              />
             </label>
             <label>
               <span>Duration minutes</span>

@@ -168,7 +168,10 @@ export default async function ReceptionDashboardPage() {
                 key={bonusClass.id}
               >
                 <strong>
-                  {formatShortDate(bonusClass.scheduledDate)} |{" "}
+                  {formatShortDate(
+                    bonusClass.scheduledDate,
+                    currentUser.dateFormat,
+                  )} |{" "}
                   {formatStartTime(bonusClass.startTime)}
                 </strong>
                 <span>

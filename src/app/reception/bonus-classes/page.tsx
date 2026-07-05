@@ -165,7 +165,17 @@ export default async function ReceptionBonusClassesPage({
             </label>
             <label>
               <span>Start time</span>
-              <input name="startTime" required type="time" />
+              <input
+                autoComplete="off"
+                inputMode="numeric"
+                maxLength={5}
+                name="startTime"
+                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+                placeholder="HH:MM"
+                required
+                title="Use 24-hour time, for example 14:30."
+                type="text"
+              />
             </label>
             <label>
               <span>Duration minutes</span>
@@ -203,7 +213,12 @@ export default async function ReceptionBonusClassesPage({
               <tbody>
                 {bonusClasses.map((bonusClass) => (
                   <tr key={bonusClass.id}>
-                    <td>{formatShortDate(bonusClass.scheduledDate)}</td>
+                    <td>
+                      {formatShortDate(
+                        bonusClass.scheduledDate,
+                        currentUser.dateFormat,
+                      )}
+                    </td>
                     <td>{formatStartTime(bonusClass.startTime)}</td>
                     <td>{bonusClass.student.fullName}</td>
                     <td>{bonusClass.subject}</td>

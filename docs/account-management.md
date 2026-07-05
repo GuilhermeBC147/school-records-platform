@@ -18,6 +18,10 @@ Admins can:
 
 Inactive accounts cannot log in because login only accepts active users.
 
+Each account also stores a preferred date format. Staff can update it from
+`/dashboard/account`; filter fields display that account format while still
+submitting ISO date values for server-side queries and database consistency.
+
 ## Password Reset
 
 Teachers and admins can start password recovery from:
