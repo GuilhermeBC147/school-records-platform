@@ -6,6 +6,7 @@ import {
 } from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
+import { TimeInput } from "@/app/components/time-input";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -323,16 +324,7 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>Start time</span>
-              <input
-                autoComplete="off"
-                inputMode="numeric"
-                maxLength={5}
-                name="startTime"
-                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-                placeholder="HH:MM"
-                title="Use 24-hour time, for example 14:30."
-                type="text"
-              />
+              <TimeInput name="startTime" />
             </label>
             <label>
               <span>Duration minutes</span>
@@ -380,16 +372,7 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>Start time</span>
-              <input
-                autoComplete="off"
-                inputMode="numeric"
-                maxLength={5}
-                name="startTime"
-                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-                placeholder="HH:MM"
-                title="Use 24-hour time, for example 14:30."
-                type="text"
-              />
+              <TimeInput name="startTime" />
             </label>
             <label>
               <span>Duration minutes</span>

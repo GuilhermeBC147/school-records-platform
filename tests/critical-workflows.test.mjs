@@ -350,6 +350,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const schema = await readProjectFile("prisma/schema.prisma");
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
+  const timeInput = await readProjectFile("src/app/components/time-input.tsx");
   const teacherWorkPage = await readProjectFile("src/app/dashboard/work/page.tsx");
   const newActivityPage = await readProjectFile(
     "src/app/dashboard/work/new/page.tsx",
@@ -376,6 +377,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workLib, /durationMinutes/);
   assert.match(workActions, /createTeacherWorkLogAction/);
   assert.match(workActions, /createTeacherMeetingAction/);
+  assert.match(workActions, /readOptionalStartTime/);
   assert.match(workActions, /category === "BONUS_CLASS" && !subject/);
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
@@ -386,12 +388,19 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(newActivityPage, /Add event/);
   assert.match(newActivityPage, /createTeacherWorkLogAction/);
   assert.match(newActivityPage, /name="subject"/);
+  assert.match(newActivityPage, /TimeInput/);
+  assert.doesNotMatch(newActivityPage, /type="time"/);
   assert.match(newActivityPage, /teacherWorkCategories/);
   assert.match(newActivityPage, /category\.value !== "MEETING"/);
+  assert.match(timeInput, /placeholder="HH:MM"/);
+  assert.match(timeInput, /type="text"/);
+  assert.match(timeInput, /pattern="\(\?:\[01\]\\d\|2\[0-3\]\):\[0-5\]\\d"/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
   assert.match(adminWorkPage, /Teacher work summaries/);
   assert.match(adminWorkPage, /getTeacherWorkSummary/);
   assert.match(adminWorkPage, /createTeacherMeetingAction/);
+  assert.match(adminWorkPage, /TimeInput/);
+  assert.doesNotMatch(adminWorkPage, /type="time"/);
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
   assert.match(dashboardPage, /\/dashboard\/work\/new/);
@@ -460,6 +469,7 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   const seed = await readProjectFile("prisma/seed.sql");
   const bonusActions = await readProjectFile("src/app/actions/bonus-classes.ts");
   const bonusLib = await readProjectFile("src/lib/bonus-classes.ts");
+  const timeInput = await readProjectFile("src/app/components/time-input.tsx");
   const receptionDashboardPage = await readProjectFile("src/app/reception/page.tsx");
   const receptionPage = await readProjectFile(
     "src/app/reception/bonus-classes/page.tsx",
@@ -515,6 +525,7 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusActions, /cancelBonusClassAction/);
   assert.match(bonusActions, /completeBonusClassAction/);
   assert.match(bonusActions, /readAttendanceStatus/);
+  assert.match(bonusActions, /normalizeStartTime/);
   assert.match(bonusActions, /hasTeacherBonusClassOverlap/);
   assert.match(bonusLib, /formatBonusClassResultMessage/);
   assert.match(bonusLib, /formatBonusClassErrorMessage/);
@@ -533,7 +544,12 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionCalendarPage, /Daily teacher calendar/);
   assert.match(receptionCalendarPage, /timeSlots/);
   assert.match(receptionCalendarPage, /formatTimeFromMinutes/);
+  assert.match(receptionCalendarPage, /formatStartTime/);
   assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);
+  assert.match(receptionPage, /TimeInput/);
+  assert.doesNotMatch(receptionPage, /type="time"/);
+  assert.match(timeInput, /placeholder="HH:MM"/);
+  assert.match(timeInput, /type="text"/);
   assert.match(receptionCombinedRedirectPage, /redirect\("\/reception\/students"\)/);
   assert.match(receptionStudentsPage, /Students/);
   assert.match(receptionStudentsPage, /studentSearch/);
@@ -568,6 +584,8 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionEditPage, /updateBonusClassAction/);
   assert.match(receptionEditPage, /completeBonusClassAction/);
   assert.match(receptionEditPage, /status\?: string/);
+  assert.match(receptionEditPage, /TimeInput/);
+  assert.doesNotMatch(receptionEditPage, /type="time"/);
   assert.match(receptionEditPage, /formatBonusClassResultMessage/);
   assert.match(teacherBonusPage, /attendanceStatus/);
   assert.match(teacherBonusPage, /bonus-calendar/);

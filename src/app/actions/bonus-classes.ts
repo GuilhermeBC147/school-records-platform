@@ -6,9 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import {
   hasTeacherBonusClassOverlap,
+  normalizeStartTime,
   readDurationMinutes,
   readIsoDate,
-  readTimeMinutes,
 } from "@/lib/bonus-classes";
 
 function readRequiredString(formData: FormData, key: string) {
@@ -71,13 +71,11 @@ async function validateBonusClassForm(formData: FormData) {
   const durationMinutes = readDurationMinutes(formData.get("durationMinutes"));
   const notes = readRequiredString(formData, "notes") || null;
   const scheduledDate = readIsoDate(readRequiredString(formData, "scheduledDate"));
-  const startTime = readRequiredString(formData, "startTime");
+  const startTime = normalizeStartTime(readRequiredString(formData, "startTime"));
   const studentSearch = readRequiredString(formData, "studentSearch");
   const studentId = readRequiredString(formData, "studentId");
   const subject = readRequiredString(formData, "subject");
   const teacherId = readRequiredString(formData, "teacherId");
-
-  readTimeMinutes(startTime);
 
   if ((!studentId && !studentSearch) || !subject || !teacherId) {
     throw new Error("Student, subject, and teacher are required.");

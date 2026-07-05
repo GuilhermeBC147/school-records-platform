@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { TeacherWorkCategory } from "@/generated/prisma/enums";
+import { readOptionalStartTime } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { teacherWorkCategories } from "@/lib/teacher-work";
@@ -66,7 +67,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
   const redirectTo = allowedRedirects.has(requestedRedirect)
     ? requestedRedirect
     : "/dashboard/work";
-  const startTime = String(formData.get("startTime") ?? "").trim() || null;
+  const startTime = readOptionalStartTime(formData.get("startTime"));
   const subject = String(formData.get("subject") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
   const workDate = readWorkDate(formData);
@@ -131,7 +132,7 @@ export async function createTeacherMeetingAction(formData: FormData) {
 
   const durationMinutes = readDurationMinutes(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
-  const startTime = String(formData.get("startTime") ?? "").trim() || null;
+  const startTime = readOptionalStartTime(formData.get("startTime"));
   const teacherIds = formData
     .getAll("teacherIds")
     .map((value) => String(value))

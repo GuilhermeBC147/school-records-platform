@@ -5,6 +5,7 @@ import { DateInput } from "@/app/components/date-input";
 import { formatDuration } from "@/lib/class-schedule";
 import {
   formatBonusClassStatus,
+  formatStartTime,
   formatTimeFromMinutes,
   readIsoDate,
   readTimeMinutes,
@@ -220,7 +221,7 @@ export default async function ReceptionCalendarPage({
                               key={bonusClass.id}
                             >
                               <strong>
-                                {bonusClass.startTime} |{" "}
+                                {formatStartTime(bonusClass.startTime)} |{" "}
                                 {formatDuration(bonusClass.durationMinutes)}
                               </strong>
                               <span>{bonusClass.student.fullName}</span>

@@ -6,6 +6,7 @@ import {
 } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
+import { TimeInput } from "@/app/components/time-input";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
@@ -170,17 +171,7 @@ export default async function ReceptionBonusClassesPage({
             </label>
             <label>
               <span>Start time</span>
-              <input
-                autoComplete="off"
-                inputMode="numeric"
-                maxLength={5}
-                name="startTime"
-                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-                placeholder="HH:MM"
-                required
-                title="Use 24-hour time, for example 14:30."
-                type="text"
-              />
+              <TimeInput name="startTime" required />
             </label>
             <label>
               <span>Duration minutes</span>
