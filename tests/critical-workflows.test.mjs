@@ -19,6 +19,8 @@ test("teacher class pages restrict class access to assigned teachers", async () 
 
   assert.match(dashboard, /currentUser\.role === "TEACHER"/);
   assert.match(dashboard, /teacherId: currentUser\.id/);
+  assert.match(dashboard, /Teacher workflows/);
+  assert.match(dashboard, /teacher-class-card/);
   assert.match(classDetail, /currentUser\.role === "TEACHER"/);
   assert.match(classDetail, /teacherId: currentUser\.id/);
   assert.match(recordForm, /currentUser\.role === "TEACHER"/);
@@ -135,6 +137,9 @@ test("admin student management supports creating and editing students", async ()
   assert.match(editStudentPage, /updateStudentAction/);
   assert.match(recordForm, /student:\s*{\s*isActive: true/s);
   assert.match(dashboardPage, /Manage students/);
+  assert.match(dashboardPage, /dashboard-metric-grid/);
+  assert.match(dashboardPage, /dashboard-action-grid/);
+  assert.match(dashboardPage, /Review substitutions/);
 });
 
 test("admin CSV export includes record filters and student rows", async () => {
@@ -419,6 +424,9 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusLib, /startMinutes < existingEnd/);
   assert.match(receptionDashboardPage, /\/reception\/calendar/);
   assert.match(receptionDashboardPage, /\/reception\/students-and-classes/);
+  assert.match(receptionDashboardPage, /dashboard-metric-grid/);
+  assert.match(receptionDashboardPage, /dashboard-action-grid/);
+  assert.match(receptionDashboardPage, /upcomingBonusClasses/);
   assert.match(receptionPage, /Schedule bonus class/);
   assert.match(receptionPage, /studentSearch/);
   assert.doesNotMatch(receptionPage, /Bonus class \{query\.status\}/);

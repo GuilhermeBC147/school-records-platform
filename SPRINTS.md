@@ -449,6 +449,7 @@ Tasks:
 - Remove class cards from the admin dashboard because classes are managed from "Manage classes".
 - Change admin dashboard wording from "Manage teachers" to "Manage accounts".
 - Change "Manage account" links to "Account settings" to avoid confusion with admin account management.
+- Improve admin, reception, and teacher dashboards with role-specific overview metrics, workflow cards, and upcoming schedule context.
 - Keep teacher dashboards focused on the signed-in account and relevant weekday classes by default.
 - Add teacher dashboard filters for classes by day of week.
 - Add student-name autocomplete to student search filters.
@@ -473,6 +474,7 @@ Done when:
 
 - Admins manage teacher and reception accounts from `/admin/manage-accounts`.
 - The admin dashboard links to management screens without duplicating class cards.
+- Admin, reception, and teacher dashboards provide useful at-a-glance status and clear workflow entry points.
 - Teacher dashboards show account-specific classes with useful day filtering.
 - Student search filters offer student-name autocomplete.
 - Risk review supports resolved/unresolved filtering and undoing accidental resolutions.
