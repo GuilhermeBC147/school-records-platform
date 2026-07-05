@@ -627,7 +627,8 @@ input[type="time"],
 }
 
 .class-filter-form {
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: start;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .class-lookup-filter-form {
@@ -650,10 +651,38 @@ input[type="time"],
   font-weight: 700;
 }
 
+.filter-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.filter-panel-heading {
+  align-items: start;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-bottom: 16px;
+}
+
+.filter-panel-heading h2 {
+  margin-bottom: 6px;
+}
+
+.wide-filter {
+  grid-column: span 2;
+}
+
 .filter-actions {
   align-items: center;
   display: flex;
   gap: 10px;
+}
+
+.class-filter-form .filter-actions {
+  align-self: end;
+  grid-column: span 2;
+  justify-content: flex-end;
 }
 
 .table-actions {
@@ -715,7 +744,7 @@ input[type="time"],
 }
 
 .compact-weekday-picker {
-  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+  grid-template-columns: repeat(3, minmax(68px, 1fr));
   padding: 6px;
 }
 
@@ -1354,6 +1383,15 @@ th {
 
   .student-test-total {
     border-right: 1px solid var(--brand-line);
+  }
+
+  .wide-filter,
+  .class-filter-form .filter-actions {
+    grid-column: auto;
+  }
+
+  .filter-panel-heading {
+    flex-direction: column;
   }
 
   h1 {
