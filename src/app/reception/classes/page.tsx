@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { Weekday } from "@/generated/prisma/enums";
 import {
   formatDuration,
   formatWeekdays,
@@ -10,6 +9,7 @@ import {
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import type { Weekday } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,18 @@ type ReceptionClassesPageProps = {
     classId?: string;
     classSearch?: string;
     teacherId?: string;
-    weekDay?: string;
+    weekDay?: string | string[];
   }>;
 };
+
+function readWeekdayFilters(value: string | string[] | undefined) {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+  const allowedWeekdays = new Set<string>(
+    weekdayOptions.map((option) => option.value),
+  );
+
+  return values.filter((item): item is Weekday => allowedWeekdays.has(item));
+}
 
 export default async function ReceptionClassesPage({
   searchParams,
@@ -38,11 +47,7 @@ export default async function ReceptionClassesPage({
   const query = await searchParams;
   const classSearch = query.classSearch?.trim() || undefined;
   const selectedTeacherId = query.teacherId?.trim() || undefined;
-  const selectedWeekDay = weekdayOptions.some(
-    (weekday) => weekday.value === query.weekDay,
-  )
-    ? (query.weekDay as Weekday)
-    : undefined;
+  const selectedWeekDays = readWeekdayFilters(query.weekDay);
 
   const [classes, teachers] = await Promise.all([
     prisma.class.findMany({
@@ -53,7 +58,9 @@ export default async function ReceptionClassesPage({
           ? { name: { contains: classSearch, mode: "insensitive" } }
           : {}),
         ...(selectedTeacherId ? { teacherId: selectedTeacherId } : {}),
-        ...(selectedWeekDay ? { weekDays: { has: selectedWeekDay } } : {}),
+        ...(selectedWeekDays.length > 0
+          ? { weekDays: { hasSome: selectedWeekDays } }
+          : {}),
       },
       take: 60,
       select: {
@@ -89,6 +96,12 @@ export default async function ReceptionClassesPage({
   ]);
   const selectedClass = query.classId
     ? classes.find((schoolClass) => schoolClass.id === query.classId)
+    : classSearch
+      ? classes.find(
+          (schoolClass) =>
+            schoolClass.name.toLocaleLowerCase() ===
+            classSearch.toLocaleLowerCase(),
+        )
     : null;
 
   return (
@@ -133,21 +146,16 @@ export default async function ReceptionClassesPage({
               <span>Class search</span>
               <input
                 defaultValue={classSearch ?? ""}
+                list="reception-classes"
                 name="classSearch"
                 placeholder="Type a class name"
                 type="search"
               />
-            </label>
-            <label>
-              <span>Class</span>
-              <select defaultValue={query.classId ?? ""} name="classId">
-                <option value="">Choose a class</option>
+              <datalist id="reception-classes">
                 {classes.map((schoolClass) => (
-                  <option key={schoolClass.id} value={schoolClass.id}>
-                    {schoolClass.name}
-                  </option>
+                  <option key={schoolClass.id} value={schoolClass.name} />
                 ))}
-              </select>
+              </datalist>
             </label>
             <label>
               <span>Teacher</span>
@@ -160,17 +168,22 @@ export default async function ReceptionClassesPage({
                 ))}
               </select>
             </label>
-            <label>
-              <span>Weekday</span>
-              <select defaultValue={selectedWeekDay ?? ""} name="weekDay">
-                <option value="">Any day</option>
+            <div>
+              <span className="form-section-label">Weekdays</span>
+              <div className="weekday-picker compact-weekday-picker">
                 {weekdayOptions.map((weekday) => (
-                  <option key={weekday.value} value={weekday.value}>
-                    {weekday.label}
-                  </option>
+                  <label className="checkbox-label" key={weekday.value}>
+                    <input
+                      defaultChecked={selectedWeekDays.includes(weekday.value)}
+                      name="weekDay"
+                      type="checkbox"
+                      value={weekday.value}
+                    />
+                    <span>{weekday.shortLabel}</span>
+                  </label>
                 ))}
-              </select>
-            </label>
+              </div>
+            </div>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
                 Search
@@ -181,6 +194,40 @@ export default async function ReceptionClassesPage({
             </div>
           </form>
         </section>
+
+        {classSearch && classes.length > 0 ? (
+          <section className="panel data-panel" aria-label="Class results">
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Class</th>
+                    <th>Teacher</th>
+                    <th>Schedule</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {classes.map((schoolClass) => (
+                    <tr key={schoolClass.id}>
+                      <td>{schoolClass.name}</td>
+                      <td>{schoolClass.teacher.name}</td>
+                      <td>{formatWeekdays(schoolClass.weekDays)}</td>
+                      <td>
+                        <Link
+                          className="text-link compact-link"
+                          href={`/reception/classes?classId=${schoolClass.id}`}
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         {selectedClass ? (
           <section className="panel data-panel" aria-labelledby="class-summary-title">

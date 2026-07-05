@@ -478,8 +478,12 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(studentProfilePanel, /student-profile-summary/);
   assert.match(studentProfilePanel, /student-grade-cards/);
   assert.match(receptionClassesPage, /Classes/);
+  assert.match(receptionClassesPage, /datalist id="reception-classes"/);
   assert.match(receptionClassesPage, /teacherId/);
   assert.match(receptionClassesPage, /weekDay/);
+  assert.match(receptionClassesPage, /hasSome/);
+  assert.match(receptionClassesPage, /checkbox-label/);
+  assert.doesNotMatch(receptionClassesPage, /Choose a class/);
   assert.match(receptionClassesPage, /Recent lessons/);
   assert.match(receptionClassesPage, /Untitled lesson/);
   assert.match(receptionEditPage, /updateBonusClassAction/);
