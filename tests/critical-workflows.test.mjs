@@ -19,6 +19,8 @@ test("teacher class pages restrict class access to assigned teachers", async () 
 
   assert.match(dashboard, /currentUser\.role === "TEACHER"/);
   assert.match(dashboard, /teacherId: currentUser\.id/);
+  assert.match(dashboard, /Teacher workflows/);
+  assert.match(dashboard, /teacher-class-card/);
   assert.match(classDetail, /currentUser\.role === "TEACHER"/);
   assert.match(classDetail, /teacherId: currentUser\.id/);
   assert.match(recordForm, /currentUser\.role === "TEACHER"/);
@@ -119,6 +121,12 @@ test("admin student management supports creating and editing students", async ()
   const editStudentPage = await readProjectFile(
     "src/app/admin/students/[studentId]/page.tsx",
   );
+  const viewStudentPage = await readProjectFile(
+    "src/app/admin/students/[studentId]/view/page.tsx",
+  );
+  const studentProfilePanel = await readProjectFile(
+    "src/app/components/student-profile-panel.tsx",
+  );
   const recordForm = await readProjectFile(
     "src/app/dashboard/classes/[classId]/record/page.tsx",
   );
@@ -131,10 +139,21 @@ test("admin student management supports creating and editing students", async ()
   assert.doesNotMatch(studentActions, /preferredName/);
   assert.match(studentActions, /isActive/);
   assert.match(studentsPage, /Create student/);
+  assert.match(studentsPage, /studentSearch/);
+  assert.match(studentsPage, /datalist id="admin-students"/);
+  assert.match(studentsPage, /\/admin\/students\/\$\{student\.id\}\/view/);
   assert.match(newStudentPage, /createStudentAction/);
   assert.match(editStudentPage, /updateStudentAction/);
+  assert.match(viewStudentPage, /StudentProfilePanel/);
+  assert.match(studentProfilePanel, /Current active class/);
+  assert.match(studentProfilePanel, /Last class lesson/);
+  assert.match(studentProfilePanel, /absentLessons/);
+  assert.match(studentProfilePanel, /gradeClassId/);
   assert.match(recordForm, /student:\s*{\s*isActive: true/s);
   assert.match(dashboardPage, /Manage students/);
+  assert.match(dashboardPage, /dashboard-metric-grid/);
+  assert.match(dashboardPage, /dashboard-action-grid/);
+  assert.match(dashboardPage, /Review substitutions/);
 });
 
 test("admin CSV export includes record filters and student rows", async () => {
@@ -229,11 +248,17 @@ test("admin risk review flags attendance and homework signals", async () => {
 
   assert.match(riskPage, /RISK_THRESHOLDS/);
   assert.match(riskPage, /incompleteHomework:\s*4/);
+  assert.match(riskPage, /lowTestTotalScore:\s*7/);
+  assert.match(riskPage, /lowOralGradeMaximum:\s*"C"/);
   assert.match(riskPage, /missedClasses:\s*4/);
   assert.match(riskPage, /consecutiveMissedClasses:\s*2/);
   assert.match(riskPage, /status: "SUBMITTED"/);
   assert.match(riskPage, /attendanceRecord\.status === "ABSENT"/);
   assert.match(riskPage, /homeworkStatus === "INCOMPLETE"/);
+  assert.match(riskPage, /compositionScore/);
+  assert.match(riskPage, /writtenTestScore/);
+  assert.match(riskPage, /testTotal < RISK_THRESHOLDS\.lowTestTotalScore/);
+  assert.match(riskPage, /lowOralGrades/);
   assert.match(riskPage, /consecutiveMissedClassCount/);
   assert.match(riskPage, /longestMissedStreak/);
   assert.match(riskPage, /\$queryRaw<RiskResolution\[\]>/);
@@ -375,7 +400,16 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
     "src/app/reception/calendar/page.tsx",
   );
   const receptionStudentsPage = await readProjectFile(
+    "src/app/reception/students/page.tsx",
+  );
+  const receptionClassesPage = await readProjectFile(
+    "src/app/reception/classes/page.tsx",
+  );
+  const receptionCombinedRedirectPage = await readProjectFile(
     "src/app/reception/students-and-classes/page.tsx",
+  );
+  const studentProfilePanel = await readProjectFile(
+    "src/app/components/student-profile-panel.tsx",
   );
   const receptionEditPage = await readProjectFile(
     "src/app/reception/bonus-classes/[bonusClassId]/page.tsx",
@@ -418,7 +452,11 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusLib, /formatBonusClassErrorMessage/);
   assert.match(bonusLib, /startMinutes < existingEnd/);
   assert.match(receptionDashboardPage, /\/reception\/calendar/);
-  assert.match(receptionDashboardPage, /\/reception\/students-and-classes/);
+  assert.match(receptionDashboardPage, /\/reception\/students/);
+  assert.match(receptionDashboardPage, /\/reception\/classes/);
+  assert.match(receptionDashboardPage, /dashboard-metric-grid/);
+  assert.match(receptionDashboardPage, /dashboard-action-grid/);
+  assert.match(receptionDashboardPage, /upcomingBonusClasses/);
   assert.match(receptionPage, /Schedule bonus class/);
   assert.match(receptionPage, /studentSearch/);
   assert.doesNotMatch(receptionPage, /Bonus class \{query\.status\}/);
@@ -428,15 +466,22 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionCalendarPage, /timeSlots/);
   assert.match(receptionCalendarPage, /formatTimeFromMinutes/);
   assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);
-  assert.match(receptionStudentsPage, /Students and classes/);
+  assert.match(receptionCombinedRedirectPage, /redirect\("\/reception\/students"\)/);
+  assert.match(receptionStudentsPage, /Students/);
   assert.match(receptionStudentsPage, /studentSearch/);
-  assert.match(receptionStudentsPage, /teacherId/);
-  assert.match(receptionStudentsPage, /weekDay/);
-  assert.match(receptionStudentsPage, /lastAttendedLesson/);
-  assert.match(receptionStudentsPage, /absentLessons/);
-  assert.match(receptionStudentsPage, /homeworkNotDone/);
-  assert.match(receptionStudentsPage, /Recent lessons/);
-  assert.match(receptionStudentsPage, /Untitled lesson/);
+  assert.match(receptionStudentsPage, /datalist id="reception-students"/);
+  assert.doesNotMatch(receptionStudentsPage, /name="studentId">\s*<option value="">Choose a student/s);
+  assert.match(receptionStudentsPage, /StudentProfilePanel/);
+  assert.match(receptionStudentsPage, /studentId=\$\{student\.id\}/);
+  assert.match(studentProfilePanel, /absentLessons/);
+  assert.match(studentProfilePanel, /gradeClassId/);
+  assert.match(studentProfilePanel, /student-profile-summary/);
+  assert.match(studentProfilePanel, /student-grade-cards/);
+  assert.match(receptionClassesPage, /Classes/);
+  assert.match(receptionClassesPage, /teacherId/);
+  assert.match(receptionClassesPage, /weekDay/);
+  assert.match(receptionClassesPage, /Recent lessons/);
+  assert.match(receptionClassesPage, /Untitled lesson/);
   assert.match(receptionEditPage, /updateBonusClassAction/);
   assert.match(receptionEditPage, /completeBonusClassAction/);
   assert.match(receptionEditPage, /status\?: string/);

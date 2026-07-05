@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 type AdminStudentsPageProps = {
   searchParams: Promise<{
     status?: string;
+    studentSearch?: string;
   }>;
 };
 
@@ -26,8 +27,14 @@ export default async function AdminStudentsPage({
   }
 
   const params = await searchParams;
+  const studentSearch = params.studentSearch?.trim() || undefined;
   const students = await prisma.student.findMany({
     orderBy: [{ isActive: "desc" }, { fullName: "asc" }],
+    where: {
+      ...(studentSearch
+        ? { fullName: { contains: studentSearch, mode: "insensitive" } }
+        : {}),
+    },
     select: {
       id: true,
       fullName: true,
@@ -78,6 +85,34 @@ export default async function AdminStudentsPage({
           </p>
         ) : null}
 
+        <section className="panel" aria-label="Student filters">
+          <form className="filter-form compact-filter-form">
+            <label>
+              <span>Student name</span>
+              <input
+                defaultValue={studentSearch ?? ""}
+                list="admin-students"
+                name="studentSearch"
+                placeholder="Type a student name"
+                type="search"
+              />
+              <datalist id="admin-students">
+                {students.map((student) => (
+                  <option key={student.id} value={student.fullName} />
+                ))}
+              </datalist>
+            </label>
+            <div className="filter-actions">
+              <button className="primary-button" type="submit">
+                Search
+              </button>
+              <Link className="text-link" href="/admin/students">
+                Clear
+              </Link>
+            </div>
+          </form>
+        </section>
+
         <section className="panel data-panel" aria-label="Students">
           <div className="table-wrap">
             <table>
@@ -96,15 +131,28 @@ export default async function AdminStudentsPage({
                     <td>{student.isActive ? "Active" : "Inactive"}</td>
                     <td>{student._count.enrollments}</td>
                     <td>
-                      <Link
-                        className="text-link compact-link"
-                        href={`/admin/students/${student.id}`}
-                      >
-                        Edit
-                      </Link>
+                      <div className="table-actions">
+                        <Link
+                          className="text-link compact-link"
+                          href={`/admin/students/${student.id}/view`}
+                        >
+                          View
+                        </Link>
+                        <Link
+                          className="text-link compact-link"
+                          href={`/admin/students/${student.id}`}
+                        >
+                          Edit
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
+                {students.length === 0 ? (
+                  <tr>
+                    <td colSpan={4}>No students match the current filters.</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>

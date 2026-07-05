@@ -37,7 +37,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Partial evaluations happen on the 7th and 23rd class.
 - Test grades are split into Mid-term and Final periods.
 - Each test grade has an oral letter grade, a composition score from 0 to 2, and a written test score from 0 to 8.
-- The written total is calculated as composition plus written test, from 0 to 10.
+- The test total is calculated as composition plus written test, from 0 to 10.
 - Submitted records stay in the app database and can be reviewed by admins.
 - Submitted lessons count toward the class teacher's monthly work summary using the class duration.
 - Substitute lesson records store the primary class teacher separately from the teacher who taught the lesson.
@@ -48,7 +48,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Work log categories are bonus class, extra activity, meeting, and other.
 - Reception accounts can schedule independent bonus classes with student, subject, teacher, date, start time, duration, and notes.
 - Scheduled bonus classes cannot overlap another non-canceled bonus class for the same teacher on the same date.
-- Reception accounts can look up active student and class information for parent-facing questions, including last attended lesson, absences, incomplete homework, class teacher, schedule, roster, and recent submitted lessons.
+- Reception accounts can use separate student and class lookup pages for parent-facing questions. Student lookup shows active class context, absences, and grades by class; class lookup shows teacher, schedule, roster, and recent submitted lessons.
 - Bonus class scheduling includes a day calendar with 30-minute time rows and one column per teacher.
 - Bonus class attendance can be confirmed as present, absent, or excused by the assigned teacher, reception, or admin.
 - Completed scheduled bonus classes count toward the assigned teacher's monthly work summary.
@@ -82,9 +82,11 @@ The admin risk review report is computed from submitted class records. Admins ca
 
 Default thresholds are kept in `src/app/admin/risk/page.tsx` so they can be adjusted in one place:
 
-- 3 incomplete homework records.
-- 3 missed classes.
+- 4 incomplete homework records.
+- 4 missed classes.
 - 2 missed classes in a row.
+- Test total below 7 out of 10.
+- Oral grade of C or below.
 
 Only `ABSENT` attendance records count as missed classes by default. `EXCUSED` and `LATE` records stay visible in class records but do not count toward the risk report thresholds.
 
