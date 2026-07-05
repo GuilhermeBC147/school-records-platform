@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
+import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import { formatStartTime } from "@/lib/bonus-classes";
 import {
@@ -142,7 +143,7 @@ export default async function TeacherWorkPage({
                     <th>Class</th>
                     <th>Lesson</th>
                     <th>Type</th>
-                    <th>Minutes</th>
+                    <th>Duration</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -158,7 +159,7 @@ export default async function TeacherWorkPage({
                           ? `Approved substitute for ${lesson.class.teacher.name}`
                           : "Regular lesson"}
                       </td>
-                      <td>{lesson.class.durationMinutes}</td>
+                      <td>{formatDuration(lesson.class.durationMinutes)}</td>
                     </tr>
                   ))}
                   {summary.lessons.length === 0 ? (
@@ -181,7 +182,7 @@ export default async function TeacherWorkPage({
                     <th>Time</th>
                     <th>Student</th>
                     <th>Subject</th>
-                    <th>Minutes</th>
+                    <th>Duration</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -196,7 +197,7 @@ export default async function TeacherWorkPage({
                       <td>{formatStartTime(bonusClass.startTime)}</td>
                       <td>{bonusClass.student.fullName}</td>
                       <td>{bonusClass.subject}</td>
-                      <td>{bonusClass.durationMinutes}</td>
+                      <td>{formatDuration(bonusClass.durationMinutes)}</td>
                     </tr>
                   ))}
                   {summary.bonusClasses.length === 0 ? (
@@ -219,7 +220,8 @@ export default async function TeacherWorkPage({
                     <th>Category</th>
                     <th>Title</th>
                     <th>Subject</th>
-                    <th>Minutes</th>
+                    <th>Students</th>
+                    <th>Duration</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -231,12 +233,19 @@ export default async function TeacherWorkPage({
                       <td>{formatTeacherWorkCategory(workLog.category)}</td>
                       <td>{workLog.title}</td>
                       <td>{workLog.subject ?? "-"}</td>
-                      <td>{workLog.durationMinutes}</td>
+                      <td>
+                        {workLog.students.length > 0
+                          ? workLog.students
+                              .map((item) => item.student.fullName)
+                              .join(", ")
+                          : "-"}
+                      </td>
+                      <td>{formatDuration(workLog.durationMinutes)}</td>
                     </tr>
                   ))}
                   {summary.workLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={5}>No paid activities this month.</td>
+                      <td colSpan={6}>No paid activities this month.</td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -260,7 +269,7 @@ export default async function TeacherWorkPage({
                     <th>Class</th>
                     <th>Primary teacher</th>
                     <th>Lesson</th>
-                    <th>Minutes</th>
+                    <th>Duration</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -272,7 +281,7 @@ export default async function TeacherWorkPage({
                       <td>{lesson.class.name}</td>
                       <td>{lesson.class.teacher.name}</td>
                       <td>{lesson.name ?? "-"}</td>
-                      <td>{lesson.class.durationMinutes}</td>
+                      <td>{formatDuration(lesson.class.durationMinutes)}</td>
                     </tr>
                   ))}
                 </tbody>

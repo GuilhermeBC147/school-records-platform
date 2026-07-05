@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { TeacherWorkCategory } from "@/generated/prisma/enums";
 import { readOptionalStartTime } from "@/lib/bonus-classes";
+import { readDurationMinutes as readDurationInputMinutes } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { teacherWorkCategories } from "@/lib/teacher-work";
@@ -38,10 +39,10 @@ function readWorkDate(formData: FormData) {
 }
 
 function readDurationMinutes(formData: FormData) {
-  const durationMinutes = Number(formData.get("durationMinutes"));
+  const durationMinutes = readDurationInputMinutes(formData.get("durationMinutes"));
 
   if (
-    !Number.isInteger(durationMinutes) ||
+    durationMinutes === null ||
     durationMinutes <= 0 ||
     durationMinutes > 720
   ) {
@@ -49,6 +50,17 @@ function readDurationMinutes(formData: FormData) {
   }
 
   return durationMinutes;
+}
+
+function readSelectedStudentIds(formData: FormData) {
+  return Array.from(
+    new Set(
+      formData
+        .getAll("studentIds")
+        .map((value) => String(value).trim())
+        .filter(Boolean),
+    ),
+  );
 }
 
 export async function createTeacherWorkLogAction(formData: FormData) {
@@ -68,6 +80,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
     ? requestedRedirect
     : "/dashboard/work";
   const startTime = readOptionalStartTime(formData.get("startTime"));
+  const selectedStudentIds = readSelectedStudentIds(formData);
   const subject = String(formData.get("subject") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
   const workDate = readWorkDate(formData);
@@ -102,6 +115,21 @@ export async function createTeacherWorkLogAction(formData: FormData) {
     throw new Error("Teacher account is required.");
   }
 
+  const selectedStudents =
+    selectedStudentIds.length > 0
+      ? await prisma.student.findMany({
+          where: {
+            id: { in: selectedStudentIds },
+            isActive: true,
+          },
+          select: { id: true },
+        })
+      : [];
+
+  if (selectedStudents.length !== selectedStudentIds.length) {
+    throw new Error("Choose active students for this activity.");
+  }
+
   await prisma.teacherWorkLog.create({
     data: {
       category: category as TeacherWorkCategory,
@@ -113,6 +141,11 @@ export async function createTeacherWorkLogAction(formData: FormData) {
       teacherId: teacher.id,
       title,
       workDate,
+      students: {
+        create: selectedStudentIds.map((studentId) => ({
+          studentId,
+        })),
+      },
     },
   });
 

@@ -281,6 +281,22 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <strong>Work summaries</strong>
                 <small>Audit lessons, bonus classes, activities, and meetings.</small>
               </Link>
+              <Link
+                className="dashboard-action-card"
+                href="/admin/work-summary/new-activity"
+              >
+                <span>Payroll</span>
+                <strong>Add activity</strong>
+                <small>Record paid teacher work and connect students when needed.</small>
+              </Link>
+              <Link
+                className="dashboard-action-card"
+                href="/admin/work-summary/new-meeting"
+              >
+                <span>Payroll</span>
+                <strong>Create meeting</strong>
+                <small>Count one meeting toward multiple teachers at once.</small>
+              </Link>
               <Link className="dashboard-action-card" href="/admin/substitutions">
                 <span>Approvals</span>
                 <strong>Review substitutions</strong>

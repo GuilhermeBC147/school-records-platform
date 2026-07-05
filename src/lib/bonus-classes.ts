@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { readDurationMinutes as readDurationInputMinutes } from "@/lib/class-schedule";
 
 export function formatBonusClassStatus(status: string) {
   return status
@@ -100,10 +101,10 @@ export function readOptionalStartTime(value: FormDataEntryValue | null) {
 }
 
 export function readDurationMinutes(value: FormDataEntryValue | null) {
-  const durationMinutes = Number(value);
+  const durationMinutes = readDurationInputMinutes(value);
 
   if (
-    !Number.isInteger(durationMinutes) ||
+    durationMinutes === null ||
     durationMinutes <= 0 ||
     durationMinutes > 720
   ) {

@@ -23,7 +23,9 @@ Branch naming:
 - `sprint-14-bonus-scheduling`
 - `sprint-15-admin-teacher-workflow-adjustments`
 - `sprint-16-consistency-pass`
-- `sprint-17-production-readiness`
+- `sprint-17-localization`
+- `sprint-18-imports`
+- `sprint-19-production-readiness`
 
 Commit style:
 
@@ -511,12 +513,73 @@ Done when:
 - Small rough edges found during testing are fixed without expanding scope.
 - Tests cover any behavior changes introduced during the pass.
 
-## Sprint 17: Production Readiness
+## Sprint 17: Platform Localization
+
+Goal: let users choose between English and Brazilian Portuguese across the platform.
+
+Tasks:
+
+- Add a locale setting for each signed-in user, with English and Brazilian Portuguese options.
+- Add a language selector in account settings or another persistent account area.
+- Define default locale behavior for new users and unauthenticated pages.
+- Extract user-facing labels, navigation text, validation messages, success messages, empty states, and email/password-reset copy into translation resources.
+- Localize role-specific admin, teacher, and reception dashboards.
+- Localize date, time, duration, status, attendance, homework, grade, risk-review, scheduling, and work-summary wording.
+- Confirm CSV/export headers use the selected or documented locale consistently.
+- Add fallback handling so missing translation keys are visible during development.
+- Add focused tests for locale selection, persistence, and translated critical workflows.
+
+Suggested commits:
+
+- `feat: add platform localization`
+- `test: cover locale selection`
+
+Done when:
+
+- Users can choose English or Brazilian Portuguese.
+- The selected language persists across sessions.
+- Critical admin, teacher, and reception workflows show translated interface text.
+- Tests cover language selection and representative translated workflows.
+
+## Sprint 18: Student and Class Imports
+
+Goal: let admins import students and classes while preventing accidental duplicate data.
+
+Tasks:
+
+- Add admin import screens for students and classes.
+- Define CSV templates for student imports and class imports.
+- Document required and optional columns for each import type.
+- Validate imported rows before writing to the database.
+- Detect repeated student information such as duplicated names, enrollment identifiers, or other configured unique fields.
+- Detect repeated class information such as duplicated class name, book, semester, year, and teacher combinations.
+- Show row-level validation errors and duplicate warnings before import confirmation.
+- Let admins download an error report for failed rows.
+- Import only valid confirmed rows and report skipped or duplicate rows clearly.
+- Add audit-friendly import summaries with counts for created, skipped, duplicated, and failed rows.
+- Add tests for successful imports, duplicate detection, validation errors, and partial-failure handling.
+
+Suggested commits:
+
+- `feat: add student and class imports`
+- `test: cover import duplicate checks`
+
+Done when:
+
+- Admins can import student and class data from documented templates.
+- Duplicate or repeated information is detected before records are created.
+- Import results clearly explain created, skipped, duplicate, and failed rows.
+- Tests cover duplicate detection and import validation behavior.
+
+## Sprint 19: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 
 Tasks:
 
+- Run a full quality-control pass across admin, teacher, reception, localization, import, grading, scheduling, risk-review, and reporting workflows.
+- Test English and Brazilian Portuguese language selection across critical screens.
+- Test student and class imports with valid files, invalid rows, duplicated data, and partial-failure cases.
 - Add production environment checklist.
 - Add hosted PostgreSQL setup notes.
 - Add backup/export routine.
@@ -526,13 +589,17 @@ Tasks:
 - Add backup guidance for grades, risk-review data, bonus classes, substitutions, and teacher work summaries.
 - Add tests for reception scheduling permissions and teacher double-booking prevention.
 - Add tests for substitution payroll counts and extra activity approval.
+- Confirm all quality-control findings are either fixed or documented as launch blockers/follow-up work.
 
 Suggested commits:
 
 - `docs: add production setup checklist`
 - `test: cover critical school workflows`
+- `test: complete production quality control`
 
 Done when:
 
 - The school has a clear handoff checklist.
-- Critical workflows are tested.
+- Critical workflows are tested across roles and supported languages.
+- Import, localization, scheduling, grading, risk-review, export, and payroll-related workflows pass quality control.
+- Launch blockers are resolved or explicitly documented before handoff.

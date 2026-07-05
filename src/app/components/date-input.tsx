@@ -35,30 +35,42 @@ export function DateInput({
   const [displayValue, setDisplayValue] = useState(initialDisplayValue);
   const isoValue = parseDateInputToIso(displayValue, dateFormat);
   const hasInvalidValue = Boolean(displayValue.trim()) && !isoValue;
+  const submittedIsoValue = hasInvalidValue ? "" : isoValue;
 
   return (
-    <>
-      <input
-        aria-describedby={`${name}-date-format`}
-        autoComplete="off"
-        className={className}
-        inputMode="numeric"
-        onChange={(event) => setDisplayValue(event.target.value)}
-        pattern={
-          dateFormat === "YYYY_MM_DD"
-            ? "\\d{4}-\\d{1,2}-\\d{1,2}"
-            : "\\d{1,2}/\\d{1,2}/(?:\\d{2}|\\d{4})"
-        }
-        placeholder={inputLabels[dateFormat]}
-        required={required}
-        title={`Use ${inputLabels[dateFormat]}.`}
-        type="text"
-        value={displayValue}
-      />
-      <input name={name} type="hidden" value={hasInvalidValue ? "" : isoValue} />
+    <span className="date-input-group">
+      <span className="date-input-row">
+        <input
+          aria-describedby={`${name}-date-format`}
+          autoComplete="off"
+          className={className}
+          inputMode="numeric"
+          onChange={(event) => setDisplayValue(event.target.value)}
+          pattern={
+            dateFormat === "YYYY_MM_DD"
+              ? "\\d{4}-\\d{1,2}-\\d{1,2}"
+              : "\\d{1,2}/\\d{1,2}/(?:\\d{2}|\\d{4})"
+          }
+          placeholder={inputLabels[dateFormat]}
+          required={required}
+          title={`Use ${inputLabels[dateFormat]}.`}
+          type="text"
+          value={displayValue}
+        />
+        <input
+          aria-label="Choose date from calendar"
+          className="date-calendar-input"
+          onChange={(event) =>
+            setDisplayValue(formatIsoDateInput(event.target.value, dateFormat))
+          }
+          type="date"
+          value={submittedIsoValue}
+        />
+      </span>
+      <input name={name} type="hidden" value={submittedIsoValue} />
       <small className="field-hint" id={`${name}-date-format`}>
         {inputLabels[dateFormat]}
       </small>
-    </>
+    </span>
   );
 }

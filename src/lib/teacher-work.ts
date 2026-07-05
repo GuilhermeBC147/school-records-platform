@@ -145,6 +145,18 @@ export async function getTeacherWorkSummary({
         durationMinutes: true,
         notes: true,
         startTime: true,
+        students: {
+          orderBy: {
+            student: { fullName: "asc" },
+          },
+          select: {
+            student: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
         subject: true,
         title: true,
         workDate: true,
