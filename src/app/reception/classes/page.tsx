@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
-import { Weekday } from "@/generated/prisma/enums";
 import {
   formatDuration,
   formatWeekdays,
@@ -10,6 +9,7 @@ import {
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import type { Weekday } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,41 @@ type ReceptionClassesPageProps = {
     classId?: string;
     classSearch?: string;
     teacherId?: string;
-    weekDay?: string;
+    weekDay?: string | string[];
   }>;
 };
+
+function readWeekdayFilters(value: string | string[] | undefined) {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+  const allowedWeekdays = new Set<string>(
+    weekdayOptions.map((option) => option.value),
+  );
+
+  return values.filter((item): item is Weekday => allowedWeekdays.has(item));
+}
+
+function buildClassHref(filters: {
+  classId: string;
+  classSearch?: string;
+  teacherId?: string;
+  weekDays: Weekday[];
+}) {
+  const params = new URLSearchParams({ classId: filters.classId });
+
+  if (filters.classSearch) {
+    params.set("classSearch", filters.classSearch);
+  }
+
+  if (filters.teacherId) {
+    params.set("teacherId", filters.teacherId);
+  }
+
+  for (const weekDay of filters.weekDays) {
+    params.append("weekDay", weekDay);
+  }
+
+  return `/reception/classes?${params.toString()}`;
+}
 
 export default async function ReceptionClassesPage({
   searchParams,
@@ -38,13 +70,9 @@ export default async function ReceptionClassesPage({
   const query = await searchParams;
   const classSearch = query.classSearch?.trim() || undefined;
   const selectedTeacherId = query.teacherId?.trim() || undefined;
-  const selectedWeekDay = weekdayOptions.some(
-    (weekday) => weekday.value === query.weekDay,
-  )
-    ? (query.weekDay as Weekday)
-    : undefined;
+  const selectedWeekDays = readWeekdayFilters(query.weekDay);
 
-  const [classes, teachers] = await Promise.all([
+  const [classes, teachers, classOptions] = await Promise.all([
     prisma.class.findMany({
       orderBy: { name: "asc" },
       where: {
@@ -53,7 +81,9 @@ export default async function ReceptionClassesPage({
           ? { name: { contains: classSearch, mode: "insensitive" } }
           : {}),
         ...(selectedTeacherId ? { teacherId: selectedTeacherId } : {}),
-        ...(selectedWeekDay ? { weekDays: { has: selectedWeekDay } } : {}),
+        ...(selectedWeekDays.length > 0
+          ? { weekDays: { hasSome: selectedWeekDays } }
+          : {}),
       },
       take: 60,
       select: {
@@ -70,7 +100,7 @@ export default async function ReceptionClassesPage({
           orderBy: { student: { fullName: "asc" } },
           select: {
             id: true,
-            student: { select: { fullName: true } },
+            student: { select: { fullName: true, id: true } },
           },
         },
         lessons: {
@@ -84,6 +114,12 @@ export default async function ReceptionClassesPage({
     prisma.user.findMany({
       orderBy: { name: "asc" },
       where: { isActive: true, role: "TEACHER" },
+      select: { id: true, name: true },
+    }),
+    prisma.class.findMany({
+      orderBy: { name: "asc" },
+      where: { isActive: true },
+      take: 200,
       select: { id: true, name: true },
     }),
   ]);
@@ -128,26 +164,21 @@ export default async function ReceptionClassesPage({
         </section>
 
         <section className="panel" aria-label="Class filters">
-          <form className="filter-form class-filter-form">
+          <form className="filter-form class-lookup-filter-form">
             <label>
               <span>Class search</span>
               <input
                 defaultValue={classSearch ?? ""}
+                list="reception-classes"
                 name="classSearch"
                 placeholder="Type a class name"
                 type="search"
               />
-            </label>
-            <label>
-              <span>Class</span>
-              <select defaultValue={query.classId ?? ""} name="classId">
-                <option value="">Choose a class</option>
-                {classes.map((schoolClass) => (
-                  <option key={schoolClass.id} value={schoolClass.id}>
-                    {schoolClass.name}
-                  </option>
+              <datalist id="reception-classes">
+                {classOptions.map((schoolClass) => (
+                  <option key={schoolClass.id} value={schoolClass.name} />
                 ))}
-              </select>
+              </datalist>
             </label>
             <label>
               <span>Teacher</span>
@@ -160,17 +191,22 @@ export default async function ReceptionClassesPage({
                 ))}
               </select>
             </label>
-            <label>
-              <span>Weekday</span>
-              <select defaultValue={selectedWeekDay ?? ""} name="weekDay">
-                <option value="">Any day</option>
+            <div className="weekday-filter">
+              <span className="form-section-label">Weekdays</span>
+              <div className="weekday-picker compact-weekday-picker">
                 {weekdayOptions.map((weekday) => (
-                  <option key={weekday.value} value={weekday.value}>
-                    {weekday.label}
-                  </option>
+                  <label className="checkbox-label" key={weekday.value}>
+                    <input
+                      defaultChecked={selectedWeekDays.includes(weekday.value)}
+                      name="weekDay"
+                      type="checkbox"
+                      value={weekday.value}
+                    />
+                    <span>{weekday.shortLabel}</span>
+                  </label>
                 ))}
-              </select>
-            </label>
+              </div>
+            </div>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
                 Search
@@ -180,6 +216,44 @@ export default async function ReceptionClassesPage({
               </Link>
             </div>
           </form>
+        </section>
+
+        <section className="panel data-panel" aria-labelledby="class-results-title">
+          <div className="section-heading-row">
+            <div>
+              <h2 id="class-results-title">Class results</h2>
+              <p className="muted-copy">
+                {classes.length} active {classes.length === 1 ? "class" : "classes"} found.
+              </p>
+            </div>
+          </div>
+          <div className="class-result-grid">
+            {classes.map((schoolClass) => (
+              <Link
+                className={`class-result-card${
+                  selectedClass?.id === schoolClass.id ? " selected" : ""
+                }`}
+                href={buildClassHref({
+                  classId: schoolClass.id,
+                  classSearch,
+                  teacherId: selectedTeacherId,
+                  weekDays: selectedWeekDays,
+                })}
+                key={schoolClass.id}
+              >
+                <span>{schoolClass.teacher.name}</span>
+                <strong>{schoolClass.name}</strong>
+                <small>{formatWeekdays(schoolClass.weekDays)}</small>
+                <div className="class-result-card-metrics">
+                  <span>{schoolClass.enrollments.length} students</span>
+                  <span>{formatDuration(schoolClass.durationMinutes)}</span>
+                </div>
+              </Link>
+            ))}
+            {classes.length === 0 ? (
+              <p className="muted-copy">No active classes match the current filters.</p>
+            ) : null}
+          </div>
         </section>
 
         {selectedClass ? (
@@ -205,46 +279,52 @@ export default async function ReceptionClassesPage({
                 <strong>Recent lessons</strong>
               </article>
             </div>
-            <dl className="detail-list">
-              <div>
-                <dt>Teacher</dt>
-                <dd>
-                  {selectedClass.teacher.name} ({selectedClass.teacher.email})
-                </dd>
-              </div>
-              <div>
-                <dt>Schedule</dt>
-                <dd>
-                  {formatWeekdays(selectedClass.weekDays)} |{" "}
-                  {formatDuration(selectedClass.durationMinutes)}
-                </dd>
-              </div>
-              <div>
-                <dt>Roster</dt>
-                <dd>
-                  {selectedClass.enrollments.length > 0
-                    ? selectedClass.enrollments
-                        .map((enrollment) => enrollment.student.fullName)
-                        .join(", ")
-                    : "No active students."}
-                </dd>
-              </div>
-              <div>
-                <dt>Recent lessons</dt>
-                <dd>
-                  {selectedClass.lessons.length > 0
-                    ? selectedClass.lessons
-                        .map(
-                          (lesson) =>
-                            `${formatShortDate(lesson.lessonDate)} | ${
-                              lesson.name ?? "Untitled lesson"
-                            }`,
-                        )
-                        .join("; ")
-                    : "No submitted lessons."}
-                </dd>
-              </div>
-            </dl>
+            <div className="class-detail-grid">
+              <article className="class-detail-card">
+                <span>Teacher</span>
+                <strong>{selectedClass.teacher.name}</strong>
+                <small>{selectedClass.teacher.email}</small>
+              </article>
+              <article className="class-detail-card">
+                <span>Schedule</span>
+                <strong>{formatWeekdays(selectedClass.weekDays)}</strong>
+                <small>{formatDuration(selectedClass.durationMinutes)}</small>
+              </article>
+            </div>
+            <div className="data-grid class-detail-sections">
+              <article className="data-panel">
+                <h2>Roster</h2>
+                <div className="student-event-list">
+                  {selectedClass.enrollments.map((enrollment) => (
+                    <Link
+                      className="student-event-row linked"
+                      href={`/reception/students?studentId=${enrollment.student.id}`}
+                      key={enrollment.id}
+                    >
+                      <strong>{enrollment.student.fullName}</strong>
+                      <small>View student details</small>
+                    </Link>
+                  ))}
+                  {selectedClass.enrollments.length === 0 ? (
+                    <p className="muted-copy">No active students.</p>
+                  ) : null}
+                </div>
+              </article>
+              <article className="data-panel">
+                <h2>Recent lessons</h2>
+                <div className="student-event-list">
+                  {selectedClass.lessons.map((lesson) => (
+                    <article className="student-event-row" key={lesson.id}>
+                      <span>{formatShortDate(lesson.lessonDate)}</span>
+                      <strong>{lesson.name ?? "Untitled lesson"}</strong>
+                    </article>
+                  ))}
+                  {selectedClass.lessons.length === 0 ? (
+                    <p className="muted-copy">No submitted lessons.</p>
+                  ) : null}
+                </div>
+              </article>
+            </div>
           </section>
         ) : null}
       </div>

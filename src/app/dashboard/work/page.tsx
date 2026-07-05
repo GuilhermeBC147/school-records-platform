@@ -148,7 +148,9 @@ export default async function TeacherWorkPage({
                 <tbody>
                   {summary.lessons.map((lesson) => (
                     <tr key={lesson.id}>
-                      <td>{formatShortDate(lesson.lessonDate)}</td>
+                      <td>
+                        {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                      </td>
                       <td>{lesson.class.name}</td>
                       <td>{lesson.name ?? "-"}</td>
                       <td>
@@ -185,7 +187,12 @@ export default async function TeacherWorkPage({
                 <tbody>
                   {summary.bonusClasses.map((bonusClass) => (
                     <tr key={bonusClass.id}>
-                      <td>{formatShortDate(bonusClass.scheduledDate)}</td>
+                      <td>
+                        {formatShortDate(
+                          bonusClass.scheduledDate,
+                          currentUser.dateFormat,
+                        )}
+                      </td>
                       <td>{formatStartTime(bonusClass.startTime)}</td>
                       <td>{bonusClass.student.fullName}</td>
                       <td>{bonusClass.subject}</td>
@@ -218,7 +225,9 @@ export default async function TeacherWorkPage({
                 <tbody>
                   {summary.workLogs.map((workLog) => (
                     <tr key={workLog.id}>
-                      <td>{formatShortDate(workLog.workDate)}</td>
+                      <td>
+                        {formatShortDate(workLog.workDate, currentUser.dateFormat)}
+                      </td>
                       <td>{formatTeacherWorkCategory(workLog.category)}</td>
                       <td>{workLog.title}</td>
                       <td>{workLog.subject ?? "-"}</td>
@@ -257,7 +266,9 @@ export default async function TeacherWorkPage({
                 <tbody>
                   {summary.pendingSubstituteLessons.map((lesson) => (
                     <tr key={lesson.id}>
-                      <td>{formatShortDate(lesson.lessonDate)}</td>
+                      <td>
+                        {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                      </td>
                       <td>{lesson.class.name}</td>
                       <td>{lesson.class.teacher.name}</td>
                       <td>{lesson.name ?? "-"}</td>

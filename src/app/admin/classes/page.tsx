@@ -24,6 +24,8 @@ type AdminClassesPageProps = {
   }>;
 };
 
+type ClassStatusFilter = "all" | "active" | "inactive";
+
 function formatTerm(semester: number | null, year: number | null) {
   if (!semester || !year) {
     return "-";
@@ -42,6 +44,14 @@ function readNumberFilter(value: string | undefined) {
   }
 
   return Number(value);
+}
+
+function readClassStatusFilter(value: string | undefined): ClassStatusFilter {
+  if (value === "active" || value === "inactive") {
+    return value;
+  }
+
+  return "all";
 }
 
 function readWeekdayFilters(value: string | string[] | undefined) {
@@ -67,8 +77,7 @@ export default async function AdminClassesPage({
   }
 
   const params = await searchParams;
-  const classStatus =
-    readFilterValue(params.classStatus) === "inactive" ? "inactive" : "active";
+  const classStatus = readClassStatusFilter(readFilterValue(params.classStatus));
   const semester = readNumberFilter(params.semester);
   const studentSearch = readFilterValue(params.student);
   const teacherId = readFilterValue(params.teacherId);
@@ -196,9 +205,18 @@ export default async function AdminClassesPage({
           </p>
         ) : null}
 
-        <section className="panel" aria-label="Class filters">
+        <section className="panel filter-panel" aria-label="Class filters">
+          <div className="filter-panel-heading">
+            <div>
+              <h2>Filter classes</h2>
+              <p className="muted-copy">
+                Combine teacher, student, schedule, term, and status filters.
+              </p>
+            </div>
+            <span className="status-pill">{classes.length} found</span>
+          </div>
           <form className="filter-form class-filter-form">
-            <label>
+            <label className="wide-filter">
               <span>Teacher</span>
               <select defaultValue={teacherId ?? ""} name="teacherId">
                 <option value="">All teachers</option>
@@ -209,7 +227,7 @@ export default async function AdminClassesPage({
                 ))}
               </select>
             </label>
-            <label>
+            <label className="wide-filter">
               <span>Student</span>
               <input
                 defaultValue={studentSearch ?? ""}
@@ -227,6 +245,7 @@ export default async function AdminClassesPage({
             <label>
               <span>Status</span>
               <select defaultValue={classStatus} name="classStatus">
+                <option value="all">All statuses</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
@@ -252,7 +271,7 @@ export default async function AdminClassesPage({
                 <option value="2">Semester 2</option>
               </select>
             </label>
-            <div>
+            <div className="weekday-filter wide-filter">
               <span className="form-section-label">Days</span>
               <div className="weekday-picker compact-weekday-picker">
                 {weekdayOptions.map((weekday) => (
@@ -279,52 +298,40 @@ export default async function AdminClassesPage({
           </form>
         </section>
 
-        <section className="panel data-panel" aria-label="Classes">
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Class</th>
-                  <th>Book</th>
-                  <th>Term</th>
-                  <th>Schedule</th>
-                  <th>Duration</th>
-                  <th>Teacher</th>
-                  <th>Status</th>
-                  <th>Students</th>
-                  <th>Lessons</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {classes.map((schoolClass) => (
-                  <tr key={schoolClass.id}>
-                    <td>{schoolClass.name}</td>
-                    <td>{schoolClass.book ?? "-"}</td>
-                    <td>{formatTerm(schoolClass.semester, schoolClass.year)}</td>
-                    <td>{formatWeekdays(schoolClass.weekDays)}</td>
-                    <td>{formatDuration(schoolClass.durationMinutes)}</td>
-                    <td>{schoolClass.teacher.name}</td>
-                    <td>{schoolClass.isActive ? "Active" : "Inactive"}</td>
-                    <td>{schoolClass._count.enrollments}</td>
-                    <td>{schoolClass._count.lessons}</td>
-                    <td>
-                      <Link
-                        className="text-link compact-link"
-                        href={`/admin/classes/${schoolClass.id}`}
-                      >
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-                {classes.length === 0 ? (
-                  <tr>
-                    <td colSpan={10}>No classes match the current filters.</td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
+        <section className="panel data-panel" aria-labelledby="admin-class-results-title">
+          <div className="section-heading-row">
+            <div>
+              <h2 id="admin-class-results-title">Class results</h2>
+              <p className="muted-copy">
+                {classes.length} {classes.length === 1 ? "class" : "classes"} found.
+              </p>
+            </div>
+          </div>
+          <div className="class-result-grid">
+            {classes.map((schoolClass) => (
+              <Link
+                className="class-result-card"
+                href={`/admin/classes/${schoolClass.id}`}
+                key={schoolClass.id}
+              >
+                <span>{schoolClass.teacher.name}</span>
+                <strong>{schoolClass.name}</strong>
+                <small>
+                  {schoolClass.book ?? "No book"} |{" "}
+                  {formatTerm(schoolClass.semester, schoolClass.year)}
+                </small>
+                <small>{formatWeekdays(schoolClass.weekDays)}</small>
+                <div className="class-result-card-metrics">
+                  <span>{schoolClass.isActive ? "Active" : "Inactive"}</span>
+                  <span>{schoolClass._count.enrollments} students</span>
+                  <span>{schoolClass._count.lessons} lessons</span>
+                  <span>{formatDuration(schoolClass.durationMinutes)}</span>
+                </div>
+              </Link>
+            ))}
+            {classes.length === 0 ? (
+              <p className="muted-copy">No classes match the current filters.</p>
+            ) : null}
           </div>
         </section>
       </div>

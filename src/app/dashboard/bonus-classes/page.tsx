@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { completeBonusClassAction } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
+import { DateFilterInput } from "@/app/components/date-filter-input";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
@@ -146,11 +147,19 @@ export default async function TeacherBonusClassesPage({
           <form className="filter-form compact-filter-form">
             <label>
               <span>From</span>
-              <input defaultValue={dateFrom} name="dateFrom" type="date" />
+              <DateFilterInput
+                dateFormat={currentUser.dateFormat}
+                defaultValue={dateFrom}
+                name="dateFrom"
+              />
             </label>
             <label>
               <span>To</span>
-              <input defaultValue={dateTo} name="dateTo" type="date" />
+              <DateFilterInput
+                dateFormat={currentUser.dateFormat}
+                defaultValue={dateTo}
+                name="dateTo"
+              />
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
@@ -171,7 +180,12 @@ export default async function TeacherBonusClassesPage({
 
               return (
                 <article className="bonus-calendar-day" key={key}>
-                  <h3>{formatShortDate(dayClasses[0].scheduledDate)}</h3>
+                  <h3>
+                    {formatShortDate(
+                      dayClasses[0].scheduledDate,
+                      currentUser.dateFormat,
+                    )}
+                  </h3>
                   <div className="bonus-calendar-events">
                     {dayClasses.map((bonusClass) => (
                       <div className="bonus-calendar-event" key={bonusClass.id}>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DateFilterInput } from "@/app/components/date-filter-input";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
@@ -230,7 +231,11 @@ export default async function AdminRecordsPage({
             </label>
             <label>
               <span>Date</span>
-              <input defaultValue={filters.date ?? ""} name="date" type="date" />
+              <DateFilterInput
+                dateFormat={currentUser.dateFormat}
+                defaultValue={filters.date ?? ""}
+                name="date"
+              />
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
@@ -260,14 +265,17 @@ export default async function AdminRecordsPage({
                     <h2>{lesson.class.name}</h2>
                     <p>Lesson name: {lesson.name ?? "Untitled lesson"}</p>
                     <p>
-                      Lesson: {formatShortDate(lesson.lessonDate)}
+                      Lesson: {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
                       {" | "}
                       Teacher: {lesson.class.teacher.name}
                     </p>
                     <p>
                       Submitted by {lesson.submittedBy?.name ?? "Unknown"}
                       {lesson.submittedAt
-                        ? ` on ${formatShortDateTime(lesson.submittedAt)}`
+                        ? ` on ${formatShortDateTime(
+                            lesson.submittedAt,
+                            currentUser.dateFormat,
+                          )}`
                         : ""}
                     </p>
                   </div>

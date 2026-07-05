@@ -113,48 +113,45 @@ export default async function AdminStudentsPage({
           </form>
         </section>
 
-        <section className="panel data-panel" aria-label="Students">
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th>Classes</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student) => (
-                  <tr key={student.id}>
-                    <td>{student.fullName}</td>
-                    <td>{student.isActive ? "Active" : "Inactive"}</td>
-                    <td>{student._count.enrollments}</td>
-                    <td>
-                      <div className="table-actions">
-                        <Link
-                          className="text-link compact-link"
-                          href={`/admin/students/${student.id}/view`}
-                        >
-                          View
-                        </Link>
-                        <Link
-                          className="text-link compact-link"
-                          href={`/admin/students/${student.id}`}
-                        >
-                          Edit
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {students.length === 0 ? (
-                  <tr>
-                    <td colSpan={4}>No students match the current filters.</td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
+        <section className="panel data-panel" aria-labelledby="admin-student-results-title">
+          <div className="section-heading-row">
+            <div>
+              <h2 id="admin-student-results-title">Student results</h2>
+              <p className="muted-copy">
+                {students.length} {students.length === 1 ? "student" : "students"} found.
+              </p>
+            </div>
+          </div>
+          <div className="student-result-grid">
+            {students.map((student) => (
+              <article className="student-result-card" key={student.id}>
+                <span>
+                  {student.isActive ? "Active student" : "Inactive student"}
+                </span>
+                <strong>{student.fullName}</strong>
+                <small>
+                  {student._count.enrollments} enrolled{" "}
+                  {student._count.enrollments === 1 ? "class" : "classes"}
+                </small>
+                <div className="card-actions">
+                  <Link
+                    className="secondary-link compact-card-link"
+                    href={`/admin/students/${student.id}/view`}
+                  >
+                    View
+                  </Link>
+                  <Link
+                    className="text-link compact-card-link"
+                    href={`/admin/students/${student.id}`}
+                  >
+                    Edit
+                  </Link>
+                </div>
+              </article>
+            ))}
+            {students.length === 0 ? (
+              <p className="muted-copy">No students match the current filters.</p>
+            ) : null}
           </div>
         </section>
       </div>

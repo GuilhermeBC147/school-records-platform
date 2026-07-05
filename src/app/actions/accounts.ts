@@ -3,6 +3,7 @@
 import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { UserRole } from "@/generated/prisma/enums";
+import { normalizeAccountDateFormat } from "@/lib/date-format";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -169,6 +170,23 @@ export async function changeOwnPasswordAction(formData: FormData) {
   });
 
   redirect("/dashboard/account?password=updated");
+}
+
+export async function updateOwnDateFormatAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  await prisma.user.update({
+    where: { id: currentUser.id },
+    data: {
+      dateFormat: normalizeAccountDateFormat(formData.get("dateFormat")),
+    },
+  });
+
+  redirect("/dashboard/account?dateFormat=updated");
 }
 
 export async function createAccountAction(formData: FormData) {
