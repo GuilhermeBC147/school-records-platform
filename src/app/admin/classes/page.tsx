@@ -298,52 +298,40 @@ export default async function AdminClassesPage({
           </form>
         </section>
 
-        <section className="panel data-panel" aria-label="Classes">
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Class</th>
-                  <th>Book</th>
-                  <th>Term</th>
-                  <th>Schedule</th>
-                  <th>Duration</th>
-                  <th>Teacher</th>
-                  <th>Status</th>
-                  <th>Students</th>
-                  <th>Lessons</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {classes.map((schoolClass) => (
-                  <tr key={schoolClass.id}>
-                    <td>{schoolClass.name}</td>
-                    <td>{schoolClass.book ?? "-"}</td>
-                    <td>{formatTerm(schoolClass.semester, schoolClass.year)}</td>
-                    <td>{formatWeekdays(schoolClass.weekDays)}</td>
-                    <td>{formatDuration(schoolClass.durationMinutes)}</td>
-                    <td>{schoolClass.teacher.name}</td>
-                    <td>{schoolClass.isActive ? "Active" : "Inactive"}</td>
-                    <td>{schoolClass._count.enrollments}</td>
-                    <td>{schoolClass._count.lessons}</td>
-                    <td>
-                      <Link
-                        className="text-link compact-link"
-                        href={`/admin/classes/${schoolClass.id}`}
-                      >
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-                {classes.length === 0 ? (
-                  <tr>
-                    <td colSpan={10}>No classes match the current filters.</td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
+        <section className="panel data-panel" aria-labelledby="admin-class-results-title">
+          <div className="section-heading-row">
+            <div>
+              <h2 id="admin-class-results-title">Class results</h2>
+              <p className="muted-copy">
+                {classes.length} {classes.length === 1 ? "class" : "classes"} found.
+              </p>
+            </div>
+          </div>
+          <div className="class-result-grid">
+            {classes.map((schoolClass) => (
+              <Link
+                className="class-result-card"
+                href={`/admin/classes/${schoolClass.id}`}
+                key={schoolClass.id}
+              >
+                <span>{schoolClass.teacher.name}</span>
+                <strong>{schoolClass.name}</strong>
+                <small>
+                  {schoolClass.book ?? "No book"} |{" "}
+                  {formatTerm(schoolClass.semester, schoolClass.year)}
+                </small>
+                <small>{formatWeekdays(schoolClass.weekDays)}</small>
+                <div className="class-result-card-metrics">
+                  <span>{schoolClass.isActive ? "Active" : "Inactive"}</span>
+                  <span>{schoolClass._count.enrollments} students</span>
+                  <span>{schoolClass._count.lessons} lessons</span>
+                  <span>{formatDuration(schoolClass.durationMinutes)}</span>
+                </div>
+              </Link>
+            ))}
+            {classes.length === 0 ? (
+              <p className="muted-copy">No classes match the current filters.</p>
+            ) : null}
           </div>
         </section>
       </div>

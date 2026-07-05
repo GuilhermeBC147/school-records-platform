@@ -695,6 +695,19 @@ input[type="time"],
   margin: 0;
 }
 
+.card-actions {
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.compact-card-link {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
 .admin-form {
   display: grid;
   gap: 16px;

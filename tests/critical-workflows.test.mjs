@@ -106,6 +106,8 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classesPage, /weekDay/);
   assert.match(classesPage, /hasSome/);
   assert.match(classesPage, /Search enrolled students/);
+  assert.match(classesPage, /Class results/);
+  assert.match(classesPage, /class-result-card/);
   assert.match(newClassPage, /Class roster/);
   assert.match(newClassPage, /RosterPicker/);
   assert.match(rosterPicker, /Search students/);
@@ -141,6 +143,8 @@ test("admin student management supports creating and editing students", async ()
   assert.match(studentsPage, /Create student/);
   assert.match(studentsPage, /studentSearch/);
   assert.match(studentsPage, /datalist id="admin-students"/);
+  assert.match(studentsPage, /Student results/);
+  assert.match(studentsPage, /student-result-card/);
   assert.match(studentsPage, /\/admin\/students\/\$\{student\.id\}\/view/);
   assert.match(newStudentPage, /createStudentAction/);
   assert.match(editStudentPage, /updateStudentAction/);
