@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { resolveRiskRecordAction } from "@/app/actions/risk";
+import {
+  resolveRiskRecordAction,
+  undoRiskResolutionAction,
+} from "@/app/actions/risk";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
@@ -10,8 +13,8 @@ import { Prisma } from "@/generated/prisma/client";
 export const dynamic = "force-dynamic";
 
 const RISK_THRESHOLDS = {
-  incompleteHomework: 3,
-  missedClasses: 3,
+  incompleteHomework: 4,
+  missedClasses: 4,
   consecutiveMissedClasses: 2,
 } as const;
 
@@ -20,6 +23,7 @@ type RiskPageProps = {
     classId?: string;
     dateFrom?: string;
     dateTo?: string;
+    resolutionStatus?: string;
     teacherId?: string;
   }>;
 };
@@ -35,6 +39,7 @@ type RiskRecord = {
   studentName: string;
   teacherName: string;
   consecutiveMissedClassCount: number;
+  resolvedThroughDate?: Date;
 };
 
 type RiskResolution = {
@@ -269,6 +274,12 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
   const teacherId = readFilterValue(filters.teacherId);
   const dateFrom = readFilterValue(filters.dateFrom);
   const dateTo = readFilterValue(filters.dateTo);
+  const resolutionStatus =
+    readFilterValue(filters.resolutionStatus) === "resolved"
+      ? "resolved"
+      : readFilterValue(filters.resolutionStatus) === "all"
+        ? "all"
+        : "unresolved";
   const dateStart = readFilterDate(dateFrom, "start");
   const dateEnd = readFilterDate(dateTo, "end");
 
@@ -352,7 +363,41 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
     `,
   ]);
 
-  const riskRecords = summarizeRiskRecords(lessons, resolutions);
+  const unresolvedRiskRecords = summarizeRiskRecords(lessons, resolutions);
+  const resolutionByStudentClass = new Map(
+    resolutions.map((resolution) => [
+      `${resolution.classId}:${resolution.studentId}`,
+      resolution.resolvedThroughDate,
+    ]),
+  );
+  const resolvedRiskRecords: RiskRecord[] = [];
+
+  for (const record of summarizeRiskRecords(lessons, [])) {
+    const resolvedThroughDate = resolutionByStudentClass.get(
+      `${record.classId}:${record.studentId}`,
+    );
+
+    if (resolvedThroughDate && record.latestSignalDate <= resolvedThroughDate) {
+      resolvedRiskRecords.push({
+        ...record,
+        resolvedThroughDate,
+      });
+    }
+  }
+  const unresolvedKeys = new Set(
+    unresolvedRiskRecords.map((record) => `${record.classId}:${record.studentId}`),
+  );
+  const riskRecords =
+    resolutionStatus === "resolved"
+      ? resolvedRiskRecords
+      : resolutionStatus === "all"
+        ? [
+            ...unresolvedRiskRecords,
+            ...resolvedRiskRecords.filter(
+              (record) => !unresolvedKeys.has(`${record.classId}:${record.studentId}`),
+            ),
+          ]
+        : unresolvedRiskRecords;
 
   return (
     <main className="app-shell">
@@ -433,6 +478,14 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
               <span>To</span>
               <input defaultValue={dateTo ?? ""} name="dateTo" type="date" />
             </label>
+            <label>
+              <span>Situation</span>
+              <select defaultValue={resolutionStatus} name="resolutionStatus">
+                <option value="unresolved">Unresolved</option>
+                <option value="resolved">Resolved</option>
+                <option value="all">All</option>
+              </select>
+            </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
                 Apply filters
@@ -499,37 +552,86 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                         >
                           Latest
                         </Link>
-                        <form action={resolveRiskRecordAction}>
-                          <input name="classId" type="hidden" value={record.classId} />
-                          <input
-                            name="studentId"
-                            type="hidden"
-                            value={record.studentId}
-                          />
-                          <input
-                            name="resolvedThroughDate"
-                            type="hidden"
-                            value={record.latestSignalDate.toISOString()}
-                          />
-                          <input name="teacherId" type="hidden" value={teacherId ?? ""} />
-                          <input
-                            name="filterClassId"
-                            type="hidden"
-                            value={classId ?? ""}
-                          />
-                          <input name="dateFrom" type="hidden" value={dateFrom ?? ""} />
-                          <input name="dateTo" type="hidden" value={dateTo ?? ""} />
-                          <button className="text-link compact-link" type="submit">
-                            Resolve
-                          </button>
-                        </form>
+                        {"resolvedThroughDate" in record &&
+                        record.resolvedThroughDate ? (
+                          <form action={undoRiskResolutionAction}>
+                            <input name="classId" type="hidden" value={record.classId} />
+                            <input
+                              name="studentId"
+                              type="hidden"
+                              value={record.studentId}
+                            />
+                            <input
+                              name="teacherId"
+                              type="hidden"
+                              value={teacherId ?? ""}
+                            />
+                            <input
+                              name="filterClassId"
+                              type="hidden"
+                              value={classId ?? ""}
+                            />
+                            <input
+                              name="dateFrom"
+                              type="hidden"
+                              value={dateFrom ?? ""}
+                            />
+                            <input name="dateTo" type="hidden" value={dateTo ?? ""} />
+                            <input
+                              name="resolutionStatus"
+                              type="hidden"
+                              value={resolutionStatus}
+                            />
+                            <button className="text-link compact-link" type="submit">
+                              Undo resolve
+                            </button>
+                          </form>
+                        ) : (
+                          <form action={resolveRiskRecordAction}>
+                            <input name="classId" type="hidden" value={record.classId} />
+                            <input
+                              name="studentId"
+                              type="hidden"
+                              value={record.studentId}
+                            />
+                            <input
+                              name="resolvedThroughDate"
+                              type="hidden"
+                              value={record.latestSignalDate.toISOString()}
+                            />
+                            <input
+                              name="teacherId"
+                              type="hidden"
+                              value={teacherId ?? ""}
+                            />
+                            <input
+                              name="filterClassId"
+                              type="hidden"
+                              value={classId ?? ""}
+                            />
+                            <input
+                              name="dateFrom"
+                              type="hidden"
+                              value={dateFrom ?? ""}
+                            />
+                            <input name="dateTo" type="hidden" value={dateTo ?? ""} />
+                            <input
+                              name="resolutionStatus"
+                              type="hidden"
+                              value={resolutionStatus}
+                            />
+                            <button className="text-link compact-link" type="submit">
+                              Resolve
+                            </button>
+                          </form>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ))}
                 {riskRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No students match the current risk thresholds.</td>
+                    <td colSpan={6}>No students match the current risk filters.</td>
                   </tr>
                 ) : null}
               </tbody>

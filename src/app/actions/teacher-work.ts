@@ -117,3 +117,57 @@ export async function createTeacherWorkLogAction(formData: FormData) {
 
   redirect(`${redirectTo}?status=created`);
 }
+
+export async function createTeacherMeetingAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  if (currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
+  const durationMinutes = readDurationMinutes(formData);
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const startTime = String(formData.get("startTime") ?? "").trim() || null;
+  const teacherIds = formData
+    .getAll("teacherIds")
+    .map((value) => String(value))
+    .filter(Boolean);
+  const title = String(formData.get("title") ?? "").trim();
+  const workDate = readWorkDate(formData);
+
+  if (!title || teacherIds.length === 0) {
+    throw new Error("Meeting title and teachers are required.");
+  }
+
+  const teachers = await prisma.user.findMany({
+    where: {
+      id: { in: teacherIds },
+      isActive: true,
+      role: "TEACHER",
+    },
+    select: { id: true },
+  });
+
+  if (teachers.length === 0) {
+    throw new Error("Choose at least one active teacher.");
+  }
+
+  await prisma.teacherWorkLog.createMany({
+    data: teachers.map((teacher) => ({
+      category: "MEETING",
+      createdById: currentUser.id,
+      durationMinutes,
+      notes,
+      startTime,
+      teacherId: teacher.id,
+      title,
+      workDate,
+    })),
+  });
+
+  redirect("/admin/work-summary?status=meeting-created");
+}

@@ -21,8 +21,9 @@ Branch naming:
 - `sprint-12-admin-risk-review`
 - `sprint-13-teacher-work-log`
 - `sprint-14-bonus-scheduling`
-- `sprint-15-consistency-pass`
-- `sprint-16-production-readiness`
+- `sprint-15-admin-teacher-workflow-adjustments`
+- `sprint-16-consistency-pass`
+- `sprint-17-production-readiness`
 
 Commit style:
 
@@ -437,7 +438,52 @@ Done when:
 - Completed bonus classes appear in teacher monthly work summaries.
 - Teacher-created bonus classes capture the same scheduling details as reception-created bonus classes.
 
-## Sprint 15: Consistency Pass and Small Adjustments
+## Sprint 15: Admin and Teacher Workflow Adjustments
+
+Goal: address workflow corrections found after bonus scheduling, before the broader consistency pass.
+
+Tasks:
+
+- Rename admin teacher management to account management, with teacher and reception account creation.
+- Move the account management route from `/admin/teachers` to `/admin/manage-accounts`, keeping old routes redirected safely.
+- Remove class cards from the admin dashboard because classes are managed from "Manage classes".
+- Change admin dashboard wording from "Manage teachers" to "Manage accounts".
+- Change "Manage account" links to "Account settings" to avoid confusion with admin account management.
+- Keep teacher dashboards focused on the signed-in account and relevant weekday classes by default.
+- Add teacher dashboard filters for classes by day of week.
+- Add student-name autocomplete to student search filters.
+- Let admins filter risk situations by resolved and unresolved state.
+- Let admins undo resolved risk situations in case of accidental clicks.
+- Update risk signals to flag 4 or more incomplete homework records.
+- Add a risk signal for 4 or more total absences, regardless of whether they are consecutive.
+- Let admins create multi-teacher meetings from work summaries and count the duration toward each teacher's monthly hours.
+- Keep teachers from creating meeting work logs from their own Add event page.
+- Let admins undo approved substitute lessons.
+- Show teacher bonus classes in a date-filtered calendar view for attendance updates.
+- Confirm displayed dates use `dd/mm/yy` formatting wherever app-rendered dates are shown.
+- Update focused workflow tests for these adjustments.
+
+Suggested commits:
+
+- `feat: refine admin account workflows`
+- `feat: polish teacher dashboard filters`
+- `fix: allow admin undo actions`
+
+Done when:
+
+- Admins manage teacher and reception accounts from `/admin/manage-accounts`.
+- The admin dashboard links to management screens without duplicating class cards.
+- Teacher dashboards show account-specific classes with useful day filtering.
+- Student search filters offer student-name autocomplete.
+- Risk review supports resolved/unresolved filtering and undoing accidental resolutions.
+- Risk rules match the 4 incomplete-homework and 4 total-absence thresholds.
+- Admin-created meetings count toward each selected teacher's monthly summary.
+- Teachers cannot create meeting work logs from their own Add event page.
+- Admins can undo approved substitute lessons.
+- Teacher bonus-class attendance is date-filtered and calendar-style.
+- Tests cover the adjusted workflows.
+
+## Sprint 16: Consistency Pass and Small Adjustments
 
 Goal: smooth out existing workflows before the final production-readiness pass.
 
@@ -463,7 +509,7 @@ Done when:
 - Small rough edges found during testing are fixed without expanding scope.
 - Tests cover any behavior changes introduced during the pass.
 
-## Sprint 16: Production Readiness
+## Sprint 17: Production Readiness
 
 Goal: prepare the app for school-owned hosting and day-to-day use.
 

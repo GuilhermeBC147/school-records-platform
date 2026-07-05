@@ -8,6 +8,8 @@ import { logoutAction } from "@/app/actions/auth";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
 import {
+  formatBonusClassErrorMessage,
+  formatBonusClassResultMessage,
   formatBonusClassStatus,
   formatStartTime,
 } from "@/lib/bonus-classes";
@@ -37,6 +39,8 @@ export default async function ReceptionBonusClassesPage({
   }
 
   const query = await searchParams;
+  const errorMessage = formatBonusClassErrorMessage(query.error);
+  const successMessage = formatBonusClassResultMessage(query.status);
   const [bonusClasses, students, teachers] = await Promise.all([
     prisma.bonusClass.findMany({
       orderBy: [{ scheduledDate: "desc" }, { startTime: "asc" }],
@@ -118,17 +122,8 @@ export default async function ReceptionBonusClassesPage({
           </div>
         </section>
 
-        {query.status ? (
-          <p className="form-success">Bonus class {query.status}.</p>
-        ) : null}
-        {query.error === "overlap" ? (
-          <p className="form-error">
-            This teacher already has a bonus class during that time.
-          </p>
-        ) : null}
-        {query.error === "invalid" ? (
-          <p className="form-error">Check the bonus class details and try again.</p>
-        ) : null}
+        {successMessage ? <p className="form-success">{successMessage}</p> : null}
+        {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
         <section className="panel data-panel" aria-labelledby="new-bonus-title">
           <h2 id="new-bonus-title">Bonus class details</h2>

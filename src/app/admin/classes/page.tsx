@@ -124,7 +124,7 @@ export default async function AdminClassesPage({
     },
   });
 
-  const [teachers, years] = await Promise.all([
+  const [teachers, years, students] = await Promise.all([
     prisma.user.findMany({
       orderBy: { name: "asc" },
       where: { role: "TEACHER" },
@@ -144,6 +144,15 @@ export default async function AdminClassesPage({
       select: {
         year: true,
       },
+    }),
+    prisma.student.findMany({
+      orderBy: { fullName: "asc" },
+      where: { isActive: true },
+      select: {
+        id: true,
+        fullName: true,
+      },
+      take: 200,
     }),
   ]);
 
@@ -204,10 +213,16 @@ export default async function AdminClassesPage({
               <span>Student</span>
               <input
                 defaultValue={studentSearch ?? ""}
+                list="admin-class-students"
                 name="student"
                 placeholder="Search enrolled students"
                 type="search"
               />
+              <datalist id="admin-class-students">
+                {students.map((student) => (
+                  <option key={student.id} value={student.fullName} />
+                ))}
+              </datalist>
             </label>
             <label>
               <span>Status</span>

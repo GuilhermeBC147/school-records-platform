@@ -8,6 +8,36 @@ export function formatBonusClassStatus(status: string) {
     .join(" ");
 }
 
+export function formatBonusClassResultMessage(status: string | undefined) {
+  switch (status) {
+    case "attendance":
+      return "Bonus class attendance confirmed.";
+    case "canceled":
+      return "Bonus class canceled.";
+    case "completed":
+      return "Bonus class completed.";
+    case "created":
+      return "Bonus class scheduled.";
+    case "updated":
+      return "Bonus class updated.";
+    default:
+      return null;
+  }
+}
+
+export function formatBonusClassErrorMessage(error: string | undefined) {
+  switch (error) {
+    case "invalid":
+      return "Check the bonus class details and try again.";
+    case "missing":
+      return "That bonus class could not be found.";
+    case "overlap":
+      return "This teacher already has a bonus class during that time.";
+    default:
+      return null;
+  }
+}
+
 export function formatStartTime(startTime: string | null) {
   return startTime || "-";
 }

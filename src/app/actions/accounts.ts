@@ -2,6 +2,7 @@
 
 import crypto from "node:crypto";
 import { redirect } from "next/navigation";
+import { UserRole } from "@/generated/prisma/enums";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -21,6 +22,16 @@ function normalizeEmail(formData: FormData) {
 
 function readRequiredString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
+}
+
+function readAccountRole(formData: FormData) {
+  const role = readRequiredString(formData, "role");
+
+  if (role !== "TEACHER" && role !== "RECEPTION") {
+    return null;
+  }
+
+  return role as UserRole;
 }
 
 async function requireAdmin() {
@@ -160,16 +171,17 @@ export async function changeOwnPasswordAction(formData: FormData) {
   redirect("/dashboard/account?password=updated");
 }
 
-export async function createTeacherAction(formData: FormData) {
+export async function createAccountAction(formData: FormData) {
   await requireAdmin();
 
   const name = readRequiredString(formData, "name");
   const email = normalizeEmail(formData);
   const password = String(formData.get("password") ?? "");
+  const role = readAccountRole(formData);
   const isActive = formData.get("isActive") === "on";
 
-  if (!name || !email || password.length < 8) {
-    redirect("/admin/teachers/new?error=invalid");
+  if (!name || !email || password.length < 8 || !role) {
+    redirect("/admin/manage-accounts/new?error=invalid");
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -178,7 +190,7 @@ export async function createTeacherAction(formData: FormData) {
   });
 
   if (existingUser) {
-    redirect("/admin/teachers/new?error=duplicate");
+    redirect("/admin/manage-accounts/new?error=duplicate");
   }
 
   await prisma.user.create({
@@ -186,66 +198,71 @@ export async function createTeacherAction(formData: FormData) {
       name,
       email,
       passwordHash: hashPassword(password),
-      role: "TEACHER",
+      role,
       isActive,
     },
   });
 
-  redirect("/admin/teachers?status=created");
+  redirect("/admin/manage-accounts?status=created");
 }
 
-export async function updateTeacherAction(formData: FormData) {
+export async function updateAccountAction(formData: FormData) {
   const currentUser = await requireAdmin();
 
-  const teacherId = readRequiredString(formData, "teacherId");
+  const accountId = readRequiredString(formData, "accountId");
   const name = readRequiredString(formData, "name");
   const email = normalizeEmail(formData);
   const password = String(formData.get("password") ?? "");
+  const role = readAccountRole(formData);
   const isActive = formData.get("isActive") === "on";
 
-  if (!teacherId || !name || !email || (password && password.length < 8)) {
-    redirect(`/admin/teachers/${teacherId}?error=invalid`);
+  if (!accountId || !name || !email || !role || (password && password.length < 8)) {
+    redirect(`/admin/manage-accounts/${accountId}?error=invalid`);
   }
 
-  if (teacherId === currentUser.id && !isActive) {
-    redirect(`/admin/teachers/${teacherId}?error=self`);
+  if (accountId === currentUser.id && !isActive) {
+    redirect(`/admin/manage-accounts/${accountId}?error=self`);
   }
 
-  const teacher = await prisma.user.findFirst({
+  const account = await prisma.user.findFirst({
     where: {
-      id: teacherId,
-      role: "TEACHER",
+      id: accountId,
+      role: { in: ["TEACHER", "RECEPTION"] },
     },
     select: {
       id: true,
     },
   });
 
-  if (!teacher) {
-    redirect("/admin/teachers");
+  if (!account) {
+    redirect("/admin/manage-accounts");
   }
 
   const duplicateUser = await prisma.user.findFirst({
     where: {
       email,
-      NOT: { id: teacherId },
+      NOT: { id: accountId },
     },
     select: { id: true },
   });
 
   if (duplicateUser) {
-    redirect(`/admin/teachers/${teacherId}?error=duplicate`);
+    redirect(`/admin/manage-accounts/${accountId}?error=duplicate`);
   }
 
   await prisma.user.update({
-    where: { id: teacherId },
+    where: { id: accountId },
     data: {
       name,
       email,
+      role,
       isActive,
       ...(password ? { passwordHash: hashPassword(password) } : {}),
     },
   });
 
-  redirect("/admin/teachers?status=updated");
+  redirect("/admin/manage-accounts?status=updated");
 }
+
+export const createTeacherAction = createAccountAction;
+export const updateTeacherAction = updateAccountAction;

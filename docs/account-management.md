@@ -1,20 +1,20 @@
 # Account Management Notes
 
-## Teacher Accounts
+## Staff Accounts
 
-Admins manage teacher accounts from:
+Admins manage teacher and reception accounts from:
 
 ```text
-http://localhost:3000/admin/teachers
+http://localhost:3000/admin/manage-accounts
 ```
 
 Admins can:
 
-- create teacher accounts
+- create teacher or reception accounts
 - set an initial password
-- edit teacher names and emails
-- set a new password for a teacher
-- activate or deactivate teacher accounts
+- edit account names, emails, and account type
+- set a new password for an account
+- activate or deactivate staff accounts
 
 Inactive accounts cannot log in because login only accepts active users.
 

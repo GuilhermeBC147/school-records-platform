@@ -12,7 +12,7 @@ function readRequiredString(formData: FormData, key: string) {
 function buildRiskRedirect(formData: FormData) {
   const params = new URLSearchParams();
 
-  for (const key of ["teacherId", "dateFrom", "dateTo"]) {
+  for (const key of ["teacherId", "dateFrom", "dateTo", "resolutionStatus"]) {
     const value = readRequiredString(formData, key);
 
     if (value) {
@@ -94,6 +94,34 @@ export async function resolveRiskRecordAction(formData: FormData) {
       "resolvedThroughDate" = EXCLUDED."resolvedThroughDate",
       "updatedAt" = CURRENT_TIMESTAMP
   `;
+
+  redirect(buildRiskRedirect(formData));
+}
+
+export async function undoRiskResolutionAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  if (currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
+  const classId = readRequiredString(formData, "classId");
+  const studentId = readRequiredString(formData, "studentId");
+
+  if (!classId || !studentId) {
+    redirect(buildRiskRedirect(formData));
+  }
+
+  await prisma.studentRiskResolution.deleteMany({
+    where: {
+      classId,
+      studentId,
+    },
+  });
 
   redirect(buildRiskRedirect(formData));
 }

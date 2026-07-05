@@ -53,20 +53,28 @@ test("admin records and export routes require admin sessions", async () => {
   }
 });
 
-test("account management supports reset tokens and admin teacher setup", async () => {
+test("account management supports reset tokens and admin staff setup", async () => {
   const schema = await readProjectFile("prisma/schema.prisma");
   const accountActions = await readProjectFile("src/app/actions/accounts.ts");
-  const teachersPage = await readProjectFile("src/app/admin/teachers/page.tsx");
+  const accountsPage = await readProjectFile(
+    "src/app/admin/manage-accounts/page.tsx",
+  );
+  const newAccountPage = await readProjectFile(
+    "src/app/admin/manage-accounts/new/page.tsx",
+  );
 
   assert.match(schema, /model PasswordResetToken/);
   assert.match(schema, /tokenHash\s+String\s+@unique/);
   assert.match(accountActions, /requestPasswordResetAction/);
   assert.match(accountActions, /resetPasswordAction/);
-  assert.match(accountActions, /createTeacherAction/);
-  assert.match(accountActions, /updateTeacherAction/);
-  assert.match(accountActions, /role: "TEACHER"/);
+  assert.match(accountActions, /createAccountAction/);
+  assert.match(accountActions, /updateAccountAction/);
+  assert.match(accountActions, /role !== "TEACHER" && role !== "RECEPTION"/);
   assert.match(accountActions, /isActive/);
-  assert.match(teachersPage, /Create teacher/);
+  assert.match(accountsPage, /Manage accounts/);
+  assert.match(accountsPage, /formatAccountRole/);
+  assert.match(newAccountPage, /Create account/);
+  assert.match(newAccountPage, /value="RECEPTION"/);
 });
 
 test("class management supports metadata and active teacher assignment", async () => {
@@ -220,8 +228,8 @@ test("admin risk review flags attendance and homework signals", async () => {
   const dataModelDoc = await readProjectFile("docs/data-model.md");
 
   assert.match(riskPage, /RISK_THRESHOLDS/);
-  assert.match(riskPage, /incompleteHomework:\s*3/);
-  assert.match(riskPage, /missedClasses:\s*3/);
+  assert.match(riskPage, /incompleteHomework:\s*4/);
+  assert.match(riskPage, /missedClasses:\s*4/);
   assert.match(riskPage, /consecutiveMissedClasses:\s*2/);
   assert.match(riskPage, /status: "SUBMITTED"/);
   assert.match(riskPage, /attendanceRecord\.status === "ABSENT"/);
@@ -230,6 +238,8 @@ test("admin risk review flags attendance and homework signals", async () => {
   assert.match(riskPage, /longestMissedStreak/);
   assert.match(riskPage, /\$queryRaw<RiskResolution\[\]>/);
   assert.match(riskPage, /resolveRiskRecordAction/);
+  assert.match(riskPage, /undoRiskResolutionAction/);
+  assert.match(riskPage, /resolutionStatus/);
   assert.match(riskPage, /teacherId/);
   assert.match(riskPage, /classId/);
   assert.match(riskPage, /dateFrom/);
@@ -237,6 +247,7 @@ test("admin risk review flags attendance and homework signals", async () => {
   assert.match(riskPage, /\/admin\/students\/\$\{record\.studentId\}/);
   assert.match(riskPage, /\/admin\/records\/\$\{record\.recentLessonId\}/);
   assert.match(riskPage, /Resolve/);
+  assert.match(riskPage, /Undo resolve/);
   assert.match(dashboardPage, /\/admin\/risk/);
   assert.match(dataModelDoc, /mark a student\/class risk row as resolved/);
   assert.match(dataModelDoc, /Risk Review/);
@@ -271,6 +282,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workLib, /status: "SUBMITTED"/);
   assert.match(workLib, /durationMinutes/);
   assert.match(workActions, /createTeacherWorkLogAction/);
+  assert.match(workActions, /createTeacherMeetingAction/);
   assert.match(workActions, /category === "BONUS_CLASS" && !subject/);
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
@@ -282,9 +294,11 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(newActivityPage, /createTeacherWorkLogAction/);
   assert.match(newActivityPage, /name="subject"/);
   assert.match(newActivityPage, /teacherWorkCategories/);
+  assert.match(newActivityPage, /category\.value !== "MEETING"/);
   assert.match(teacherWorkPage, /Submitted class lessons count automatically/);
   assert.match(adminWorkPage, /Teacher work summaries/);
   assert.match(adminWorkPage, /getTeacherWorkSummary/);
+  assert.match(adminWorkPage, /createTeacherMeetingAction/);
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
   assert.match(dashboardPage, /\/dashboard\/work\/new/);
@@ -335,9 +349,11 @@ test("substitute teachers can submit lessons pending admin approval", async () =
   assert.match(substitutionPage, /substitute=1/);
   assert.match(substitutionActions, /approveSubstitutionAction/);
   assert.match(substitutionActions, /rejectSubstitutionAction/);
+  assert.match(substitutionActions, /undoSubstitutionApprovalAction/);
   assert.match(substitutionActions, /substitutionReviewedById/);
   assert.match(adminSubstitutionsPage, /approveSubstitutionAction/);
   assert.match(adminSubstitutionsPage, /rejectSubstitutionAction/);
+  assert.match(adminSubstitutionsPage, /Undo approval/);
   assert.match(dashboardPage, /\/dashboard\/substitutions\/new/);
   assert.match(dashboardPage, /\/admin\/substitutions/);
   assert.match(workLib, /substitutionStatus: "APPROVED"/);
@@ -398,11 +414,16 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusActions, /completeBonusClassAction/);
   assert.match(bonusActions, /readAttendanceStatus/);
   assert.match(bonusActions, /hasTeacherBonusClassOverlap/);
+  assert.match(bonusLib, /formatBonusClassResultMessage/);
+  assert.match(bonusLib, /formatBonusClassErrorMessage/);
   assert.match(bonusLib, /startMinutes < existingEnd/);
   assert.match(receptionDashboardPage, /\/reception\/calendar/);
   assert.match(receptionDashboardPage, /\/reception\/students-and-classes/);
   assert.match(receptionPage, /Schedule bonus class/);
   assert.match(receptionPage, /studentSearch/);
+  assert.doesNotMatch(receptionPage, /Bonus class \{query\.status\}/);
+  assert.match(receptionPage, /formatBonusClassResultMessage/);
+  assert.match(receptionPage, /formatBonusClassErrorMessage/);
   assert.match(receptionCalendarPage, /Daily teacher calendar/);
   assert.match(receptionCalendarPage, /timeSlots/);
   assert.match(receptionCalendarPage, /formatTimeFromMinutes/);
@@ -415,11 +436,18 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionStudentsPage, /absentLessons/);
   assert.match(receptionStudentsPage, /homeworkNotDone/);
   assert.match(receptionStudentsPage, /Recent lessons/);
+  assert.match(receptionStudentsPage, /Untitled lesson/);
   assert.match(receptionEditPage, /updateBonusClassAction/);
   assert.match(receptionEditPage, /completeBonusClassAction/);
+  assert.match(receptionEditPage, /status\?: string/);
+  assert.match(receptionEditPage, /formatBonusClassResultMessage/);
   assert.match(teacherBonusPage, /attendanceStatus/);
+  assert.match(teacherBonusPage, /bonus-calendar/);
+  assert.match(teacherBonusPage, /dateFrom/);
+  assert.match(teacherBonusPage, /formatBonusClassResultMessage/);
   assert.match(globalStyles, /schedule-table/);
   assert.match(dashboardPage, /currentUser\.role === "RECEPTION"/);
+  assert.match(dashboardPage, /Admin dashboard/);
   assert.match(dashboardPage, /\/reception/);
   assert.match(dashboardPage, /\/dashboard\/bonus-classes/);
   assert.match(workLib, /bonusClasses/);

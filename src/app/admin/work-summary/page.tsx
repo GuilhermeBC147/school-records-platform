@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createTeacherWorkLogAction } from "@/app/actions/teacher-work";
+import {
+  createTeacherMeetingAction,
+  createTeacherWorkLogAction,
+} from "@/app/actions/teacher-work";
 import { logoutAction } from "@/app/actions/auth";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { formatShortDate } from "@/lib/date-format";
@@ -93,8 +96,12 @@ export default async function AdminWorkSummaryPage({
           </p>
         </section>
 
-        {query.status === "created" ? (
-          <p className="form-success">Paid activity saved.</p>
+        {query.status === "created" || query.status === "meeting-created" ? (
+          <p className="form-success">
+            {query.status === "meeting-created"
+              ? "Meeting saved for selected teachers."
+              : "Paid activity saved."}
+          </p>
         ) : null}
 
         <section className="panel" aria-label="Work summary filters">
@@ -197,7 +204,7 @@ export default async function AdminWorkSummaryPage({
                         </td>
                         <td>{formatShortDate(lesson.lessonDate)}</td>
                         <td>
-                          {lesson.class.name} | {lesson.name ?? "Untitled"}
+                          {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
                         <td>-</td>
                         <td>{lesson.class.durationMinutes}</td>
@@ -232,7 +239,7 @@ export default async function AdminWorkSummaryPage({
                         <td>Pending substitute</td>
                         <td>{formatShortDate(lesson.lessonDate)}</td>
                         <td>
-                          {lesson.class.name} | {lesson.name ?? "Untitled"}
+                          {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
                         </td>
                         <td>-</td>
                         <td>{lesson.class.durationMinutes}</td>
@@ -313,6 +320,50 @@ export default async function AdminWorkSummaryPage({
             <div className="record-actions">
               <button className="primary-button" type="submit">
                 Save activity
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="panel data-panel" aria-labelledby="admin-meeting-title">
+          <h2 id="admin-meeting-title">Create meeting</h2>
+          <form action={createTeacherMeetingAction} className="admin-form">
+            <label>
+              <span>Teachers</span>
+              <div className="roster-list compact-roster-list">
+                {teachers
+                  .filter((teacher) => teacher.isActive)
+                  .map((teacher) => (
+                    <label className="checkbox-label roster-student" key={teacher.id}>
+                      <input name="teacherIds" type="checkbox" value={teacher.id} />
+                      <span>{teacher.name}</span>
+                    </label>
+                  ))}
+              </div>
+            </label>
+            <label>
+              <span>Title</span>
+              <input name="title" required type="text" />
+            </label>
+            <label>
+              <span>Date</span>
+              <input name="workDate" required type="date" />
+            </label>
+            <label>
+              <span>Start time</span>
+              <input name="startTime" type="time" />
+            </label>
+            <label>
+              <span>Duration minutes</span>
+              <input min="1" max="720" name="durationMinutes" required type="number" />
+            </label>
+            <label>
+              <span>Notes</span>
+              <textarea name="notes" rows={3} />
+            </label>
+            <div className="record-actions">
+              <button className="primary-button" type="submit">
+                Save meeting
               </button>
             </div>
           </form>

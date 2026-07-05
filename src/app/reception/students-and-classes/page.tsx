@@ -54,7 +54,7 @@ function lessonLabel(lesson: {
   name: string | null;
 }) {
   return `${formatShortDate(lesson.lessonDate)} | ${lesson.class.name} | ${
-    lesson.name ?? "Untitled"
+    lesson.name ?? "Untitled lesson"
   }`;
 }
 
@@ -269,10 +269,16 @@ export default async function ReceptionLookupPage({
               <span>Student search</span>
               <input
                 defaultValue={studentSearch ?? ""}
+                list="reception-students"
                 name="studentSearch"
                 placeholder="Type a student name"
                 type="search"
               />
+              <datalist id="reception-students">
+                {students.map((student) => (
+                  <option key={student.id} value={student.fullName} />
+                ))}
+              </datalist>
             </label>
             <label>
               <span>Student</span>
@@ -361,7 +367,7 @@ export default async function ReceptionLookupPage({
                 <dd>
                   {insight.lastAttendedLesson
                     ? lessonLabel(insight.lastAttendedLesson.lesson)
-                    : "No attended submitted lesson found."}
+                    : "No attended submitted lessons found."}
                 </dd>
               </div>
               <div>
@@ -466,7 +472,7 @@ export default async function ReceptionLookupPage({
                         .map(
                           (lesson) =>
                             `${formatShortDate(lesson.lessonDate)} | ${
-                              lesson.name ?? "Untitled"
+                              lesson.name ?? "Untitled lesson"
                             }`,
                         )
                         .join("; ")

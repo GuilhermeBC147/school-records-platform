@@ -5,7 +5,11 @@ import {
   updateBonusClassAction,
 } from "@/app/actions/bonus-classes";
 import { logoutAction } from "@/app/actions/auth";
-import { formatBonusClassStatus } from "@/lib/bonus-classes";
+import {
+  formatBonusClassErrorMessage,
+  formatBonusClassResultMessage,
+  formatBonusClassStatus,
+} from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -17,6 +21,7 @@ type EditBonusClassPageProps = {
   }>;
   searchParams: Promise<{
     error?: string;
+    status?: string;
   }>;
 };
 
@@ -48,6 +53,8 @@ export default async function EditBonusClassPage({
 
   const { bonusClassId } = await params;
   const query = await searchParams;
+  const errorMessage = formatBonusClassErrorMessage(query.error);
+  const successMessage = formatBonusClassResultMessage(query.status);
   const [bonusClass, students, teachers] = await Promise.all([
     prisma.bonusClass.findFirst({
       where: {
@@ -137,14 +144,8 @@ export default async function EditBonusClassPage({
           ) : null}
         </section>
 
-        {query.error === "overlap" ? (
-          <p className="form-error">
-            This teacher already has a bonus class during that time.
-          </p>
-        ) : null}
-        {query.error === "invalid" ? (
-          <p className="form-error">Check the bonus class details and try again.</p>
-        ) : null}
+        {successMessage ? <p className="form-success">{successMessage}</p> : null}
+        {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
         <section className="panel data-panel" aria-label="Bonus class form">
           <form action={updateBonusClassAction} className="admin-form">

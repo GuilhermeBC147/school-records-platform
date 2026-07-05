@@ -18,6 +18,10 @@ export default async function NewTeacherActivityPage() {
     redirect("/admin/work-summary");
   }
 
+  const teacherCreatedCategories = teacherWorkCategories.filter(
+    (category) => category.value !== "MEETING",
+  );
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -42,8 +46,8 @@ export default async function NewTeacherActivityPage() {
           <p className="eyebrow">Teacher work</p>
           <h1 id="activity-title">Add event</h1>
           <p className="lede">
-            Record bonus classes, extra activities, meetings, or other paid
-            work that should be counted in your monthly summary.
+            Record bonus classes, extra activities, or other paid work that
+            should be counted in your monthly summary.
           </p>
         </section>
 
@@ -53,7 +57,7 @@ export default async function NewTeacherActivityPage() {
             <label>
               <span>Category</span>
               <select name="category" required>
-                {teacherWorkCategories.map((category) => (
+                {teacherCreatedCategories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>

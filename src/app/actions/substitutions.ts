@@ -50,3 +50,25 @@ export async function approveSubstitutionAction(formData: FormData) {
 export async function rejectSubstitutionAction(formData: FormData) {
   await updateSubstitutionStatus(formData, "REJECTED");
 }
+
+export async function undoSubstitutionApprovalAction(formData: FormData) {
+  await requireAdmin();
+  const lessonId = String(formData.get("lessonId") ?? "");
+
+  if (!lessonId) {
+    throw new Error("Lesson is required.");
+  }
+
+  await prisma.lesson.update({
+    where: {
+      id: lessonId,
+    },
+    data: {
+      substitutionReviewedAt: null,
+      substitutionReviewedById: null,
+      substitutionStatus: "PENDING_APPROVAL",
+    },
+  });
+
+  redirect("/admin/substitutions");
+}
