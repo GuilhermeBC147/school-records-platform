@@ -271,6 +271,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <strong>Manage students</strong>
                 <small>Update student status and keep records tidy.</small>
               </Link>
+              <Link className="dashboard-action-card" href="/admin/records">
+                <span>Records</span>
+                <strong>Submitted records</strong>
+                <small>Review class submissions and export attendance or homework.</small>
+              </Link>
               <Link className="dashboard-action-card" href="/admin/risk">
                 <span>Review</span>
                 <strong>Student risk</strong>

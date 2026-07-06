@@ -246,6 +246,8 @@ test("admin student management supports creating and editing students", async ()
   assert.match(studentProfilePanel, /gradeClassId/);
   assert.match(recordForm, /student:\s*{\s*isActive: true/s);
   assert.match(dashboardPage, /Manage students/);
+  assert.match(dashboardPage, /\/admin\/records/);
+  assert.match(dashboardPage, /Submitted records/);
   assert.match(dashboardPage, /dashboard-metric-grid/);
   assert.match(dashboardPage, /dashboard-action-grid/);
   assert.match(dashboardPage, /Review substitutions/);
