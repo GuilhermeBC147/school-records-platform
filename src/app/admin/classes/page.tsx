@@ -6,6 +6,7 @@ import {
   formatWeekdays,
   weekdayOptions,
 } from "@/lib/class-schedule";
+import { formatEntityResultMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import type { Prisma, Weekday } from "@/generated/prisma/client";
@@ -83,6 +84,7 @@ export default async function AdminClassesPage({
   const teacherId = readFilterValue(params.teacherId);
   const weekDays = readWeekdayFilters(params.weekDay);
   const year = readNumberFilter(params.year);
+  const successMessage = formatEntityResultMessage("Class", params.status);
 
   const classWhere: Prisma.ClassWhereInput = {
     ...(classStatus === "active" ? { isActive: true } : {}),
@@ -199,11 +201,7 @@ export default async function AdminClassesPage({
           </div>
         </section>
 
-        {params.status ? (
-          <p className="form-success">
-            Class {params.status === "created" ? "created" : "updated"}.
-          </p>
-        ) : null}
+        {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
         <section className="panel filter-panel" aria-label="Class filters">
           <div className="filter-panel-heading">

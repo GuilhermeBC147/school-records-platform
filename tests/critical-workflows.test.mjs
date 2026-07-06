@@ -74,6 +74,7 @@ test("admin records and export routes require admin sessions", async () => {
 test("account management supports reset tokens and admin staff setup", async () => {
   const schema = await readProjectFile("prisma/schema.prisma");
   const accountActions = await readProjectFile("src/app/actions/accounts.ts");
+  const messages = await readProjectFile("src/lib/messages.ts");
   const accountsPage = await readProjectFile(
     "src/app/admin/manage-accounts/page.tsx",
   );
@@ -94,10 +95,14 @@ test("account management supports reset tokens and admin staff setup", async () 
   assert.match(accountActions, /updateAccountAction/);
   assert.match(accountActions, /role !== "TEACHER" && role !== "RECEPTION"/);
   assert.match(accountActions, /isActive/);
+  assert.match(messages, /formatEntityResultMessage/);
+  assert.match(messages, /status !== "created" && status !== "updated"/);
   assert.match(accountPage, /accountDateFormatOptions/);
   assert.match(accountPage, /name="dateFormat"/);
   assert.match(accountsPage, /Manage accounts/);
   assert.match(accountsPage, /formatAccountRole/);
+  assert.match(accountsPage, /formatEntityResultMessage\("Account", params\.status\)/);
+  assert.match(accountsPage, /No staff accounts have been created yet\./);
   assert.match(newAccountPage, /Create account/);
   assert.match(newAccountPage, /value="RECEPTION"/);
 });
@@ -179,6 +184,7 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classActions, /role: "TEACHER"/);
   assert.match(classActions, /isActive: true/);
   assert.match(classesPage, /Create class/);
+  assert.match(classesPage, /formatEntityResultMessage\("Class", params\.status\)/);
   assert.match(classesPage, /Semester/);
   assert.match(classesPage, /classStatus/);
   assert.doesNotMatch(classesPage, /Active and inactive/);
@@ -224,6 +230,7 @@ test("admin student management supports creating and editing students", async ()
   assert.doesNotMatch(studentActions, /preferredName/);
   assert.match(studentActions, /isActive/);
   assert.match(studentsPage, /Create student/);
+  assert.match(studentsPage, /formatEntityResultMessage\("Student", params\.status\)/);
   assert.match(studentsPage, /studentSearch/);
   assert.match(studentsPage, /datalist id="admin-students"/);
   assert.match(studentsPage, /Student results/);

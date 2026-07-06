@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
+import { formatEntityResultMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -28,6 +29,7 @@ export default async function AdminStudentsPage({
 
   const params = await searchParams;
   const studentSearch = params.studentSearch?.trim() || undefined;
+  const successMessage = formatEntityResultMessage("Student", params.status);
   const students = await prisma.student.findMany({
     orderBy: [{ isActive: "desc" }, { fullName: "asc" }],
     where: {
@@ -79,11 +81,7 @@ export default async function AdminStudentsPage({
           </div>
         </section>
 
-        {params.status ? (
-          <p className="form-success">
-            Student {params.status === "created" ? "created" : "updated"}.
-          </p>
-        ) : null}
+        {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
         <section className="panel" aria-label="Student filters">
           <form className="filter-form compact-filter-form">
