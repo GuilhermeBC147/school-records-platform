@@ -246,6 +246,8 @@ test("admin student management supports creating and editing students", async ()
   assert.match(studentProfilePanel, /gradeClassId/);
   assert.match(recordForm, /student:\s*{\s*isActive: true/s);
   assert.match(dashboardPage, /Manage students/);
+  assert.match(dashboardPage, /\/admin\/records/);
+  assert.match(dashboardPage, /Submitted records/);
   assert.match(dashboardPage, /dashboard-metric-grid/);
   assert.match(dashboardPage, /dashboard-action-grid/);
   assert.match(dashboardPage, /Review substitutions/);
@@ -381,6 +383,9 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const schema = await readProjectFile("prisma/schema.prisma");
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
+  const messages = await readProjectFile("src/lib/messages.ts");
+  const classSchedule = await readProjectFile("src/lib/class-schedule.ts");
+  const bonusLib = await readProjectFile("src/lib/bonus-classes.ts");
   const timeInput = await readProjectFile("src/app/components/time-input.tsx");
   const durationInput = await readProjectFile(
     "src/app/components/duration-input.tsx",
@@ -437,10 +442,21 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
   assert.match(workActions, /teacherWorkLog\.create/);
+  assert.match(classSchedule, /formatClockTimeFromMinutes/);
+  assert.match(classSchedule, /return formatClockTimeFromMinutes\(minutes\)/);
+  assert.match(bonusLib, /formatClockTimeFromMinutes/);
+  assert.match(bonusLib, /return formatClockTimeFromMinutes\(totalMinutes\)/);
+  assert.match(
+    messages,
+    /Check the required activity or meeting details and try again\./,
+  );
   assert.match(teacherWorkPage, /Monthly summary/);
   assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
+  assert.match(teacherWorkPage, /Add activity/);
+  assert.doesNotMatch(teacherWorkPage, /Add event/);
   assert.doesNotMatch(teacherWorkPage, /createTeacherWorkLogAction/);
-  assert.match(newActivityPage, /Add event/);
+  assert.match(newActivityPage, /Add activity/);
+  assert.doesNotMatch(newActivityPage, /Add event/);
   assert.match(newActivityPage, /createTeacherWorkLogAction/);
   assert.match(newActivityPage, /name="subject"/);
   assert.match(newActivityPage, /TimeInput/);
@@ -475,6 +491,8 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(adminWorkPage, /All teachers/);
   assert.match(dashboardPage, /\/dashboard\/work/);
   assert.match(dashboardPage, /\/dashboard\/work\/new/);
+  assert.match(dashboardPage, /Add activity/);
+  assert.doesNotMatch(dashboardPage, /Add event/);
   assert.match(dashboardPage, /\/admin\/work-summary/);
   assert.match(dashboardPage, /\/admin\/work-summary\/new-activity/);
   assert.match(dashboardPage, /\/admin\/work-summary\/new-meeting/);
@@ -685,9 +703,14 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
 });
 
 test("production handoff documents deployment, backups, and smoke tests", async () => {
+  const readme = await readProjectFile("README.md");
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");
 
+  assert.match(readme, /reception@example\.com/);
+  assert.match(readme, /one reception account/);
+  assert.match(readme, /sample grading records/);
+  assert.match(readme, /one submitted class record with attendance and homework/);
   assert.match(productionDoc, /DATABASE_URL/);
   assert.match(productionDoc, /AUTH_SECRET/);
   assert.match(productionDoc, /prisma migrate deploy/);

@@ -95,7 +95,7 @@ Seed sample data:
 npm.cmd run db:seed
 ```
 
-The seed data creates one admin, two teachers, two classes, five students, sample enrollments, and one submitted class record.
+The seed data creates one admin, one reception account, two teachers, two classes, five students, sample enrollments, one submitted class record with attendance and homework, and sample grading records.
 
 ## Planning
 

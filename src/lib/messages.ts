@@ -12,7 +12,7 @@ export function formatEntityResultMessage(
 export function formatTeacherWorkErrorMessage(error: string | undefined) {
   switch (error) {
     case "invalid":
-      return "Check the required work details and try again.";
+      return "Check the required activity or meeting details and try again.";
     case "students":
       return "Choose only active students for this activity.";
     case "teacher":
