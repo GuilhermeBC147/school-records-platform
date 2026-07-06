@@ -21,18 +21,19 @@ export function formatWeekdays(weekDays: string[]) {
     .join(", ");
 }
 
+export function formatClockTimeFromMinutes(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 export function formatDuration(minutes: number | null) {
   if (!minutes) {
     return "-";
   }
 
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-
-  return `${String(hours).padStart(2, "0")}:${String(remainingMinutes).padStart(
-    2,
-    "0",
-  )}`;
+  return formatClockTimeFromMinutes(minutes);
 }
 
 export function readDurationMinutes(value: FormDataEntryValue | null) {

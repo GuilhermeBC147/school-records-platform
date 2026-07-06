@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { readDurationMinutes as readDurationInputMinutes } from "@/lib/class-schedule";
+import {
+  formatClockTimeFromMinutes,
+  readDurationMinutes as readDurationInputMinutes,
+} from "@/lib/class-schedule";
 
 export function formatBonusClassStatus(status: string) {
   return status
@@ -52,10 +55,7 @@ export function formatStartTime(startTime: string | null) {
 }
 
 export function formatTimeFromMinutes(totalMinutes: number) {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  return formatClockTimeFromMinutes(totalMinutes);
 }
 
 export function readIsoDate(value: string) {

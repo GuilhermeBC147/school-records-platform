@@ -381,6 +381,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   const schema = await readProjectFile("prisma/schema.prisma");
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const workActions = await readProjectFile("src/app/actions/teacher-work.ts");
+  const classSchedule = await readProjectFile("src/lib/class-schedule.ts");
   const timeInput = await readProjectFile("src/app/components/time-input.tsx");
   const durationInput = await readProjectFile(
     "src/app/components/duration-input.tsx",
@@ -437,6 +438,8 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workActions, /currentUser\.role === "ADMIN"/);
   assert.match(workActions, /role: "TEACHER"/);
   assert.match(workActions, /teacherWorkLog\.create/);
+  assert.match(classSchedule, /formatClockTimeFromMinutes/);
+  assert.match(classSchedule, /return formatClockTimeFromMinutes\(minutes\)/);
   assert.match(teacherWorkPage, /Monthly summary/);
   assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
   assert.doesNotMatch(teacherWorkPage, /createTeacherWorkLogAction/);
