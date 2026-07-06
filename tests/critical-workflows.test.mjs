@@ -690,9 +690,14 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
 });
 
 test("production handoff documents deployment, backups, and smoke tests", async () => {
+  const readme = await readProjectFile("README.md");
   const productionDoc = await readProjectFile("docs/production-readiness.md");
   const backupDoc = await readProjectFile("docs/backup-export.md");
 
+  assert.match(readme, /reception@example\.com/);
+  assert.match(readme, /one reception account/);
+  assert.match(readme, /sample grading records/);
+  assert.match(readme, /one submitted class record with attendance and homework/);
   assert.match(productionDoc, /DATABASE_URL/);
   assert.match(productionDoc, /AUTH_SECRET/);
   assert.match(productionDoc, /prisma migrate deploy/);
