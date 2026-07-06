@@ -519,15 +519,15 @@ Goal: let users choose between English and Brazilian Portuguese across the platf
 
 Tasks:
 
-- Add a locale setting for each signed-in user, with English and Brazilian Portuguese options.
-- Add a language selector in account settings or another persistent account area.
-- Define default locale behavior for new users and unauthenticated pages.
-- Extract user-facing labels, navigation text, validation messages, success messages, empty states, and email/password-reset copy into translation resources.
-- Localize role-specific admin, teacher, and reception dashboards.
-- Localize date, time, duration, status, attendance, homework, grade, risk-review, scheduling, and work-summary wording.
-- Confirm CSV/export headers use the selected or documented locale consistently.
-- Add fallback handling so missing translation keys are visible during development.
-- Add focused tests for locale selection, persistence, and translated critical workflows.
+- [x] Add a locale setting for each signed-in user, with English and Brazilian Portuguese options.
+- [x] Add a language selector in account settings or another persistent account area.
+- [x] Define default locale behavior for new users and unauthenticated pages.
+- [x] Extract user-facing labels, navigation text, validation messages, success messages, empty states, and email/password-reset copy into translation resources.
+- [x] Localize role-specific admin, teacher, and reception dashboards.
+- [x] Localize date, time, duration, status, attendance, homework, grade, risk-review, scheduling, and work-summary wording.
+- [x] Confirm CSV/export headers use the selected or documented locale consistently.
+- [x] Add fallback handling so missing translation keys are visible during development.
+- [x] Add focused tests for locale selection, persistence, and translated critical workflows.
 
 Suggested commits:
 

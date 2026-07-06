@@ -1,18 +1,16 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
+import { accountLocaleOptions, normalizeAccountLocale } from "@/lib/locale";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
+    locale?: string;
     reset?: string;
   }>;
-};
-
-const errorMessages = {
-  invalid: "Email or password is incorrect.",
-  missing: "Enter both email and password.",
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -23,6 +21,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   const params = await searchParams;
+  const locale = normalizeAccountLocale(params.locale);
+  const t = getTranslations(locale);
+  const errorMessages = {
+    invalid: t("auth.loginInvalid"),
+    missing: t("auth.loginMissing"),
+  };
   const errorMessage =
     params.error && params.error in errorMessages
       ? errorMessages[params.error as keyof typeof errorMessages]
@@ -30,52 +34,71 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="auth-page">
+      <header className="auth-topbar">
+        <form action="/login" className="topbar-locale-form" method="get">
+          {params.error ? <input name="error" type="hidden" value={params.error} /> : null}
+          {params.reset ? <input name="reset" type="hidden" value={params.reset} /> : null}
+          <label>
+            <span>{t("account.language")}</span>
+            <select defaultValue={locale} name="locale">
+              {accountLocaleOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="secondary-button" type="submit">
+            {t("account.saveLanguage")}
+          </button>
+        </form>
+      </header>
+
       <section className="auth-panel" aria-labelledby="login-title">
-        <p className="eyebrow">Teacher access</p>
-        <h1 id="login-title">Sign in to class records</h1>
-        <p className="lede">
-          Use your school account to view assigned classes and submit records.
-        </p>
+        <p className="eyebrow">{t("auth.teacherAccess")}</p>
+        <h1 id="login-title">{t("auth.signInTitle")}</h1>
+        <p className="lede">{t("auth.loginCopy")}</p>
 
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
         {params.reset === "success" ? (
-          <p className="form-success">Password updated. Sign in again.</p>
+          <p className="form-success">{t("auth.passwordUpdatedSignIn")}</p>
         ) : null}
 
         <form action={loginAction} className="form-stack">
+          <input name="locale" type="hidden" value={locale} />
           <label>
-            <span>Email</span>
+            <span>{t("auth.email")}</span>
             <input
               autoComplete="email"
               name="email"
-              placeholder="ana@example.com"
+              placeholder={t("auth.emailPlaceholder")}
               required
               type="email"
             />
           </label>
 
           <label>
-            <span>Password</span>
+            <span>{t("auth.password")}</span>
             <input
               autoComplete="current-password"
               name="password"
-              placeholder="password123"
+              placeholder={t("auth.passwordPlaceholder")}
               required
               type="password"
             />
           </label>
 
           <button className="primary-button" type="submit">
-            Sign in
+            {t("auth.signIn")}
           </button>
         </form>
 
         <Link className="text-link" href="/forgot-password">
-          Forgot your password?
+          {t("auth.forgotPassword")}
         </Link>
 
         <div className="demo-credentials">
-          <strong>Development accounts</strong>
+          <strong>{t("auth.devAccounts")}</strong>
           <span>admin@example.com / password123</span>
           <span>reception@example.com / password123</span>
           <span>ana@example.com / password123</span>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,24 @@ function csvCell(value: string | number | null | undefined) {
   return `"${stringValue.replaceAll('"', '""')}"`;
 }
 
+type CsvRow = Array<string | number | null | undefined>;
+
+function csvHeaders(t: ReturnType<typeof getTranslations>) {
+  return [
+    t("export.lessonId"),
+    t("export.lessonName"),
+    t("export.lessonDate"),
+    t("export.class"),
+    t("export.teacher"),
+    t("export.student"),
+    t("export.attendance"),
+    t("export.homework"),
+    t("export.submittedBy"),
+    t("export.submittedAt"),
+    t("export.notes"),
+  ];
+}
+
 export async function GET(request: Request) {
   const currentUser = await getCurrentUser();
 
@@ -42,6 +61,7 @@ export async function GET(request: Request) {
   const dateRange = readFilterDate(searchParams.get("date"));
   const studentId = readFilterValue(searchParams.get("studentId"));
   const teacherId = readFilterValue(searchParams.get("teacherId"));
+  const t = getTranslations(currentUser.locale);
 
   const lessons = await prisma.lesson.findMany({
     where: {
@@ -109,21 +129,7 @@ export async function GET(request: Request) {
     },
   });
 
-  const rows = [
-    [
-      "lesson_id",
-      "lesson_name",
-      "lesson_date",
-      "class",
-      "teacher",
-      "student",
-      "attendance",
-      "homework",
-      "submitted_by",
-      "submitted_at",
-      "notes",
-    ],
-  ];
+  const rows: CsvRow[] = [csvHeaders(t)];
 
   for (const lesson of lessons) {
     const homeworkByStudentId = new Map(
@@ -138,14 +144,16 @@ export async function GET(request: Request) {
       rows.push([
         lesson.id,
         lesson.name ?? "",
-        formatShortDate(lesson.lessonDate),
+        formatShortDate(lesson.lessonDate, currentUser.dateFormat),
         lesson.class.name,
         lesson.class.teacher.name,
         attendanceRecord.student.fullName,
         attendanceRecord.status,
         homeworkByStudentId.get(attendanceRecord.student.id) ?? "INCOMPLETE",
         lesson.submittedBy?.name ?? "",
-        lesson.submittedAt ? formatShortDateTime(lesson.submittedAt) : "",
+        lesson.submittedAt
+          ? formatShortDateTime(lesson.submittedAt, currentUser.dateFormat)
+          : "",
         lesson.notes ?? "",
       ]);
     }

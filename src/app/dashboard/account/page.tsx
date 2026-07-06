@@ -4,22 +4,18 @@ import {
   changeOwnPasswordAction,
   updateOwnDateFormatAction,
 } from "@/app/actions/accounts";
-import { logoutAction } from "@/app/actions/auth";
 import { accountDateFormatOptions } from "@/lib/date-format";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type AccountPageProps = {
   searchParams: Promise<{
     dateFormat?: string;
+    locale?: string;
     password?: string;
   }>;
 };
-
-const passwordMessages = {
-  current: "Enter your current password correctly before saving a new one.",
-  invalid: "Use a new password with at least 8 characters and matching confirmation.",
-  updated: "Password updated.",
-} as const;
 
 export default async function AccountPage({ searchParams }: AccountPageProps) {
   const currentUser = await getCurrentUser();
@@ -29,47 +25,45 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   }
 
   const params = await searchParams;
+  const t = getTranslations(currentUser.locale);
+  const passwordMessages = {
+    current: t("account.passwordCurrentError"),
+    invalid: t("account.passwordInvalidError"),
+    updated: t("account.passwordUpdated"),
+  } as const;
   const passwordMessage =
     params.password && params.password in passwordMessages
       ? passwordMessages[params.password as keyof typeof passwordMessages]
       : null;
   const isSuccess = params.password === "updated";
   const dateFormatUpdated = params.dateFormat === "updated";
+  const localeUpdated = params.locale === "updated";
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="account-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("account.backToDashboard")}
           </Link>
-          <p className="eyebrow">Account</p>
-          <h1 id="account-title">Your account</h1>
+          <p className="eyebrow">{t("dashboard.account")}</p>
+          <h1 id="account-title">{t("account.yourAccount")}</h1>
           <p className="lede">{currentUser.email}</p>
+          {localeUpdated ? (
+            <p className="form-success">{t("account.languageUpdated")}</p>
+          ) : null}
         </section>
 
         <section className="panel">
-          <h2>Date format</h2>
+          <h2>{t("account.dateFormat")}</h2>
           {dateFormatUpdated ? (
-            <p className="form-success">Date format updated.</p>
+            <p className="form-success">{t("account.dateFormatUpdated")}</p>
           ) : null}
           <form action={updateOwnDateFormatAction} className="admin-form">
             <label>
-              <span>Preferred date format</span>
+              <span>{t("account.preferredDateFormat")}</span>
               <select defaultValue={currentUser.dateFormat} name="dateFormat">
                 {accountDateFormatOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -80,14 +74,14 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             </label>
             <div className="record-actions">
               <button className="primary-button" type="submit">
-                Save date format
+                {t("account.saveDateFormat")}
               </button>
             </div>
           </form>
         </section>
 
         <section className="panel">
-          <h2>Change password</h2>
+          <h2>{t("account.changePassword")}</h2>
           {passwordMessage ? (
             <p className={isSuccess ? "form-success" : "form-error"}>
               {passwordMessage}
@@ -95,7 +89,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           ) : null}
           <form action={changeOwnPasswordAction} className="admin-form">
             <label>
-              <span>Current password</span>
+              <span>{t("account.currentPassword")}</span>
               <input
                 autoComplete="current-password"
                 name="currentPassword"
@@ -104,7 +98,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               />
             </label>
             <label>
-              <span>New password</span>
+              <span>{t("auth.newPassword")}</span>
               <input
                 autoComplete="new-password"
                 minLength={8}
@@ -114,7 +108,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               />
             </label>
             <label>
-              <span>Confirm new password</span>
+              <span>{t("auth.confirmPassword")}</span>
               <input
                 autoComplete="new-password"
                 minLength={8}
@@ -125,7 +119,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             </label>
             <div className="record-actions">
               <button className="primary-button" type="submit">
-                Update password
+                {t("account.updatePassword")}
               </button>
             </div>
           </form>

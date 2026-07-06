@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
 import { formatDuration } from "@/lib/class-schedule";
 import {
@@ -12,6 +11,8 @@ import {
 } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +73,7 @@ export default async function ReceptionCalendarPage({
   }
 
   const query = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const calendarDate = safeCalendarDate(query.date);
   const selectedTeacherId = query.teacherId?.trim() || undefined;
   const teachers = await prisma.user.findMany({
@@ -120,47 +122,34 @@ export default async function ReceptionCalendarPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="calendar-title">
           <Link className="text-link" href="/reception">
-            Back to reception
+            {t("label.backToReception")}
           </Link>
-          <p className="eyebrow">Reception</p>
-          <h1 id="calendar-title">Bonus calendar</h1>
-          <p className="lede">
-            Scan scheduled bonus classes by teacher in 30-minute intervals.
-          </p>
+          <p className="eyebrow">{t("dashboard.reception")}</p>
+          <h1 id="calendar-title">{t("dashboard.calendar")}</h1>
+          <p className="lede">{t("dashboard.teacherAvailabilityCopy")}</p>
           <div className="action-row">
             {currentUser.role === "ADMIN" ? (
               <Link className="secondary-link" href="/dashboard">
-                Back to dashboard
+                {t("label.backToDashboard")}
               </Link>
             ) : null}
             <Link className="primary-link" href="/reception/bonus-classes">
-              Schedule bonus class
+              {t("label.scheduleBonusClass")}
             </Link>
           </div>
         </section>
 
-        <section className="panel" aria-label="Calendar filters">
+        <section className="panel" aria-label={t("label.calendarFilters")}>
           <form className="filter-form compact-filter-form">
             <label>
-              <span>Date</span>
+              <span>{t("label.date")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={calendarDate.label}
                 name="date"
@@ -168,9 +157,9 @@ export default async function ReceptionCalendarPage({
               />
             </label>
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={selectedTeacherId ?? ""} name="teacherId">
-                <option value="">All teachers</option>
+                <option value="">{t("label.allTeachers")}</option>
                 {allTeachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -180,22 +169,22 @@ export default async function ReceptionCalendarPage({
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                View
+                {t("label.view")}
               </button>
               <Link className="text-link" href="/reception/calendar">
-                Today
+                {t("dashboard.today")}
               </Link>
             </div>
           </form>
         </section>
 
         <section className="panel data-panel" aria-labelledby="daily-calendar-title">
-          <h2 id="daily-calendar-title">Daily teacher calendar</h2>
+          <h2 id="daily-calendar-title">{t("label.dailyTeacherCalendar")}</h2>
           <div className="table-wrap schedule-wrap">
             <table className="schedule-table">
               <thead>
                 <tr>
-                  <th>Time</th>
+                  <th>{t("label.time")}</th>
                   {teachers.map((teacher) => (
                     <th key={teacher.id}>{teacher.name}</th>
                   ))}
@@ -227,8 +216,15 @@ export default async function ReceptionCalendarPage({
                               <span>{bonusClass.student.fullName}</span>
                               <span>{bonusClass.subject}</span>
                               <span>
-                                {formatBonusClassStatus(bonusClass.status)} |{" "}
-                                {formatBonusClassStatus(bonusClass.attendanceStatus)}
+                                {formatBonusClassStatus(
+                                  bonusClass.status,
+                                  currentUser.locale,
+                                )}{" "}
+                                |{" "}
+                                {formatBonusClassStatus(
+                                  bonusClass.attendanceStatus,
+                                  currentUser.locale,
+                                )}
                               </span>
                             </Link>
                           ))}

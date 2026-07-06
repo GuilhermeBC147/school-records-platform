@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import { StudentProfilePanel } from "@/app/components/student-profile-panel";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function ViewStudentPage({
 
   const { studentId } = await params;
   const query = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const studentExists = await prisma.student.findUnique({
     where: { id: studentId },
     select: { id: true },
@@ -43,30 +45,18 @@ export default async function ViewStudentPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="view-student-title">
           <Link className="text-link" href="/admin/students">
-            Back to students
+            {t("adminStudents.backToStudents")}
           </Link>
-          <p className="eyebrow">Admin review</p>
-          <h1 id="view-student-title">Student profile</h1>
+          <p className="eyebrow">{t("label.adminReview")}</p>
+          <h1 id="view-student-title">{t("adminStudents.studentProfile")}</h1>
           <div className="action-row">
             <Link className="secondary-link" href={`/admin/students/${studentId}`}>
-              Edit student
+              {t("adminStudents.editStudent")}
             </Link>
           </div>
         </section>
@@ -74,6 +64,7 @@ export default async function ViewStudentPage({
         <StudentProfilePanel
           basePath={`/admin/students/${studentId}/view`}
           dateFormat={currentUser.dateFormat}
+          locale={currentUser.locale}
           selectedClassId={query.gradeClassId}
           studentId={studentId}
         />

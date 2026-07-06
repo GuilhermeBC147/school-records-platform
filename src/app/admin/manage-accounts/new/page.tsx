@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAccountAction } from "@/app/actions/accounts";
-import { logoutAction } from "@/app/actions/auth";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type NewAccountPageProps = {
   searchParams: Promise<{
@@ -10,10 +11,19 @@ type NewAccountPageProps = {
   }>;
 };
 
-const errorMessages = {
-  duplicate: "A user with that email already exists.",
-  invalid: "Enter a name, email, account type, and password with at least 8 characters.",
-};
+function formatAccountErrorMessage(
+  error: string | undefined,
+  t: ReturnType<typeof getTranslations>,
+) {
+  switch (error) {
+    case "duplicate":
+      return t("accountManagement.duplicateError");
+    case "invalid":
+      return t("accountManagement.invalidCreateError");
+    default:
+      return null;
+  }
+}
 
 export default async function NewAccountPage({
   searchParams,
@@ -29,56 +39,44 @@ export default async function NewAccountPage({
   }
 
   const params = await searchParams;
-  const errorMessage =
-    params.error && params.error in errorMessages
-      ? errorMessages[params.error as keyof typeof errorMessages]
-      : null;
+  const t = getTranslations(currentUser.locale);
+  const errorMessage = formatAccountErrorMessage(params.error, t);
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="new-account-title">
           <Link className="text-link" href="/admin/manage-accounts">
-            Back to accounts
+            {t("accountManagement.backToAccounts")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="new-account-title">Create account</h1>
+          <p className="eyebrow">{t("accountManagement.adminSetup")}</p>
+          <h1 id="new-account-title">{t("accountManagement.createAccount")}</h1>
         </section>
 
         <section className="panel">
           {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
           <form action={createAccountAction} className="admin-form">
             <label>
-              <span>Name</span>
+              <span>{t("label.name")}</span>
               <input name="name" required type="text" />
             </label>
             <label>
-              <span>Email</span>
+              <span>{t("account.email")}</span>
               <input autoComplete="email" name="email" required type="email" />
             </label>
             <label>
-              <span>Account type</span>
+              <span>{t("accountManagement.accountType")}</span>
               <select defaultValue="TEACHER" name="role" required>
-                <option value="TEACHER">Teacher</option>
-                <option value="RECEPTION">Reception</option>
+                <option value="TEACHER">{t("accountManagement.teacher")}</option>
+                <option value="RECEPTION">
+                  {t("accountManagement.reception")}
+                </option>
               </select>
             </label>
             <label>
-              <span>Initial password</span>
+              <span>{t("accountManagement.initialPassword")}</span>
               <input
                 autoComplete="new-password"
                 minLength={8}
@@ -89,14 +87,14 @@ export default async function NewAccountPage({
             </label>
             <label className="checkbox-label">
               <input defaultChecked name="isActive" type="checkbox" />
-              <span>Active account</span>
+              <span>{t("accountManagement.activeAccount")}</span>
             </label>
             <div className="record-actions">
               <Link className="text-link" href="/admin/manage-accounts">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Create account
+                {t("accountManagement.createAccount")}
               </button>
             </div>
           </form>

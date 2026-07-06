@@ -5,13 +5,27 @@ import {
   rejectSubstitutionAction,
   undoSubstitutionApprovalAction,
 } from "@/app/actions/substitutions";
-import { logoutAction } from "@/app/actions/auth";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations, type TranslationKey } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
+
+function formatSubstitutionStatus(
+  status: string,
+  t: ReturnType<typeof getTranslations>,
+) {
+  const labels: Record<string, TranslationKey> = {
+    APPROVED: "option.statusApproved",
+    PENDING_APPROVAL: "option.statusPendingApproval",
+    REJECTED: "option.statusRejected",
+  };
+
+  return labels[status] ? t(labels[status]) : status;
+}
 
 export default async function AdminSubstitutionsPage() {
   const currentUser = await getCurrentUser();
@@ -24,6 +38,7 @@ export default async function AdminSubstitutionsPage() {
     redirect("/dashboard");
   }
 
+  const t = getTranslations(currentUser.locale);
   const substituteLessons = await prisma.lesson.findMany({
     where: {
       substitutionStatus: {
@@ -74,50 +89,48 @@ export default async function AdminSubstitutionsPage() {
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="substitutions-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin review</p>
-          <h1 id="substitutions-title">Substitute lessons</h1>
-          <p className="lede">
-            Review substitute lesson claims. Attendance and homework are saved
-            immediately; approval decides whether the hours count for payroll.
-          </p>
+          <p className="eyebrow">{t("label.adminReview")}</p>
+          <h1 id="substitutions-title">{t("adminReview.substituteLessons")}</h1>
+          <p className="lede">{t("adminReview.substituteLessonsCopy")}</p>
         </section>
 
-        <section className="records-review" aria-label="Substitute lessons">
+        <section className="records-review" aria-label={t("adminReview.substituteLessons")}>
           {substituteLessons.map((lesson) => (
             <article className="panel data-panel record-review" key={lesson.id}>
               <div className="record-review-header">
                 <div>
-                  <p className="eyebrow">{lesson.substitutionStatus}</p>
-                  <h2>{lesson.class.name}</h2>
-                  <p>Lesson: {lesson.name ?? "Untitled lesson"}</p>
-                  <p>
-                    Date: {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                  <p className="eyebrow">
+                    {formatSubstitutionStatus(lesson.substitutionStatus, t)}
                   </p>
-                  <p>Primary teacher: {lesson.class.teacher.name}</p>
-                  <p>Substitute teacher: {lesson.taughtBy?.name ?? "Unknown"}</p>
+                  <h2>{lesson.class.name}</h2>
                   <p>
-                    Submitted by {lesson.submittedBy?.name ?? "Unknown"}
+                    {t("label.lesson")}:{" "}
+                    {lesson.name ?? t("adminReview.untitledLesson")}
+                  </p>
+                  <p>
+                    {t("label.date")}:{" "}
+                    {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                  </p>
+                  <p>
+                    {t("adminReview.primaryTeacher")}:{" "}
+                    {lesson.class.teacher.name}
+                  </p>
+                  <p>
+                    {t("adminReview.substituteTeacher")}:{" "}
+                    {lesson.taughtBy?.name ?? t("adminReview.unknown")}
+                  </p>
+                  <p>
+                    {t("adminReview.submittedBy")}{" "}
+                    {lesson.submittedBy?.name ?? t("adminReview.unknown")}
                     {lesson.submittedAt
-                      ? ` on ${formatShortDateTime(
+                      ? ` ${t("adminReview.onDate")} ${formatShortDateTime(
                           lesson.submittedAt,
                           currentUser.dateFormat,
                         )}`
@@ -125,9 +138,10 @@ export default async function AdminSubstitutionsPage() {
                   </p>
                   {lesson.substitutionReviewedBy ? (
                     <p>
-                      Reviewed by {lesson.substitutionReviewedBy.name}
+                      {t("adminReview.reviewedBy")}{" "}
+                      {lesson.substitutionReviewedBy.name}
                       {lesson.substitutionReviewedAt
-                        ? ` on ${formatShortDateTime(
+                        ? ` ${t("adminReview.onDate")} ${formatShortDateTime(
                           lesson.substitutionReviewedAt,
                           currentUser.dateFormat,
                         )}`
@@ -137,7 +151,7 @@ export default async function AdminSubstitutionsPage() {
                 </div>
                 <div className="metric compact-metric">
                   <span>{formatDuration(lesson.class.durationMinutes)}</span>
-                  <strong>Duration</strong>
+                  <strong>{t("label.duration")}</strong>
                 </div>
               </div>
 
@@ -150,13 +164,13 @@ export default async function AdminSubstitutionsPage() {
                   <form action={approveSubstitutionAction}>
                     <input name="lessonId" type="hidden" value={lesson.id} />
                     <button className="primary-button" type="submit">
-                      Approve
+                      {t("adminReview.approve")}
                     </button>
                   </form>
                   <form action={rejectSubstitutionAction}>
                     <input name="lessonId" type="hidden" value={lesson.id} />
                     <button className="secondary-button" type="submit">
-                      Reject
+                      {t("adminReview.reject")}
                     </button>
                   </form>
                 </div>
@@ -166,7 +180,7 @@ export default async function AdminSubstitutionsPage() {
                   <form action={undoSubstitutionApprovalAction}>
                     <input name="lessonId" type="hidden" value={lesson.id} />
                     <button className="secondary-button" type="submit">
-                      Undo approval
+                      {t("adminReview.undoApproval")}
                     </button>
                   </form>
                 </div>
@@ -176,9 +190,9 @@ export default async function AdminSubstitutionsPage() {
 
           {substituteLessons.length === 0 ? (
             <article className="panel data-panel">
-              <h2>No substitute lessons yet</h2>
+              <h2>{t("adminReview.noSubstituteLessons")}</h2>
               <p className="muted-copy">
-                Substitute lesson records submitted by teachers will appear here.
+                {t("adminReview.noSubstituteLessonsCopy")}
               </p>
             </article>
           ) : null}

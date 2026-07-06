@@ -23,9 +23,6 @@ export function DurationInput({
       pattern="\d{1,2}:[0-5]\d"
       placeholder="HH:MM"
       required={required}
-      title={`Use hours and minutes, for example 01:30. Maximum ${formatDuration(
-        maxMinutes,
-      )}.`}
       type="text"
     />
   );

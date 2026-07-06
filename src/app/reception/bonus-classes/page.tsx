@@ -4,7 +4,6 @@ import {
   cancelBonusClassAction,
   createBonusClassAction,
 } from "@/app/actions/bonus-classes";
-import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
@@ -18,6 +17,8 @@ import {
 } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -42,8 +43,9 @@ export default async function ReceptionBonusClassesPage({
   }
 
   const query = await searchParams;
-  const errorMessage = formatBonusClassErrorMessage(query.error);
-  const successMessage = formatBonusClassResultMessage(query.status);
+  const t = getTranslations(currentUser.locale);
+  const errorMessage = formatBonusClassErrorMessage(query.error, currentUser.locale);
+  const successMessage = formatBonusClassResultMessage(query.status, currentUser.locale);
   const [bonusClasses, students, teachers] = await Promise.all([
     prisma.bonusClass.findMany({
       orderBy: [{ scheduledDate: "desc" }, { startTime: "asc" }],
@@ -88,39 +90,24 @@ export default async function ReceptionBonusClassesPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="bonus-title">
           <Link className="text-link" href="/reception">
-            Back to reception
+            {t("label.backToReception")}
           </Link>
-          <p className="eyebrow">Reception</p>
-          <h1 id="bonus-title">Schedule bonus class</h1>
-          <p className="lede">
-            Create an independent bonus class with student, subject, teacher,
-            date, time, duration, and notes.
-          </p>
+          <p className="eyebrow">{t("dashboard.reception")}</p>
+          <h1 id="bonus-title">{t("label.scheduleBonusClass")}</h1>
+          <p className="lede">{t("text.scheduleBonusCopy")}</p>
           <div className="action-row">
             {currentUser.role === "ADMIN" ? (
               <Link className="secondary-link" href="/dashboard">
-                Back to dashboard
+                {t("label.backToDashboard")}
               </Link>
             ) : null}
             <Link className="primary-link" href="/reception/calendar">
-              View calendar
+              {t("label.view")} {t("dashboard.calendar").toLowerCase()}
             </Link>
           </div>
         </section>
@@ -129,15 +116,15 @@ export default async function ReceptionBonusClassesPage({
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
         <section className="panel data-panel" aria-labelledby="new-bonus-title">
-          <h2 id="new-bonus-title">Bonus class details</h2>
+          <h2 id="new-bonus-title">{t("label.bonusClassDetails")}</h2>
           <form action={createBonusClassAction} className="admin-form">
             <label>
-              <span>Student search</span>
+              <span>{t("label.studentSearch")}</span>
               <input
                 autoComplete="off"
                 list="bonus-students"
                 name="studentSearch"
-                placeholder="Type a student name"
+                placeholder={t("receptionLookup.studentSearchPlaceholder")}
                 required
                 type="search"
               />
@@ -148,13 +135,13 @@ export default async function ReceptionBonusClassesPage({
               </datalist>
             </label>
             <label>
-              <span>Subject</span>
+              <span>{t("label.subject")}</span>
               <input name="subject" required type="text" />
             </label>
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select name="teacherId" required>
-                <option value="">Choose a teacher</option>
+                <option value="">{t("label.chooseTeacher")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -163,48 +150,49 @@ export default async function ReceptionBonusClassesPage({
               </select>
             </label>
             <label>
-              <span>Date</span>
+              <span>{t("label.date")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 name="scheduledDate"
                 required
               />
             </label>
             <label>
-              <span>Start time</span>
+              <span>{t("label.startTime")}</span>
               <TimeInput name="startTime" required />
             </label>
             <label>
-              <span>Duration</span>
+              <span>{t("label.duration")}</span>
               <DurationInput name="durationMinutes" required />
             </label>
             <label>
-              <span>Notes</span>
+              <span>{t("label.notes")}</span>
               <textarea name="notes" rows={3} />
             </label>
             <div className="record-actions">
               <button className="primary-button" type="submit">
-                Schedule bonus class
+                {t("label.scheduleBonusClass")}
               </button>
             </div>
           </form>
         </section>
 
         <section className="panel data-panel" aria-labelledby="scheduled-title">
-          <h2 id="scheduled-title">Recent bonus classes</h2>
+          <h2 id="scheduled-title">{t("label.recentBonusClasses")}</h2>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Student</th>
-                  <th>Subject</th>
-                  <th>Teacher</th>
-                  <th>Duration</th>
-                  <th>Status</th>
-                  <th>Attendance</th>
-                  <th>Actions</th>
+                  <th>{t("label.date")}</th>
+                  <th>{t("label.time")}</th>
+                  <th>{t("label.student")}</th>
+                  <th>{t("label.subject")}</th>
+                  <th>{t("label.teacher")}</th>
+                  <th>{t("label.duration")}</th>
+                  <th>{t("label.status")}</th>
+                  <th>{t("label.attendance")}</th>
+                  <th>{t("label.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,15 +209,15 @@ export default async function ReceptionBonusClassesPage({
                     <td>{bonusClass.subject}</td>
                     <td>{bonusClass.teacher.name}</td>
                     <td>{formatDuration(bonusClass.durationMinutes)}</td>
-                    <td>{formatBonusClassStatus(bonusClass.status)}</td>
-                    <td>{formatBonusClassStatus(bonusClass.attendanceStatus)}</td>
+                    <td>{formatBonusClassStatus(bonusClass.status, currentUser.locale)}</td>
+                    <td>{formatBonusClassStatus(bonusClass.attendanceStatus, currentUser.locale)}</td>
                     <td>
                       <div className="table-actions">
                         <Link
                           className="text-link"
                           href={`/reception/bonus-classes/${bonusClass.id}`}
                         >
-                          Open
+                          {t("label.open")}
                         </Link>
                         {bonusClass.status === "SCHEDULED" ? (
                           <form action={cancelBonusClassAction}>
@@ -239,7 +227,7 @@ export default async function ReceptionBonusClassesPage({
                               value={bonusClass.id}
                             />
                             <button className="secondary-button" type="submit">
-                              Cancel
+                              {t("label.cancel")}
                             </button>
                           </form>
                         ) : null}
@@ -249,7 +237,7 @@ export default async function ReceptionBonusClassesPage({
                 ))}
                 {bonusClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={9}>No bonus classes scheduled yet.</td>
+                    <td colSpan={9}>{t("message.noBonusClassesScheduled")}</td>
                   </tr>
                 ) : null}
               </tbody>

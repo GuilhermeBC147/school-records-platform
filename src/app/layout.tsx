@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import {
+  defaultUnauthenticatedLocale,
+  formatHtmlLang,
+} from "@/lib/locale";
+import { translate } from "@/lib/translations";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Class Records Platform",
-  description: "Teacher attendance and homework records for ESL schools.",
+  title: translate(defaultUnauthenticatedLocale, "app.name"),
+  description: translate(defaultUnauthenticatedLocale, "app.description"),
 };
 
 export default function RootLayout({
@@ -12,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang={formatHtmlLang(defaultUnauthenticatedLocale)}>
       <body suppressHydrationWarning>{children}</body>
     </html>
   );

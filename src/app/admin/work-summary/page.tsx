@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
@@ -12,6 +11,8 @@ import {
   readMonth,
 } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export default async function AdminWorkSummaryPage({
   }
 
   const query = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const month = readMonth(query.month);
   const selectedTeacherId = query.teacherId?.trim() || undefined;
   const teachers = await prisma.user.findMany({
@@ -65,116 +67,101 @@ export default async function AdminWorkSummaryPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="work-summary-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin review</p>
-          <h1 id="work-summary-title">Teacher work summaries</h1>
-          <p className="lede">
-            Audit monthly paid work from submitted lessons and teacher activity
-            logs.
-          </p>
+          <p className="eyebrow">{t("label.adminReview")}</p>
+          <h1 id="work-summary-title">{t("dashboard.workSummaries")}</h1>
+          <p className="lede">{t("text.workSummaryAdminCopy")}</p>
         </section>
 
         {query.status === "created" || query.status === "meeting-created" ? (
           <p className="form-success">
             {query.status === "meeting-created"
-              ? "Meeting saved for selected teachers."
-              : "Paid activity saved."}
+              ? t("message.meetingSaved")
+              : t("message.paidActivitySaved")}
           </p>
         ) : null}
 
-        <section className="panel" aria-label="Work summary filters">
+        <section className="panel" aria-label={t("label.monthlyDetails")}>
           <form className="filter-form compact-filter-form">
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={selectedTeacherId ?? ""} name="teacherId">
-                <option value="">All teachers</option>
+                <option value="">{t("label.allTeachers")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
-                    {teacher.isActive ? "" : " (inactive)"}
+                    {teacher.isActive ? "" : ` (${t("label.inactive")})`}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              <span>Month</span>
+              <span>{t("label.month")}</span>
               <input defaultValue={month.label} name="month" type="month" />
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Apply
+                {t("label.apply")}
               </button>
               <Link className="text-link" href="/admin/work-summary">
-                Current month
+                {t("label.currentMonth")}
               </Link>
             </div>
           </form>
         </section>
 
-        <section className="records-review" aria-label="Teacher summaries">
+        <section className="records-review" aria-label={t("dashboard.workSummaries")}>
           {summaries.map((summary) => (
             <article className="panel data-panel record-review" key={summary.teacher.id}>
               <div className="record-review-header">
                 <div>
-                  <p className="eyebrow">Monthly total</p>
+                  <p className="eyebrow">{t("label.monthlyTotal")}</p>
                   <h2>{summary.teacher.name}</h2>
                   <p className="muted-copy">
-                    {summary.lessons.length} lessons and{" "}
-                    {summary.bonusClasses.length} bonus classes and{" "}
-                    {summary.workLogs.length} paid activities.
+                    {summary.lessons.length} {t("label.lessons")} |{" "}
+                    {summary.bonusClasses.length} {t("label.bonusClasses")} |{" "}
+                    {summary.workLogs.length} {t("label.paidActivities")}.
                     {summary.pendingSubstituteLessons.length > 0
-                      ? ` ${summary.pendingSubstituteLessons.length} substitute lessons pending approval.`
+                      ? ` ${summary.pendingSubstituteLessons.length} ${t("label.pendingSubstituteLessons")}.`
                       : ""}
                   </p>
                 </div>
                 <div className="metric compact-metric">
                   <span>{formatHours(summary.totalMinutes)}</span>
-                  <strong>Total hours</strong>
+                  <strong>{t("label.finalizedHours")}</strong>
                 </div>
               </div>
 
               <div className="metric-grid compact-metrics">
                 <article className="metric">
                   <span>{summary.lessons.length}</span>
-                  <strong>Lessons</strong>
+                  <strong>{t("label.lessons")}</strong>
                 </article>
                 <article className="metric">
                   <span>{formatHours(summary.lessonMinutes)}</span>
-                  <strong>Lesson hours</strong>
+                  <strong>{t("label.lessonHours")}</strong>
                 </article>
                 <article className="metric">
                   <span>{summary.bonusClasses.length}</span>
-                  <strong>Bonus classes</strong>
+                  <strong>{t("label.bonusClasses")}</strong>
                 </article>
                 <article className="metric">
                   <span>{formatHours(summary.bonusClassMinutes)}</span>
-                  <strong>Bonus hours</strong>
+                  <strong>{t("label.bonusHours")}</strong>
                 </article>
                 <article className="metric">
                   <span>{summary.workLogs.length}</span>
-                  <strong>Activities</strong>
+                  <strong>{t("dashboard.activity")}</strong>
                 </article>
                 <article className="metric">
                   <span>{formatHours(summary.workLogMinutes)}</span>
-                  <strong>Activity hours</strong>
+                  <strong>{t("label.activityHours")}</strong>
                 </article>
               </div>
 
@@ -182,13 +169,13 @@ export default async function AdminWorkSummaryPage({
                 <table>
                   <thead>
                     <tr>
-                  <th>Type</th>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Subject</th>
-                  <th>Students</th>
-                  <th>Duration</th>
-                  <th>Created by</th>
+                  <th>{t("label.type")}</th>
+                  <th>{t("label.date")}</th>
+                  <th>{t("label.description")}</th>
+                  <th>{t("label.subject")}</th>
+                  <th>{t("label.students")}</th>
+                  <th>{t("label.duration")}</th>
+                  <th>{t("label.createdBy")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -196,24 +183,24 @@ export default async function AdminWorkSummaryPage({
                       <tr key={lesson.id}>
                         <td>
                           {lesson.substitutionStatus === "APPROVED"
-                            ? "Approved substitute"
-                            : "Regular lesson"}
+                            ? t("label.approvedSubstitute")
+                            : t("label.regularLesson")}
                         </td>
                         <td>
                           {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
                         </td>
                         <td>
-                          {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
+                          {lesson.class.name} | {lesson.name ?? t("label.lesson")}
                         </td>
                         <td>-</td>
                         <td>-</td>
                         <td>{formatDuration(lesson.class.durationMinutes)}</td>
-                        <td>Class record</td>
+                        <td>{t("label.classRecordSource")}</td>
                       </tr>
                     ))}
                     {summary.bonusClasses.map((bonusClass) => (
                       <tr key={bonusClass.id}>
-                        <td>Completed bonus class</td>
+                        <td>{t("label.completedBonusClass")}</td>
                         <td>
                           {formatShortDate(
                             bonusClass.scheduledDate,
@@ -227,12 +214,17 @@ export default async function AdminWorkSummaryPage({
                         <td>{bonusClass.subject}</td>
                         <td>{bonusClass.student.fullName}</td>
                         <td>{formatDuration(bonusClass.durationMinutes)}</td>
-                        <td>Reception schedule</td>
+                        <td>{t("label.receptionSchedule")}</td>
                       </tr>
                     ))}
                     {summary.workLogs.map((workLog) => (
                       <tr key={workLog.id}>
-                        <td>{formatTeacherWorkCategory(workLog.category)}</td>
+                        <td>
+                          {formatTeacherWorkCategory(
+                            workLog.category,
+                            currentUser.locale,
+                          )}
+                        </td>
                         <td>
                           {formatShortDate(workLog.workDate, currentUser.dateFormat)}
                         </td>
@@ -251,17 +243,17 @@ export default async function AdminWorkSummaryPage({
                     ))}
                     {summary.pendingSubstituteLessons.map((lesson) => (
                       <tr key={lesson.id}>
-                        <td>Pending substitute</td>
+                        <td>{t("label.pendingSubstitute")}</td>
                         <td>
                           {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
                         </td>
                         <td>
-                          {lesson.class.name} | {lesson.name ?? "Untitled lesson"}
+                          {lesson.class.name} | {lesson.name ?? t("label.lesson")}
                         </td>
                         <td>-</td>
                         <td>-</td>
                         <td>{formatDuration(lesson.class.durationMinutes)}</td>
-                        <td>Pending admin approval</td>
+                        <td>{t("label.adminApprovalPending")}</td>
                       </tr>
                     ))}
                     {summary.lessons.length +
@@ -270,7 +262,7 @@ export default async function AdminWorkSummaryPage({
                       summary.pendingSubstituteLessons.length ===
                     0 ? (
                       <tr>
-                        <td colSpan={7}>No counted work for this month.</td>
+                        <td colSpan={7}>{t("message.noCountedWorkMonth")}</td>
                       </tr>
                     ) : null}
                   </tbody>

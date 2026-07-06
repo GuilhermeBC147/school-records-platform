@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import {
   formatDuration,
   formatWeekdays,
@@ -9,7 +8,9 @@ import {
 import { formatEntityResultMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 import type { Prisma, Weekday } from "@/generated/prisma/client";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +28,16 @@ type AdminClassesPageProps = {
 
 type ClassStatusFilter = "all" | "active" | "inactive";
 
-function formatTerm(semester: number | null, year: number | null) {
+function formatTerm(
+  semester: number | null,
+  year: number | null,
+  t: ReturnType<typeof getTranslations>,
+) {
   if (!semester || !year) {
     return "-";
   }
 
-  return `Semester ${semester}/${year}`;
+  return `${t("dashboard.semester")} ${semester}/${year}`;
 }
 
 function readFilterValue(value: string | undefined) {
@@ -78,13 +83,18 @@ export default async function AdminClassesPage({
   }
 
   const params = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const classStatus = readClassStatusFilter(readFilterValue(params.classStatus));
   const semester = readNumberFilter(params.semester);
   const studentSearch = readFilterValue(params.student);
   const teacherId = readFilterValue(params.teacherId);
   const weekDays = readWeekdayFilters(params.weekDay);
   const year = readNumberFilter(params.year);
-  const successMessage = formatEntityResultMessage("Class", params.status);
+  const successMessage = formatEntityResultMessage(
+    "Class",
+    params.status,
+    currentUser.locale,
+  );
 
   const classWhere: Prisma.ClassWhereInput = {
     ...(classStatus === "active" ? { isActive: true } : {}),
@@ -169,55 +179,46 @@ export default async function AdminClassesPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="classes-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="classes-title">Classes</h1>
-          <p className="lede">
-            Create classes, assign teachers, and control which classes are
-            active for teacher dashboards.
-          </p>
+          <p className="eyebrow">{t("adminClasses.adminSetup")}</p>
+          <h1 id="classes-title">{t("dashboard.classes")}</h1>
+          <p className="lede">{t("adminClasses.createCopy")}</p>
           <div className="action-row">
             <Link className="primary-link" href="/admin/classes/new">
-              Create class
+              {t("adminClasses.createClass")}
             </Link>
           </div>
         </section>
 
         {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
-        <section className="panel filter-panel" aria-label="Class filters">
+        <section
+          className="panel filter-panel"
+          aria-label={t("dashboard.classFilters")}
+        >
           <div className="filter-panel-heading">
             <div>
-              <h2>Filter classes</h2>
-              <p className="muted-copy">
-                Combine teacher, student, schedule, term, and status filters.
-              </p>
+              <h2>{t("adminClasses.filterClasses")}</h2>
+              <p className="muted-copy">{t("adminClasses.filterCopy")}</p>
             </div>
-            <span className="status-pill">{classes.length} found</span>
+            <span className="status-pill">
+              {classes.length}{" "}
+              {classes.length === 1
+                ? t("adminClasses.classFound")
+                : t("adminClasses.classesFound")}
+            </span>
           </div>
           <form className="filter-form class-filter-form">
             <label className="wide-filter">
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={teacherId ?? ""} name="teacherId">
-                <option value="">All teachers</option>
+                <option value="">{t("label.allTeachers")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -226,12 +227,12 @@ export default async function AdminClassesPage({
               </select>
             </label>
             <label className="wide-filter">
-              <span>Student</span>
+              <span>{t("label.student")}</span>
               <input
                 defaultValue={studentSearch ?? ""}
                 list="admin-class-students"
                 name="student"
-                placeholder="Search enrolled students"
+                placeholder={t("adminClasses.searchEnrolledStudents")}
                 type="search"
               />
               <datalist id="admin-class-students">
@@ -241,17 +242,17 @@ export default async function AdminClassesPage({
               </datalist>
             </label>
             <label>
-              <span>Status</span>
+              <span>{t("label.status")}</span>
               <select defaultValue={classStatus} name="classStatus">
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">{t("adminClasses.allStatuses")}</option>
+                <option value="active">{t("label.active")}</option>
+                <option value="inactive">{t("label.inactive")}</option>
               </select>
             </label>
             <label>
-              <span>Year</span>
+              <span>{t("adminClasses.year")}</span>
               <select defaultValue={year ?? ""} name="year">
-                <option value="">All years</option>
+                <option value="">{t("adminClasses.allYears")}</option>
                 {years.map((item) =>
                   item.year ? (
                     <option key={item.year} value={item.year}>
@@ -262,15 +263,15 @@ export default async function AdminClassesPage({
               </select>
             </label>
             <label>
-              <span>Semester</span>
+              <span>{t("dashboard.semester")}</span>
               <select defaultValue={semester ?? ""} name="semester">
-                <option value="">All semesters</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
+                <option value="">{t("adminClasses.allSemesters")}</option>
+                <option value="1">{t("dashboard.semester")} 1</option>
+                <option value="2">{t("dashboard.semester")} 2</option>
               </select>
             </label>
             <div className="weekday-filter wide-filter">
-              <span className="form-section-label">Days</span>
+              <span className="form-section-label">{t("adminClasses.days")}</span>
               <div className="weekday-picker compact-weekday-picker">
                 {weekdayOptions.map((weekday) => (
                   <label className="checkbox-label" key={weekday.value}>
@@ -280,17 +281,19 @@ export default async function AdminClassesPage({
                       type="checkbox"
                       value={weekday.value}
                     />
-                    <span>{weekday.shortLabel}</span>
+                    <span>
+                      {formatWeekdays([weekday.value], currentUser.locale)}
+                    </span>
                   </label>
                 ))}
               </div>
             </div>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Apply filters
+                {t("label.applyFilters")}
               </button>
               <Link className="text-link" href="/admin/classes">
-                Clear
+                {t("label.clear")}
               </Link>
             </div>
           </form>
@@ -299,9 +302,14 @@ export default async function AdminClassesPage({
         <section className="panel data-panel" aria-labelledby="admin-class-results-title">
           <div className="section-heading-row">
             <div>
-              <h2 id="admin-class-results-title">Class results</h2>
+              <h2 id="admin-class-results-title">
+                {t("adminClasses.classResults")}
+              </h2>
               <p className="muted-copy">
-                {classes.length} {classes.length === 1 ? "class" : "classes"} found.
+                {classes.length}{" "}
+                {classes.length === 1
+                  ? t("adminClasses.classFound")
+                  : t("adminClasses.classesFound")}
               </p>
             </div>
           </div>
@@ -315,20 +323,28 @@ export default async function AdminClassesPage({
                 <span>{schoolClass.teacher.name}</span>
                 <strong>{schoolClass.name}</strong>
                 <small>
-                  {schoolClass.book ?? "No book"} |{" "}
-                  {formatTerm(schoolClass.semester, schoolClass.year)}
+                  {schoolClass.book ?? t("adminClasses.noBook")} |{" "}
+                  {formatTerm(schoolClass.semester, schoolClass.year, t)}
                 </small>
-                <small>{formatWeekdays(schoolClass.weekDays)}</small>
+                <small>
+                  {formatWeekdays(schoolClass.weekDays, currentUser.locale)}
+                </small>
                 <div className="class-result-card-metrics">
-                  <span>{schoolClass.isActive ? "Active" : "Inactive"}</span>
-                  <span>{schoolClass._count.enrollments} students</span>
-                  <span>{schoolClass._count.lessons} lessons</span>
+                  <span>
+                    {schoolClass.isActive ? t("label.active") : t("label.inactive")}
+                  </span>
+                  <span>
+                    {schoolClass._count.enrollments} {t("label.students")}
+                  </span>
+                  <span>
+                    {schoolClass._count.lessons} {t("label.lessons")}
+                  </span>
                   <span>{formatDuration(schoolClass.durationMinutes)}</span>
                 </div>
               </Link>
             ))}
             {classes.length === 0 ? (
-              <p className="muted-copy">No classes match the current filters.</p>
+              <p className="muted-copy">{t("adminClasses.noClassesMatch")}</p>
             ) : null}
           </div>
         </section>

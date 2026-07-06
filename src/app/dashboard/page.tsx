@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { logoutAction } from "@/app/actions/auth";
 import {
   formatDuration,
   formatWeekdays,
@@ -10,7 +9,9 @@ import { formatShortDate } from "@/lib/date-format";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations, type TranslationKey } from "@/lib/translations";
 import type { Weekday } from "@/generated/prisma/client";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,16 @@ function getTodayRange() {
   return { end, start };
 }
 
+const weekdayTranslationKeys = {
+  FRIDAY: "dashboard.weekdayFriday",
+  MONDAY: "dashboard.weekdayMonday",
+  SATURDAY: "dashboard.weekdaySaturday",
+  SUNDAY: "dashboard.weekdaySunday",
+  THURSDAY: "dashboard.weekdayThursday",
+  TUESDAY: "dashboard.weekdayTuesday",
+  WEDNESDAY: "dashboard.weekdayWednesday",
+} as const satisfies Record<Weekday, TranslationKey>;
+
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const currentUser = await getCurrentUser();
 
@@ -62,6 +73,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   const params = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const selectedDay =
     currentUser.role === "TEACHER"
       ? params.day === "all"
@@ -69,11 +81,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         : readWeekday(params.day) ?? getCurrentWeekday()
       : undefined;
   const dashboardTitle =
-    currentUser.role === "ADMIN" ? "Admin dashboard" : currentUser.name;
+    currentUser.role === "ADMIN" ? t("dashboard.adminDashboard") : currentUser.name;
   const dashboardLede =
     currentUser.role === "ADMIN"
-      ? "Manage school records, staff accounts, reception tools, risk review, and teacher work summaries from one place."
-      : "Open class records, review assigned bonus classes, and manage your monthly work summary.";
+      ? t("dashboard.adminLede")
+      : t("dashboard.teacherLede");
 
   const classes =
     currentUser.role === "TEACHER"
@@ -109,9 +121,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const dayFilterValue = params.day === "all" ? "all" : selectedDay ?? "";
   const visibleClassesLabel =
     dayFilterValue === "all"
-      ? "All classes"
-      : weekdayOptions.find((option) => option.value === selectedDay)?.label ??
-        "Today";
+      ? t("dashboard.allClasses")
+      : selectedDay
+        ? t(weekdayTranslationKeys[selectedDay])
+        : t("dashboard.today");
   const today = getTodayRange();
   const adminDashboard =
     currentUser.role === "ADMIN"
@@ -205,123 +218,115 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="dashboard-title">
-          <p className="eyebrow">{currentUser.role.toLowerCase()} dashboard</p>
+          <p className="eyebrow">
+            {currentUser.role === "ADMIN"
+              ? t("dashboard.adminDashboard")
+              : t("dashboard.teacherWorkflows")}
+          </p>
           <h1 id="dashboard-title">{dashboardTitle}</h1>
           <p className="lede">{dashboardLede}</p>
         </section>
 
         {currentUser.role === "ADMIN" && adminDashboard ? (
           <>
-            <section className="dashboard-metric-grid" aria-label="Admin overview">
+            <section className="dashboard-metric-grid" aria-label={t("dashboard.adminOverview")}>
               <article className="metric">
                 <span>{adminDashboard.activeStaff}</span>
-                <strong>Active staff</strong>
+                <strong>{t("dashboard.activeStaff")}</strong>
               </article>
               <article className="metric">
                 <span>{adminDashboard.activeClasses}</span>
-                <strong>Active classes</strong>
+                <strong>{t("dashboard.activeClasses")}</strong>
               </article>
               <article className="metric">
                 <span>{adminDashboard.activeStudents}</span>
-                <strong>Active students</strong>
+                <strong>{t("dashboard.activeStudents")}</strong>
               </article>
               <article className="metric">
                 <span>{adminDashboard.lessonsToday}</span>
-                <strong>Lessons today</strong>
+                <strong>{t("dashboard.lessonsToday")}</strong>
               </article>
               <article className="metric">
                 <span>{adminDashboard.pendingSubstitutions}</span>
-                <strong>Pending substitutions</strong>
+                <strong>{t("dashboard.pendingSubstitutions")}</strong>
               </article>
               <article className="metric">
                 <span>{adminDashboard.bonusClassesToday}</span>
-                <strong>Bonus classes today</strong>
+                <strong>{t("dashboard.bonusClassesToday")}</strong>
               </article>
             </section>
 
-            <section className="dashboard-action-grid" aria-label="Admin workflows">
+            <section className="dashboard-action-grid" aria-label={t("dashboard.adminWorkflows")}>
               <Link className="dashboard-action-card" href="/admin/manage-accounts">
-                <span>Staff</span>
-                <strong>Manage accounts</strong>
-                <small>Create teacher or reception access and deactivate old logins.</small>
+                <span>{t("dashboard.staff")}</span>
+                <strong>{t("dashboard.manageAccounts")}</strong>
+                <small>{t("dashboard.manageAccountsCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/admin/classes">
-                <span>Classes</span>
-                <strong>Manage classes</strong>
-                <small>Maintain active classes, schedules, teachers, and rosters.</small>
+                <span>{t("dashboard.classes")}</span>
+                <strong>{t("dashboard.manageClasses")}</strong>
+                <small>{t("dashboard.manageClassesCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/admin/students">
-                <span>Students</span>
-                <strong>Manage students</strong>
-                <small>Update student status and keep records tidy.</small>
+                <span>{t("dashboard.students")}</span>
+                <strong>{t("dashboard.manageStudents")}</strong>
+                <small>{t("dashboard.manageStudentsCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/admin/records">
-                <span>Records</span>
-                <strong>Submitted records</strong>
-                <small>Review class submissions and export attendance or homework.</small>
+                <span>{t("dashboard.records")}</span>
+                <strong>{t("dashboard.submittedRecords")}</strong>
+                <small>{t("dashboard.submittedRecordsCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/admin/risk">
-                <span>Review</span>
-                <strong>Student risk</strong>
-                <small>Check unresolved attendance and homework signals.</small>
+                <span>{t("dashboard.review")}</span>
+                <strong>{t("dashboard.studentRisk")}</strong>
+                <small>{t("dashboard.studentRiskCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/admin/work-summary">
-                <span>Payroll</span>
-                <strong>Work summaries</strong>
-                <small>Audit lessons, bonus classes, activities, and meetings.</small>
+                <span>{t("dashboard.payroll")}</span>
+                <strong>{t("dashboard.workSummaries")}</strong>
+                <small>{t("dashboard.workSummariesCopy")}</small>
               </Link>
               <Link
                 className="dashboard-action-card"
                 href="/admin/work-summary/new-activity"
               >
-                <span>Payroll</span>
-                <strong>Add activity</strong>
-                <small>Record paid teacher work and connect students when needed.</small>
+                <span>{t("dashboard.payroll")}</span>
+                <strong>{t("dashboard.addActivity")}</strong>
+                <small>{t("dashboard.addActivityCopy")}</small>
               </Link>
               <Link
                 className="dashboard-action-card"
                 href="/admin/work-summary/new-meeting"
               >
-                <span>Payroll</span>
-                <strong>Create meeting</strong>
-                <small>Count one meeting toward multiple teachers at once.</small>
+                <span>{t("dashboard.payroll")}</span>
+                <strong>{t("dashboard.createMeeting")}</strong>
+                <small>{t("dashboard.createMeetingCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/admin/substitutions">
-                <span>Approvals</span>
-                <strong>Review substitutions</strong>
-                <small>Approve, reject, or undo substitute lesson payroll claims.</small>
+                <span>{t("dashboard.approvals")}</span>
+                <strong>{t("dashboard.reviewSubstitutions")}</strong>
+                <small>{t("dashboard.reviewSubstitutionsCopy")}</small>
               </Link>
               <Link className="dashboard-action-card" href="/reception">
-                <span>Front desk</span>
-                <strong>Reception tools</strong>
-                <small>Schedule bonus classes and answer class lookup questions.</small>
+                <span>{t("dashboard.frontDesk")}</span>
+                <strong>{t("dashboard.receptionTools")}</strong>
+                <small>{t("dashboard.receptionToolsCopy")}</small>
               </Link>
             </section>
 
             <section className="panel dashboard-feed" aria-labelledby="admin-feed-title">
               <div className="section-heading-row">
                 <div>
-                  <p className="eyebrow">Upcoming</p>
-                  <h2 id="admin-feed-title">Scheduled bonus classes</h2>
+                  <p className="eyebrow">{t("dashboard.upcoming")}</p>
+                  <h2 id="admin-feed-title">{t("dashboard.scheduledBonusClasses")}</h2>
                 </div>
                 <Link className="text-link" href="/reception/calendar">
-                  Open calendar
+                  {t("dashboard.openCalendar")}
                 </Link>
               </div>
               <div className="dashboard-feed-list">
@@ -339,13 +344,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                       {formatStartTime(bonusClass.startTime)}
                     </strong>
                     <span>
-                      {bonusClass.student.fullName} with {bonusClass.teacher.name}
+                      {bonusClass.student.fullName} {t("dashboard.withTeacher")} {bonusClass.teacher.name}
                     </span>
                     <small>{bonusClass.subject}</small>
                   </Link>
                 ))}
                 {adminDashboard.upcomingBonusClasses.length === 0 ? (
-                  <p className="muted-copy">No scheduled bonus classes coming up.</p>
+                  <p className="muted-copy">{t("dashboard.noScheduledBonusClasses")}</p>
                 ) : null}
               </div>
             </section>
@@ -358,7 +363,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <>
                 <section
                   className="dashboard-metric-grid"
-                  aria-label="Teacher overview"
+                  aria-label={t("dashboard.teacherOverview")}
                 >
                   <article className="metric">
                     <span>{classes.length}</span>
@@ -366,78 +371,78 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   </article>
                   <article className="metric">
                     <span>{visibleClassStudentCount}</span>
-                    <strong>Visible students</strong>
+                    <strong>{t("dashboard.visibleStudents")}</strong>
                   </article>
                   <article className="metric">
                     <span>{visibleClassLessonCount}</span>
-                    <strong>Submitted lessons</strong>
+                    <strong>{t("dashboard.submittedLessons")}</strong>
                   </article>
                   <article className="metric">
                     <span>{teacherDashboard.bonusClassesToday}</span>
-                    <strong>Bonus classes today</strong>
+                    <strong>{t("dashboard.bonusClassesToday")}</strong>
                   </article>
                   <article className="metric">
                     <span>{teacherDashboard.pendingBonusAttendance}</span>
-                    <strong>Pending bonus attendance</strong>
+                    <strong>{t("dashboard.pendingBonusAttendance")}</strong>
                   </article>
                 </section>
 
                 <section
                   className="dashboard-action-grid teacher-action-grid"
-                  aria-label="Teacher workflows"
+                  aria-label={t("dashboard.teacherWorkflows")}
                 >
                   <Link className="dashboard-action-card" href="/dashboard/work">
-                    <span>Payroll</span>
-                    <strong>Monthly summary</strong>
-                    <small>Review counted lessons, bonus classes, and paid activities.</small>
+                    <span>{t("dashboard.payroll")}</span>
+                    <strong>{t("dashboard.monthlySummary")}</strong>
+                    <small>{t("dashboard.monthlySummaryCopy")}</small>
                   </Link>
                   <Link className="dashboard-action-card" href="/dashboard/work/new">
-                    <span>Activity</span>
-                    <strong>Add activity</strong>
-                    <small>Record bonus classes, extra activities, or other paid work.</small>
+                    <span>{t("dashboard.activity")}</span>
+                    <strong>{t("dashboard.addActivity")}</strong>
+                    <small>{t("dashboard.addActivityCopy")}</small>
                   </Link>
                   <Link
                     className="dashboard-action-card"
                     href="/dashboard/bonus-classes"
                   >
-                    <span>Attendance</span>
-                    <strong>Bonus classes</strong>
-                    <small>Confirm attendance for assigned bonus classes.</small>
+                    <span>{t("dashboard.attendance")}</span>
+                    <strong>{t("dashboard.bonusClasses")}</strong>
+                    <small>{t("dashboard.confirmBonusAttendanceCopy")}</small>
                   </Link>
                   <Link
                     className="dashboard-action-card"
                     href="/dashboard/substitutions/new"
                   >
-                    <span>Substitution</span>
-                    <strong>Substitute lesson</strong>
-                    <small>Submit class records when covering another teacher.</small>
+                    <span>{t("dashboard.substitution")}</span>
+                    <strong>{t("dashboard.substituteLesson")}</strong>
+                    <small>{t("dashboard.substituteLessonCopy")}</small>
                   </Link>
                   <Link className="dashboard-action-card" href="/dashboard/account">
-                    <span>Account</span>
-                    <strong>Account settings</strong>
-                    <small>Update your password and review your account details.</small>
+                    <span>{t("dashboard.account")}</span>
+                    <strong>{t("dashboard.accountSettings")}</strong>
+                    <small>{t("dashboard.accountSettingsCopy")}</small>
                   </Link>
                 </section>
 
-                <section className="panel" aria-label="Class filters">
+                <section className="panel" aria-label={t("dashboard.classFilters")}>
                   <form className="filter-form compact-filter-form">
                     <label>
-                      <span>Day</span>
+                      <span>{t("dashboard.day")}</span>
                       <select defaultValue={dayFilterValue} name="day">
-                        <option value="all">All days</option>
+                        <option value="all">{t("dashboard.allDays")}</option>
                         {weekdayOptions.map((weekday) => (
                           <option key={weekday.value} value={weekday.value}>
-                            {weekday.label}
+                            {t(weekdayTranslationKeys[weekday.value])}
                           </option>
                         ))}
                       </select>
                     </label>
                     <div className="filter-actions">
                       <button className="primary-button" type="submit">
-                        Apply
+                        {t("dashboard.apply")}
                       </button>
                       <Link className="text-link" href={allClassesHref}>
-                        Show all
+                        {t("dashboard.showAll")}
                       </Link>
                     </div>
                   </form>
@@ -452,24 +457,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     >
                       <div>
                         <p className="eyebrow">
-                          {schoolClass.book ?? "Class"}
+                          {schoolClass.book ?? t("dashboard.classFallback")}
                           {schoolClass.semester && schoolClass.year
-                            ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+                            ? ` | ${t("dashboard.semester")} ${schoolClass.semester}/${schoolClass.year}`
                             : ""}
                         </p>
                         <h2>{schoolClass.name}</h2>
                         <p>
-                          {formatWeekdays(schoolClass.weekDays)} |{" "}
+                          {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
                           {formatDuration(schoolClass.durationMinutes)}
                         </p>
                       </div>
                       <dl>
                         <div>
-                          <dt>Students</dt>
+                          <dt>{t("dashboard.students")}</dt>
                           <dd>{schoolClass._count.enrollments}</dd>
                         </div>
                         <div>
-                          <dt>Lessons</dt>
+                          <dt>{t("dashboard.lessons")}</dt>
                           <dd>{schoolClass._count.lessons}</dd>
                         </div>
                       </dl>
@@ -477,9 +482,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   ))}
                   {classes.length === 0 ? (
                     <article className="panel class-card">
-                      <h2>No classes for {visibleClassesLabel.toLowerCase()}</h2>
+                      <h2>{t("dashboard.noClassesFor")} {visibleClassesLabel.toLowerCase()}</h2>
                       <Link className="text-link" href={allClassesHref}>
-                        Show all classes
+                        {t("dashboard.showAllClasses")}
                       </Link>
                     </article>
                   ) : null}

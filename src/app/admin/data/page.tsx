@@ -1,10 +1,39 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatShortDate } from "@/lib/date-format";
+import { defaultUnauthenticatedLocale } from "@/lib/locale";
+import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 
 export const dynamic = "force-dynamic";
 
+function formatUserRole(role: string, t: ReturnType<typeof getTranslations>) {
+  switch (role) {
+    case "ADMIN":
+      return t("accountManagement.adminSetup");
+    case "RECEPTION":
+      return t("accountManagement.reception");
+    case "TEACHER":
+      return t("accountManagement.teacher");
+    default:
+      return role;
+  }
+}
+
+function formatLessonStatus(status: string, t: ReturnType<typeof getTranslations>) {
+  switch (status) {
+    case "DRAFT":
+      return t("option.statusDraft");
+    case "SUBMITTED":
+      return t("option.statusSubmitted");
+    default:
+      return status;
+  }
+}
+
 export default async function AdminDataPage() {
+  const currentUser = await getCurrentUser();
+  const t = getTranslations(currentUser?.locale ?? defaultUnauthenticatedLocale);
   const [teachers, classes, students, recentLessons] = await Promise.all([
     prisma.user.findMany({
       orderBy: { name: "asc" },
@@ -75,55 +104,52 @@ export default async function AdminDataPage() {
       <header className="topbar">
         <div className="topbar-inner">
           <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>Database preview</span>
+            <strong>{t("app.name")}</strong>
+            <span>{t("data.databasePreview")}</span>
           </div>
           <Link className="text-link" href="/">
-            Home
+            {t("data.home")}
           </Link>
         </div>
       </header>
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="data-title">
-          <p className="eyebrow">Sprint 2</p>
-          <h1 id="data-title">Local school data from PostgreSQL</h1>
-          <p className="lede">
-            This page confirms the app can read the seeded teachers, classes,
-            students, and lessons from the local database.
-          </p>
+          <p className="eyebrow">{t("data.sprint")}</p>
+          <h1 id="data-title">{t("data.title")}</h1>
+          <p className="lede">{t("data.introCopy")}</p>
 
-          <div className="metric-grid" aria-label="Database record counts">
+          <div className="metric-grid" aria-label={t("data.databaseRecordCounts")}>
             <article className="metric">
               <span>{teachers.length}</span>
-              <strong>Users</strong>
+              <strong>{t("label.users")}</strong>
             </article>
             <article className="metric">
               <span>{classes.length}</span>
-              <strong>Classes</strong>
+              <strong>{t("dashboard.classes")}</strong>
             </article>
             <article className="metric">
               <span>{students.length}</span>
-              <strong>Students</strong>
+              <strong>{t("dashboard.students")}</strong>
             </article>
             <article className="metric">
               <span>{recentLessons.length}</span>
-              <strong>Recent Lessons</strong>
+              <strong>{t("label.recentLessons")}</strong>
             </article>
           </div>
         </section>
 
-        <section className="data-grid" aria-label="Database tables">
+        <section className="data-grid" aria-label={t("data.databaseTables")}>
           <article className="panel data-panel">
-            <h2>Teachers and Admins</h2>
+            <h2>{t("data.teachersAndAdmins")}</h2>
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Classes</th>
+                    <th>{t("label.name")}</th>
+                    <th>{t("account.email")}</th>
+                    <th>{t("accountManagement.accountType")}</th>
+                    <th>{t("dashboard.classes")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -131,7 +157,7 @@ export default async function AdminDataPage() {
                     <tr key={teacher.id}>
                       <td>{teacher.name}</td>
                       <td>{teacher.email}</td>
-                      <td>{teacher.role}</td>
+                      <td>{formatUserRole(teacher.role, t)}</td>
                       <td>{teacher._count.classes}</td>
                     </tr>
                   ))}
@@ -141,16 +167,16 @@ export default async function AdminDataPage() {
           </article>
 
           <article className="panel data-panel">
-            <h2>Classes</h2>
+            <h2>{t("dashboard.classes")}</h2>
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Class</th>
-                    <th>Book</th>
-                    <th>Term</th>
-                    <th>Teacher</th>
-                    <th>Students</th>
+                    <th>{t("label.class")}</th>
+                    <th>{t("label.book")}</th>
+                    <th>{t("label.term")}</th>
+                    <th>{t("label.teacher")}</th>
+                    <th>{t("dashboard.students")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,7 +186,7 @@ export default async function AdminDataPage() {
                       <td>{schoolClass.book ?? "-"}</td>
                       <td>
                         {schoolClass.semester && schoolClass.year
-                          ? `Semester ${schoolClass.semester}/${schoolClass.year}`
+                          ? `${t("dashboard.semester")} ${schoolClass.semester}/${schoolClass.year}`
                           : "-"}
                       </td>
                       <td>{schoolClass.teacher.name}</td>
@@ -173,13 +199,13 @@ export default async function AdminDataPage() {
           </article>
 
           <article className="panel data-panel">
-            <h2>Students</h2>
+            <h2>{t("dashboard.students")}</h2>
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Classes</th>
+                    <th>{t("label.name")}</th>
+                    <th>{t("dashboard.classes")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -195,23 +221,28 @@ export default async function AdminDataPage() {
           </article>
 
           <article className="panel data-panel">
-            <h2>Recent Lessons</h2>
+            <h2>{t("data.recentLessons")}</h2>
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Class</th>
-                    <th>Status</th>
-                    <th>Teacher</th>
+                    <th>{t("label.date")}</th>
+                    <th>{t("label.class")}</th>
+                    <th>{t("label.status")}</th>
+                    <th>{t("label.teacher")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentLessons.map((lesson) => (
                     <tr key={lesson.id}>
-                      <td>{formatShortDate(lesson.lessonDate)}</td>
+                      <td>
+                        {formatShortDate(
+                          lesson.lessonDate,
+                          currentUser?.dateFormat,
+                        )}
+                      </td>
                       <td>{lesson.class.name}</td>
-                      <td>{lesson.status}</td>
+                      <td>{formatLessonStatus(lesson.status, t)}</td>
                       <td>{lesson.submittedBy?.name ?? "-"}</td>
                     </tr>
                   ))}

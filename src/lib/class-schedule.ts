@@ -1,3 +1,7 @@
+import type { AccountLocale } from "@/lib/locale";
+import { defaultUnauthenticatedLocale } from "@/lib/locale";
+import { translate } from "@/lib/translations";
+
 export const weekdayOptions = [
   { label: "Monday", shortLabel: "Mon", value: "MONDAY" },
   { label: "Tuesday", shortLabel: "Tue", value: "TUESDAY" },
@@ -10,14 +14,34 @@ export const weekdayOptions = [
 
 export type WeekdayValue = (typeof weekdayOptions)[number]["value"];
 
-export function formatWeekdays(weekDays: string[]) {
+export function formatWeekdays(
+  weekDays: string[],
+  locale: AccountLocale = defaultUnauthenticatedLocale,
+) {
   if (weekDays.length === 0) {
     return "-";
   }
 
   return weekdayOptions
     .filter((option) => weekDays.includes(option.value))
-    .map((option) => option.shortLabel)
+    .map((option) => {
+      switch (option.value) {
+        case "MONDAY":
+          return translate(locale, "dashboard.weekdayMonday").slice(0, 3);
+        case "TUESDAY":
+          return translate(locale, "dashboard.weekdayTuesday").slice(0, 3);
+        case "WEDNESDAY":
+          return translate(locale, "dashboard.weekdayWednesday").slice(0, 3);
+        case "THURSDAY":
+          return translate(locale, "dashboard.weekdayThursday").slice(0, 3);
+        case "FRIDAY":
+          return translate(locale, "dashboard.weekdayFriday").slice(0, 3);
+        case "SATURDAY":
+          return translate(locale, "dashboard.weekdaySaturday").slice(0, 3);
+        case "SUNDAY":
+          return translate(locale, "dashboard.weekdaySunday").slice(0, 3);
+      }
+    })
     .join(", ");
 }
 

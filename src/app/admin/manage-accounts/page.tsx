@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import { formatEntityResultMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,13 @@ type ManageAccountsPageProps = {
   }>;
 };
 
-function formatAccountRole(role: string) {
-  return role === "RECEPTION" ? "Reception" : "Teacher";
+function formatAccountRole(
+  role: string,
+  t: ReturnType<typeof getTranslations>,
+) {
+  return role === "RECEPTION"
+    ? t("accountManagement.reception")
+    : t("accountManagement.teacher");
 }
 
 export default async function ManageAccountsPage({
@@ -31,7 +37,12 @@ export default async function ManageAccountsPage({
   }
 
   const params = await searchParams;
-  const successMessage = formatEntityResultMessage("Account", params.status);
+  const t = getTranslations(currentUser.locale);
+  const successMessage = formatEntityResultMessage(
+    "Account",
+    params.status,
+    currentUser.locale,
+  );
   const accounts = await prisma.user.findMany({
     where: { role: { in: ["TEACHER", "RECEPTION"] } },
     orderBy: [{ isActive: "desc" }, { role: "asc" }, { name: "asc" }],
@@ -49,51 +60,39 @@ export default async function ManageAccountsPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="accounts-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="accounts-title">Manage accounts</h1>
-          <p className="lede">
-            Create staff logins and deactivate accounts that should no longer
-            access school records.
-          </p>
+          <p className="eyebrow">{t("accountManagement.adminSetup")}</p>
+          <h1 id="accounts-title">{t("accountManagement.manageAccounts")}</h1>
+          <p className="lede">{t("accountManagement.createCopy")}</p>
           <div className="action-row">
             <Link className="primary-link" href="/admin/manage-accounts/new">
-              Create account
+              {t("accountManagement.createAccount")}
             </Link>
           </div>
         </section>
 
         {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
-        <section className="panel data-panel" aria-label="Staff accounts">
+        <section
+          className="panel data-panel"
+          aria-label={t("accountManagement.staffAccounts")}
+        >
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Classes</th>
-                  <th>Action</th>
+                  <th>{t("label.name")}</th>
+                  <th>{t("account.email")}</th>
+                  <th>{t("label.type")}</th>
+                  <th>{t("label.status")}</th>
+                  <th>{t("dashboard.classes")}</th>
+                  <th>{t("label.action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,22 +100,24 @@ export default async function ManageAccountsPage({
                   <tr key={account.id}>
                     <td>{account.name}</td>
                     <td>{account.email}</td>
-                    <td>{formatAccountRole(account.role)}</td>
-                    <td>{account.isActive ? "Active" : "Inactive"}</td>
+                    <td>{formatAccountRole(account.role, t)}</td>
+                    <td>
+                      {account.isActive ? t("label.active") : t("label.inactive")}
+                    </td>
                     <td>{account.role === "TEACHER" ? account._count.classes : "-"}</td>
                     <td>
                       <Link
                         className="text-link compact-link"
                         href={`/admin/manage-accounts/${account.id}`}
                       >
-                        Edit
+                        {t("label.edit")}
                       </Link>
                     </td>
                   </tr>
                 ))}
                 {accounts.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No staff accounts have been created yet.</td>
+                    <td colSpan={6}>{t("empty.noStaffAccounts")}</td>
                   </tr>
                 ) : null}
               </tbody>

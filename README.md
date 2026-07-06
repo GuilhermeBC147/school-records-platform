@@ -1,4 +1,4 @@
-# Class Records Platform
+# School Records Platform
 
 Web platform for ESL teachers to record attendance and homework completion without paper class records.
 
@@ -15,7 +15,7 @@ Prerequisites:
 First run:
 
 ```powershell
-cd "C:\Users\guilh\OneDrive\Documentos\Sponte"
+cd "E:\Projects\school-records-platform"
 npm.cmd install
 Copy-Item .env.example .env.local
 docker compose up -d

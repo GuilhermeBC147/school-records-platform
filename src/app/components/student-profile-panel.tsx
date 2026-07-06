@@ -7,14 +7,19 @@ import {
 } from "@/lib/date-format";
 import {
   formatGradeLabel,
+  formatPartialEvaluationPeriodLabel,
+  formatTestPeriodLabel,
   partialEvaluationPeriods,
   testPeriods,
 } from "@/lib/grades";
+import { defaultAccountLocale, type AccountLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
+import { getTranslations } from "@/lib/translations";
 
 type StudentProfilePanelProps = {
   basePath: string;
   dateFormat?: AccountDateFormat;
+  locale?: AccountLocale;
   selectedClassId?: string;
   studentId: string;
 };
@@ -28,9 +33,12 @@ type LessonSummary = {
 function lessonLabel(
   lesson: LessonSummary,
   dateFormat: AccountDateFormat = defaultAccountDateFormat,
+  locale: AccountLocale = defaultAccountLocale,
 ) {
+  const t = getTranslations(locale);
+
   return `${formatShortDate(lesson.lessonDate, dateFormat)} | ${
-    lesson.name ?? "Untitled lesson"
+    lesson.name ?? t("adminReview.untitledLesson")
   }`;
 }
 
@@ -74,9 +82,11 @@ function findTestGrade<
 export async function StudentProfilePanel({
   basePath,
   dateFormat = defaultAccountDateFormat,
+  locale = defaultAccountLocale,
   selectedClassId,
   studentId,
 }: StudentProfilePanelProps) {
+  const t = getTranslations(locale);
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     select: {
@@ -168,18 +178,18 @@ export async function StudentProfilePanel({
       <div className="section-heading-row">
         <div>
           <h2 id="student-profile-title">{student.fullName}</h2>
-          <p className="muted-copy">Student class, attendance, and grade overview.</p>
+          <p className="muted-copy">{t("receptionLookup.studentOverview")}</p>
         </div>
       </div>
 
       <div className="metric-grid compact-metrics student-profile-summary">
         <article className="metric">
           <span>{activeClasses.length}</span>
-          <strong>Active classes</strong>
+          <strong>{t("dashboard.activeClasses")}</strong>
         </article>
         <article className="metric">
           <span>{absentLessons.length}</span>
-          <strong>Absences</strong>
+          <strong>{t("receptionLookup.absences")}</strong>
         </article>
         <article className="metric">
           <span>
@@ -187,12 +197,12 @@ export async function StudentProfilePanel({
               ? formatShortDate(latestActiveClassLesson.lessonDate, dateFormat)
               : "-"}
           </span>
-          <strong>Last class lesson</strong>
+          <strong>{t("receptionLookup.lastClassLesson")}</strong>
         </article>
       </div>
 
       <div className="student-profile-section">
-        <h3>Current active class</h3>
+        <h3>{t("receptionLookup.currentActiveClass")}</h3>
         <div className="student-class-card-list">
           {activeClasses.map((schoolClass) => {
             const lesson = schoolClass.lessons[0];
@@ -202,18 +212,20 @@ export async function StudentProfilePanel({
                 <strong>{schoolClass.name}</strong>
                 <span>{schoolClass.teacher.name}</span>
                 <small>
-                  {formatWeekdays(schoolClass.weekDays)} |{" "}
+                  {formatWeekdays(schoolClass.weekDays, locale)} |{" "}
                   {formatDuration(schoolClass.durationMinutes)}
                 </small>
                 <small>
-                  Last lesson:{" "}
-                  {lesson ? lessonLabel(lesson, dateFormat) : "No submitted lessons"}
+                  {t("receptionLookup.lastLesson")}:{" "}
+                  {lesson
+                    ? lessonLabel(lesson, dateFormat, locale)
+                    : t("receptionLookup.noSubmittedLessons")}
                 </small>
               </article>
             );
           })}
           {activeClasses.length === 0 ? (
-            <p className="muted-copy">No active class enrollment.</p>
+            <p className="muted-copy">{t("receptionLookup.noActiveClassEnrollment")}</p>
           ) : null}
         </div>
       </div>
@@ -222,8 +234,8 @@ export async function StudentProfilePanel({
         <article className="data-panel">
           <div className="section-heading-row">
             <div>
-              <h2>Absent lessons</h2>
-              <p className="muted-copy">Submitted lessons where the student was absent.</p>
+              <h2>{t("receptionLookup.absentLessons")}</h2>
+              <p className="muted-copy">{t("receptionLookup.absentLessonsCopy")}</p>
             </div>
           </div>
           <div className="student-event-list">
@@ -233,11 +245,13 @@ export async function StudentProfilePanel({
                   {formatShortDate(record.lesson.lessonDate, dateFormat)}
                 </span>
                 <strong>{record.lesson.class.name}</strong>
-                <small>{record.lesson.name ?? "Untitled lesson"}</small>
+                <small>
+                  {record.lesson.name ?? t("adminReview.untitledLesson")}
+                </small>
               </article>
             ))}
             {absentLessons.length === 0 ? (
-              <p className="muted-copy">No absences in submitted records.</p>
+              <p className="muted-copy">{t("receptionLookup.noAbsences")}</p>
             ) : null}
           </div>
         </article>
@@ -245,14 +259,14 @@ export async function StudentProfilePanel({
         <article className="data-panel">
           <div className="section-heading-row">
             <div>
-              <h2>Grades</h2>
-              <p className="muted-copy">Select an active class to view saved grades.</p>
+              <h2>{t("label.grades")}</h2>
+              <p className="muted-copy">{t("receptionLookup.gradesCopy")}</p>
             </div>
           </div>
           <form className="filter-form compact-filter-form">
             <input name="studentId" type="hidden" value={student.id} />
             <label>
-              <span>Class</span>
+              <span>{t("label.class")}</span>
               <select defaultValue={gradeClassId ?? ""} name="gradeClassId">
                 {activeClasses.map((schoolClass) => (
                   <option key={schoolClass.id} value={schoolClass.id}>
@@ -260,16 +274,16 @@ export async function StudentProfilePanel({
                   </option>
                 ))}
                 {activeClasses.length === 0 ? (
-                  <option value="">No active classes</option>
+                  <option value="">{t("receptionLookup.noActiveClasses")}</option>
                 ) : null}
               </select>
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                View grades
+                {t("receptionLookup.viewGrades")}
               </button>
               <Link className="text-link" href={basePath}>
-                Clear
+                {t("label.clear")}
               </Link>
             </div>
           </form>
@@ -277,14 +291,16 @@ export async function StudentProfilePanel({
           {selectedClass ? (
             <div className="student-grade-cards">
               <div className="student-grade-group">
-                <h3>Partial evaluations</h3>
+                <h3>{t("receptionLookup.partialEvaluations")}</h3>
                 <div className="student-grade-card-row">
                   {partialEvaluationPeriods.map((period) => {
                     const grade = findPartialGrade(partialGrades, period.value);
 
                     return (
                       <article className="student-grade-card" key={period.value}>
-                        <span>{period.label}</span>
+                        <span>
+                          {formatPartialEvaluationPeriodLabel(period.value, locale)}
+                        </span>
                         <strong>{grade ? formatGradeLabel(grade) : "-"}</strong>
                       </article>
                     );
@@ -298,21 +314,21 @@ export async function StudentProfilePanel({
                 return (
                   <article className="student-test-card" key={period.value}>
                     <div className="student-test-total">
-                      <span>{period.label}</span>
+                      <span>{formatTestPeriodLabel(period.value, locale)}</span>
                       <strong>{testTotal(grade)}</strong>
-                      <small>Total</small>
+                      <small>{t("label.testTotal")}</small>
                     </div>
                     <div className="student-test-breakdown">
                       <div className="student-score-item">
-                        <span>Oral</span>
+                        <span>{t("label.oral")}</span>
                         <strong>{grade ? formatGradeLabel(grade.oralGrade) : "-"}</strong>
                       </div>
                       <div className="student-score-item">
-                        <span>Composition</span>
+                        <span>{t("label.composition")}</span>
                         <strong>{grade ? formatScore(grade.compositionScore) : "-"}</strong>
                       </div>
                       <div className="student-score-item">
-                        <span>Written</span>
+                        <span>{t("label.written")}</span>
                         <strong>{grade ? formatScore(grade.writtenTestScore) : "-"}</strong>
                       </div>
                     </div>
@@ -321,7 +337,7 @@ export async function StudentProfilePanel({
               })}
             </div>
           ) : (
-            <p className="muted-copy">No active class available for grades.</p>
+            <p className="muted-copy">{t("receptionLookup.noActiveClassAvailable")}</p>
           )}
         </article>
       </div>

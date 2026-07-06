@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { updateStudentAction } from "@/app/actions/students";
-import { logoutAction } from "@/app/actions/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type EditStudentPageProps = {
   params: Promise<{
@@ -30,6 +31,7 @@ export default async function EditStudentPage({
 
   const { studentId } = await params;
   const query = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     select: {
@@ -45,37 +47,25 @@ export default async function EditStudentPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="edit-student-title">
           <Link className="text-link" href="/admin/students">
-            Back to students
+            {t("adminStudents.backToStudents")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="edit-student-title">Edit student</h1>
+          <p className="eyebrow">{t("adminStudents.adminSetup")}</p>
+          <h1 id="edit-student-title">{t("adminStudents.editStudent")}</h1>
         </section>
 
         <section className="panel">
           {query.error === "invalid" ? (
-            <p className="form-error">Enter the student's full name.</p>
+            <p className="form-error">{t("adminStudents.invalidError")}</p>
           ) : null}
           <form action={updateStudentAction} className="admin-form">
             <input name="studentId" type="hidden" value={student.id} />
             <label>
-              <span>Full name</span>
+              <span>{t("adminStudents.fullName")}</span>
               <input
                 defaultValue={student.fullName}
                 name="fullName"
@@ -89,14 +79,14 @@ export default async function EditStudentPage({
                 name="isActive"
                 type="checkbox"
               />
-              <span>Active student</span>
+              <span>{t("adminStudents.activeStudent")}</span>
             </label>
             <div className="record-actions">
               <Link className="text-link" href="/admin/students">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Save student
+                {t("adminStudents.saveStudent")}
               </button>
             </div>
           </form>

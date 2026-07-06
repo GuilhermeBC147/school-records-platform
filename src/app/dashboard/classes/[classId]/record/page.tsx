@@ -4,11 +4,12 @@ import {
   saveDraftClassRecordAction,
   submitClassRecordAction,
 } from "@/app/actions/class-records";
-import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
 import { formatShortDateInput } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,7 @@ export default async function ClassRecordPage({
 
   const { classId } = await params;
   const { lessonId, substitute } = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const isSubstituteRecord = currentUser.role === "TEACHER" && substitute === "1";
 
   const schoolClass = await prisma.class.findFirst({
@@ -139,47 +141,31 @@ export default async function ClassRecordPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="record-title">
           <Link className="text-link" href={`/dashboard/classes/${schoolClass.id}`}>
-            Back to class
+            {t("label.backToClass")}
           </Link>
           <p className="eyebrow">
-            {schoolClass.book ?? "Class"}
+            {schoolClass.book ?? t("label.classFallback")}
             {schoolClass.semester && schoolClass.year
-              ? ` | Semester ${schoolClass.semester}/${schoolClass.year}`
+              ? ` | ${t("dashboard.semester")} ${schoolClass.semester}/${schoolClass.year}`
               : ""}
           </p>
           <h1 id="record-title">
             {isSubstituteRecord
-              ? "Substitute class record"
+              ? t("label.substituteClassRecord")
               : isEditingSubmitted
-                ? "Edit class record"
-                : "Class record"}
+                ? t("label.editClassRecord")
+                : t("label.classRecord")}
           </h1>
           <p className="lede">
-            {schoolClass.name} with {schoolClass.teacher.name}
+            {schoolClass.name} {t("dashboard.withTeacher")} {schoolClass.teacher.name}
           </p>
           {isSubstituteRecord || isPendingSubstitution ? (
-            <p className="muted-copy">
-              This record will be saved for attendance and homework immediately.
-              Admin approval decides whether the substitute hours count toward
-              payroll.
-            </p>
+            <p className="muted-copy">{t("text.classRecordSubstitutionCopy")}</p>
           ) : null}
         </section>
 
@@ -192,20 +178,21 @@ export default async function ClassRecordPage({
             <input name="lessonId" type="hidden" value={lessonRecord.id} />
           ) : null}
 
-          <section className="panel record-settings" aria-label="Lesson details">
+          <section className="panel record-settings" aria-label={t("label.lesson")}>
             <label>
-              <span>Lesson name</span>
+              <span>{t("label.lessonName")}</span>
               <input
                 defaultValue={lessonRecord?.name ?? ""}
                 name="lessonName"
-                placeholder="Conversation practice"
+                placeholder={t("text.lessonNamePlaceholder")}
                 required
                 type="text"
               />
             </label>
             <label>
-              <span>Lesson date</span>
+              <span>{t("label.lessonDate")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 className="date-input"
                 dateFormat={currentUser.dateFormat}
                 defaultValue={
@@ -218,21 +205,21 @@ export default async function ClassRecordPage({
               />
             </label>
             <label>
-              <span>Notes</span>
+              <span>{t("label.notes")}</span>
               <textarea
                 defaultValue={lessonRecord?.notes ?? ""}
                 name="notes"
-                placeholder="Optional notes about this lesson"
+                placeholder={t("text.lessonNotesPlaceholder")}
                 rows={3}
               />
             </label>
             {isSubstituteRecord || isPendingSubstitution ? (
               <label>
-                <span>Substitution notes</span>
+                <span>{t("label.substitutionNotes")}</span>
                 <textarea
                   defaultValue={lessonRecord?.substitutionNotes ?? ""}
                   name="substitutionNotes"
-                  placeholder="Optional note for admin review"
+                  placeholder={t("text.adminReviewNotePlaceholder")}
                   rows={3}
                 />
               </label>
@@ -240,7 +227,7 @@ export default async function ClassRecordPage({
           </section>
 
           <section className="panel data-panel" aria-labelledby="students-title">
-            <h2 id="students-title">Students</h2>
+            <h2 id="students-title">{t("label.students")}</h2>
             <div className="record-list">
               {schoolClass.enrollments.map((enrollment) => (
                 <article className="student-record-row" key={enrollment.id}>
@@ -249,7 +236,7 @@ export default async function ClassRecordPage({
                   </div>
 
                   <label>
-                    <span>Attendance</span>
+                    <span>{t("label.attendance")}</span>
                     <select
                       defaultValue={findStudentStatus(
                         lessonRecord?.attendanceRecords ?? [],
@@ -259,16 +246,16 @@ export default async function ClassRecordPage({
                       name={`attendance:${enrollment.student.id}`}
                     >
                       <option hidden value="ABSENT">
-                        Absent
+                        {t("option.attendanceAbsent")}
                       </option>
-                      <option value="PRESENT">Present</option>
-                      <option value="LATE">Late</option>
-                      <option value="EXCUSED">Excused</option>
+                      <option value="PRESENT">{t("option.attendancePresent")}</option>
+                      <option value="LATE">{t("option.attendanceLate")}</option>
+                      <option value="EXCUSED">{t("option.attendanceExcused")}</option>
                     </select>
                   </label>
 
                   <label>
-                    <span>Homework</span>
+                    <span>{t("label.homework")}</span>
                     <select
                       defaultValue={findStudentStatus(
                         lessonRecord?.homeworkRecords ?? [],
@@ -277,8 +264,8 @@ export default async function ClassRecordPage({
                       )}
                       name={`homework:${enrollment.student.id}`}
                     >
-                      <option value="COMPLETED">Complete</option>
-                      <option value="INCOMPLETE">Not done</option>
+                      <option value="COMPLETED">{t("option.attendanceComplete")}</option>
+                      <option value="INCOMPLETE">{t("option.attendanceNotDone")}</option>
                     </select>
                   </label>
                 </article>
@@ -293,15 +280,15 @@ export default async function ClassRecordPage({
                 formAction={saveDraftClassRecordAction}
                 type="submit"
               >
-                Save draft
+                {t("label.saveDraft")}
               </button>
             )}
             <button className="primary-button" type="submit">
               {isEditingSubmitted
-                ? "Update submission"
+                ? t("label.updateSubmission")
                 : isSubstituteRecord
-                  ? "Submit substitute record"
-                  : "Submit class record"}
+                  ? t("label.submitSubstituteRecord")
+                  : t("label.submitClassRecord")}
             </button>
           </div>
         </form>

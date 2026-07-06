@@ -11,10 +11,23 @@ type RosterStudent = {
 
 type RosterPickerProps = {
   emptyMessage: string;
+  labels: {
+    inactive: string;
+    noMatches: string;
+    search: string;
+    searchHint: string;
+    searchPlaceholder: string;
+    selected: string;
+    shown: string;
+  };
   students: RosterStudent[];
 };
 
-export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
+export function RosterPicker({
+  emptyMessage,
+  labels,
+  students,
+}: RosterPickerProps) {
   const [query, setQuery] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState(
     () =>
@@ -58,11 +71,11 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
       ))}
 
       <label>
-        <span>Search students</span>
+        <span>{labels.search}</span>
         <input
           list="roster-student-options"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Type a student name"
+          placeholder={labels.searchPlaceholder}
           type="search"
           value={query}
         />
@@ -74,8 +87,8 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
       </label>
 
       <div className="roster-summary">
-        {selectedStudentIds.size} selected
-        {normalizedQuery ? `, ${visibleStudents.length} shown` : ""}
+        {selectedStudentIds.size} {labels.selected}
+        {normalizedQuery ? `, ${visibleStudents.length} ${labels.shown}` : ""}
       </div>
 
       {normalizedQuery ? (
@@ -94,7 +107,7 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
                 />
                 <span>
                   {student.fullName}
-                  {student.isActive ? "" : " - inactive"}
+                  {student.isActive ? "" : ` - ${labels.inactive}`}
                 </span>
               </label>
             );
@@ -111,22 +124,20 @@ export function RosterPicker({ emptyMessage, students }: RosterPickerProps) {
               />
               <span>
                 {student.fullName}
-                {student.isActive ? "" : " - inactive"}
+                {student.isActive ? "" : ` - ${labels.inactive}`}
               </span>
             </label>
           ))}
         </div>
       ) : students.length > 0 ? (
-        <p className="muted-copy">
-          Type in the search box to show students for this roster.
-        </p>
+        <p className="muted-copy">{labels.searchHint}</p>
       ) : null}
 
       {students.length === 0 ? (
         <p className="muted-copy">{emptyMessage}</p>
       ) : null}
       {students.length > 0 && normalizedQuery && visibleStudents.length === 0 ? (
-        <p className="muted-copy">No students match that search.</p>
+        <p className="muted-copy">{labels.noMatches}</p>
       ) : null}
     </div>
   );

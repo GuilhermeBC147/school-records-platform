@@ -4,12 +4,13 @@ import {
   updateClassAction,
   updateClassRosterAction,
 } from "@/app/actions/classes";
-import { logoutAction } from "@/app/actions/auth";
 import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DurationInput } from "@/app/components/duration-input";
-import { weekdayOptions } from "@/lib/class-schedule";
+import { formatWeekdays, weekdayOptions } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type EditClassPageProps = {
   params: Promise<{
@@ -36,6 +37,7 @@ export default async function EditClassPage({
   }
 
   const { classId } = await params;
+  const t = getTranslations(currentUser.locale);
   const [query, schoolClass, teachers, students] = await Promise.all([
     searchParams,
     prisma.class.findUnique({
@@ -92,49 +94,46 @@ export default async function EditClassPage({
   if (!schoolClass) {
     notFound();
   }
+  const rosterLabels = {
+    inactive: t("label.inactive"),
+    noMatches: t("adminClasses.noStudentsMatchSearch"),
+    search: t("adminClasses.searchStudents"),
+    searchHint: t("adminClasses.rosterSearchHint"),
+    searchPlaceholder: t("receptionLookup.studentSearchPlaceholder"),
+    selected: t("adminClasses.selected"),
+    shown: t("adminClasses.shown"),
+  };
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="edit-class-title">
           <Link className="text-link" href="/admin/classes">
-            Back to classes
+            {t("adminClasses.backToClasses")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="edit-class-title">Edit class</h1>
+          <p className="eyebrow">{t("adminClasses.adminSetup")}</p>
+          <h1 id="edit-class-title">{t("adminClasses.editClass")}</h1>
         </section>
 
         <section className="panel">
           {query.error === "invalid" ? (
-            <p className="form-error">
-              Enter a class name, active teacher, duration, weekdays, and valid semester/year.
-            </p>
+            <p className="form-error">{t("adminClasses.invalidError")}</p>
           ) : null}
           {query.status === "roster-updated" ? (
-            <p className="form-success">Class roster updated.</p>
+            <p className="form-success">
+              {t("adminClasses.classRosterUpdated")}
+            </p>
           ) : null}
           <form action={updateClassAction} className="admin-form">
             <input name="classId" type="hidden" value={schoolClass.id} />
             <label>
-              <span>Name</span>
+              <span>{t("label.name")}</span>
               <input defaultValue={schoolClass.name} name="name" required type="text" />
             </label>
             <label>
-              <span>Book</span>
+              <span>{t("adminClasses.book")}</span>
               <input
                 defaultValue={schoolClass.book ?? ""}
                 list="book-options"
@@ -151,15 +150,15 @@ export default async function EditClassPage({
               <option value="Junior 3" />
             </datalist>
             <label>
-              <span>Semester</span>
+              <span>{t("dashboard.semester")}</span>
               <select defaultValue={schoolClass.semester ?? ""} name="semester">
-                <option value="">No semester</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
+                <option value="">{t("adminClasses.noSemester")}</option>
+                <option value="1">{t("dashboard.semester")} 1</option>
+                <option value="2">{t("dashboard.semester")} 2</option>
               </select>
             </label>
             <label>
-              <span>Year</span>
+              <span>{t("adminClasses.year")}</span>
               <input
                 defaultValue={schoolClass.year ?? ""}
                 max="2100"
@@ -169,7 +168,7 @@ export default async function EditClassPage({
               />
             </label>
             <label>
-              <span>Duration</span>
+              <span>{t("label.duration")}</span>
               <DurationInput
                 maxMinutes={600}
                 name="durationMinutes"
@@ -178,7 +177,9 @@ export default async function EditClassPage({
               />
             </label>
             <div>
-              <span className="form-section-label">Weekdays</span>
+              <span className="form-section-label">
+                {t("receptionLookup.weekdays")}
+              </span>
               <div className="weekday-picker">
                 {weekdayOptions.map((weekday) => (
                   <label className="checkbox-label" key={weekday.value}>
@@ -188,13 +189,15 @@ export default async function EditClassPage({
                       type="checkbox"
                       value={weekday.value}
                     />
-                    <span>{weekday.label}</span>
+                    <span>
+                      {formatWeekdays([weekday.value], currentUser.locale)}
+                    </span>
                   </label>
                 ))}
               </div>
             </div>
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={schoolClass.teacherId} name="teacherId" required>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
@@ -209,14 +212,14 @@ export default async function EditClassPage({
                 name="isActive"
                 type="checkbox"
               />
-              <span>Active class</span>
+              <span>{t("adminClasses.activeClass")}</span>
             </label>
             <div className="record-actions">
               <Link className="text-link" href="/admin/classes">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Save class
+                {t("adminClasses.saveClass")}
               </button>
             </div>
           </form>
@@ -224,13 +227,14 @@ export default async function EditClassPage({
 
         <section className="panel data-panel" aria-labelledby="roster-title">
           {query.error === "roster" ? (
-            <p className="form-error">Choose active students for this roster.</p>
+            <p className="form-error">{t("adminClasses.chooseActiveRoster")}</p>
           ) : null}
-          <h2 id="roster-title">Class roster</h2>
+          <h2 id="roster-title">{t("adminClasses.classRoster")}</h2>
           <form action={updateClassRosterAction} className="admin-form">
             <input name="classId" type="hidden" value={schoolClass.id} />
             <RosterPicker
-              emptyMessage="No students have been created yet."
+              emptyMessage={t("adminClasses.noStudentsCreated")}
+              labels={rosterLabels}
               students={students.map((student) => {
                 const enrollment = schoolClass.enrollments.find(
                   (item) => item.studentId === student.id,
@@ -244,7 +248,7 @@ export default async function EditClassPage({
             />
             <div className="record-actions">
               <button className="primary-button" type="submit">
-                Save roster
+                {t("adminClasses.saveRoster")}
               </button>
             </div>
           </form>

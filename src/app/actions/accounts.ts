@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { UserRole } from "@/generated/prisma/enums";
 import { normalizeAccountDateFormat } from "@/lib/date-format";
+import { defaultAccountLocale, normalizeAccountLocale } from "@/lib/locale";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -33,6 +34,19 @@ function readAccountRole(formData: FormData) {
   }
 
   return role as UserRole;
+}
+
+function readSafeRedirectPath(value: FormDataEntryValue | null) {
+  const redirectTo = String(value ?? "");
+
+  if (!redirectTo.startsWith("/") || redirectTo.startsWith("//")) {
+    return "/dashboard/account";
+  }
+
+  const url = new URL(redirectTo, "http://local");
+  url.searchParams.set("locale", "updated");
+
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 async function requireAdmin() {
@@ -189,6 +203,23 @@ export async function updateOwnDateFormatAction(formData: FormData) {
   redirect("/dashboard/account?dateFormat=updated");
 }
 
+export async function updateOwnLocaleAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  await prisma.user.update({
+    where: { id: currentUser.id },
+    data: {
+      locale: normalizeAccountLocale(formData.get("locale")),
+    },
+  });
+
+  redirect(readSafeRedirectPath(formData.get("redirectTo")));
+}
+
 export async function createAccountAction(formData: FormData) {
   await requireAdmin();
 
@@ -217,6 +248,7 @@ export async function createAccountAction(formData: FormData) {
       email,
       passwordHash: hashPassword(password),
       role,
+      locale: defaultAccountLocale,
       isActive,
     },
   });

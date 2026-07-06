@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClassAction } from "@/app/actions/classes";
-import { logoutAction } from "@/app/actions/auth";
 import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DurationInput } from "@/app/components/duration-input";
-import { weekdayOptions } from "@/lib/class-schedule";
+import { formatWeekdays, weekdayOptions } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type NewClassPageProps = {
   searchParams: Promise<{
@@ -47,46 +48,52 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
       },
     }),
   ]);
+  const t = getTranslations(currentUser.locale);
+  const rosterLabels = {
+    inactive: t("label.inactive"),
+    noMatches: t("adminClasses.noStudentsMatchSearch"),
+    search: t("adminClasses.searchStudents"),
+    searchHint: t("adminClasses.rosterSearchHint"),
+    searchPlaceholder: t("receptionLookup.studentSearchPlaceholder"),
+    selected: t("adminClasses.selected"),
+    shown: t("adminClasses.shown"),
+  };
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="new-class-title">
           <Link className="text-link" href="/admin/classes">
-            Back to classes
+            {t("adminClasses.backToClasses")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="new-class-title">Create class</h1>
+          <p className="eyebrow">{t("adminClasses.adminSetup")}</p>
+          <h1 id="new-class-title">{t("adminClasses.createClass")}</h1>
         </section>
 
         <section className="panel">
           {params.error === "invalid" ? (
-            <p className="form-error">
-              Enter a class name, active teacher, duration, weekdays, and valid semester/year.
-            </p>
+            <p className="form-error">{t("adminClasses.invalidError")}</p>
           ) : null}
           <form action={createClassAction} className="admin-form">
             <label>
-              <span>Name</span>
-              <input name="name" placeholder="Evening English A2" required type="text" />
+              <span>{t("label.name")}</span>
+              <input
+                name="name"
+                placeholder={t("adminClasses.namePlaceholder")}
+                required
+                type="text"
+              />
             </label>
             <label>
-              <span>Book</span>
-              <input list="book-options" name="book" placeholder="Book 1" type="text" />
+              <span>{t("adminClasses.book")}</span>
+              <input
+                list="book-options"
+                name="book"
+                placeholder={t("adminClasses.bookPlaceholder")}
+                type="text"
+              />
             </label>
             <datalist id="book-options">
               <option value="Book 1" />
@@ -97,19 +104,19 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
               <option value="Junior 3" />
             </datalist>
             <label>
-              <span>Semester</span>
+              <span>{t("dashboard.semester")}</span>
               <select name="semester">
-                <option value="">No semester</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
+                <option value="">{t("adminClasses.noSemester")}</option>
+                <option value="1">{t("dashboard.semester")} 1</option>
+                <option value="2">{t("dashboard.semester")} 2</option>
               </select>
             </label>
             <label>
-              <span>Year</span>
+              <span>{t("adminClasses.year")}</span>
               <input name="year" placeholder="2026" type="number" min="2000" max="2100" />
             </label>
             <label>
-              <span>Duration</span>
+              <span>{t("label.duration")}</span>
               <DurationInput
                 maxMinutes={600}
                 name="durationMinutes"
@@ -118,20 +125,24 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
               />
             </label>
             <div>
-              <span className="form-section-label">Weekdays</span>
+              <span className="form-section-label">
+                {t("receptionLookup.weekdays")}
+              </span>
               <div className="weekday-picker">
                 {weekdayOptions.map((weekday) => (
                   <label className="checkbox-label" key={weekday.value}>
                     <input name="weekDays" type="checkbox" value={weekday.value} />
-                    <span>{weekday.label}</span>
+                    <span>
+                      {formatWeekdays([weekday.value], currentUser.locale)}
+                    </span>
                   </label>
                 ))}
               </div>
             </div>
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select name="teacherId" required>
-                <option value="">Choose a teacher</option>
+                <option value="">{t("label.chooseTeacher")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -141,12 +152,15 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
             </label>
             <label className="checkbox-label">
               <input defaultChecked name="isActive" type="checkbox" />
-              <span>Active class</span>
+              <span>{t("adminClasses.activeClass")}</span>
             </label>
             <div>
-              <span className="form-section-label">Class roster</span>
+              <span className="form-section-label">
+                {t("adminClasses.classRoster")}
+              </span>
               <RosterPicker
-                emptyMessage="No active students yet. Create students before assigning the roster."
+                emptyMessage={t("adminClasses.rosterEmptyCreate")}
+                labels={rosterLabels}
                 students={students.map((student) => ({
                   ...student,
                   isActive: true,
@@ -155,10 +169,10 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
             </div>
             <div className="record-actions">
               <Link className="text-link" href="/admin/classes">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Create class
+                {t("adminClasses.createClass")}
               </button>
             </div>
           </form>

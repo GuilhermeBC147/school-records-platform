@@ -1,8 +1,8 @@
-# Project Brief: Class Records Platform
+# Project Brief: School Records Platform
 
 ## Summary
 
-Class Records Platform is a web platform for an ESL school where teachers can log in, choose their classes, and record attendance and homework completion digitally.
+School Records Platform is a web platform for an ESL school where teachers can log in, choose their classes, and record attendance and homework completion digitally.
 
 The app will store teachers, classes, students, attendance, and homework records in its own database.
 

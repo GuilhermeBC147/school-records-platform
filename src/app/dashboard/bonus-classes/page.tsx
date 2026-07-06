@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { completeBonusClassAction } from "@/app/actions/bonus-classes";
-import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
 import { formatDuration } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
@@ -12,6 +11,8 @@ import {
 } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -67,12 +68,16 @@ export default async function TeacherBonusClassesPage({
   }
 
   const query = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const defaultRange = getDefaultDateRange();
   const dateFrom = query.dateFrom ?? defaultRange.dateFrom;
   const dateTo = query.dateTo ?? defaultRange.dateTo;
   const dateStart = readDateFilter(dateFrom, "start");
   const dateEnd = readDateFilter(dateTo, "end");
-  const successMessage = formatBonusClassResultMessage(query.status);
+  const successMessage = formatBonusClassResultMessage(
+    query.status,
+    currentUser.locale,
+  );
   const bonusClasses = await prisma.bonusClass.findMany({
     orderBy: [{ scheduledDate: "asc" }, { startTime: "asc" }],
     where: {
@@ -114,48 +119,35 @@ export default async function TeacherBonusClassesPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="teacher-bonus-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Teacher work</p>
-          <h1 id="teacher-bonus-title">Bonus classes</h1>
-          <p className="lede">
-            Confirm assigned bonus classes after they happen so they count in
-            your monthly summary.
-          </p>
+          <p className="eyebrow">{t("label.teacherWork")}</p>
+          <h1 id="teacher-bonus-title">{t("label.bonusClasses")}</h1>
+          <p className="lede">{t("text.teacherBonusCopy")}</p>
         </section>
 
         {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
-        <section className="panel" aria-label="Bonus class filters">
+        <section className="panel" aria-label={t("label.bonusClasses")}>
           <form className="filter-form compact-filter-form">
             <label>
-              <span>From</span>
+              <span>{t("label.from")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateFrom}
                 name="dateFrom"
               />
             </label>
             <label>
-              <span>To</span>
+              <span>{t("label.to")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateTo}
                 name="dateTo"
@@ -163,17 +155,17 @@ export default async function TeacherBonusClassesPage({
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Apply
+                {t("label.apply")}
               </button>
               <Link className="text-link" href="/dashboard/bonus-classes">
-                Current month
+                {t("label.currentMonth")}
               </Link>
             </div>
           </form>
         </section>
 
         <section className="panel data-panel" aria-labelledby="assigned-bonus-title">
-          <h2 id="assigned-bonus-title">Assigned bonus classes</h2>
+          <h2 id="assigned-bonus-title">{t("label.assignedBonusClasses")}</h2>
           <div className="bonus-calendar">
             {calendarDates.map((key) => {
               const dayClasses = bonusClassesByDate.get(key) ?? [];
@@ -199,8 +191,15 @@ export default async function TeacherBonusClassesPage({
                             {formatDuration(bonusClass.durationMinutes)}
                           </span>
                           <span>
-                            {formatBonusClassStatus(bonusClass.status)} |{" "}
-                            {formatBonusClassStatus(bonusClass.attendanceStatus)}
+                            {formatBonusClassStatus(
+                              bonusClass.status,
+                              currentUser.locale,
+                            )}{" "}
+                            |{" "}
+                            {formatBonusClassStatus(
+                              bonusClass.attendanceStatus,
+                              currentUser.locale,
+                            )}
                           </span>
                         </div>
                         {bonusClass.status !== "CANCELED" ? (
@@ -223,12 +222,18 @@ export default async function TeacherBonusClassesPage({
                               }
                               name="attendanceStatus"
                             >
-                              <option value="PRESENT">Present</option>
-                              <option value="ABSENT">Absent</option>
-                              <option value="EXCUSED">Excused</option>
+                              <option value="PRESENT">
+                                {t("option.attendancePresent")}
+                              </option>
+                              <option value="ABSENT">
+                                {t("option.attendanceAbsent")}
+                              </option>
+                              <option value="EXCUSED">
+                                {t("option.attendanceExcused")}
+                              </option>
                             </select>
                             <button className="primary-button" type="submit">
-                              Confirm
+                              {t("label.confirm")}
                             </button>
                           </form>
                         ) : null}
@@ -239,7 +244,7 @@ export default async function TeacherBonusClassesPage({
               );
             })}
             {bonusClasses.length === 0 ? (
-              <p className="muted-copy">No bonus classes assigned for this date range.</p>
+              <p className="muted-copy">{t("message.noBonusAssignedRange")}</p>
             ) : null}
           </div>
         </section>

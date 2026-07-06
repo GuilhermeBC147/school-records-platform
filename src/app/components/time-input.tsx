@@ -19,7 +19,6 @@ export function TimeInput({
       pattern="(?:[01]\d|2[0-3]):[0-5]\d"
       placeholder="HH:MM"
       required={required}
-      title="Use 24-hour time, for example 14:30."
       type="text"
     />
   );
