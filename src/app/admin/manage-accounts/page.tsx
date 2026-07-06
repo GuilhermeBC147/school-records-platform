@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
+import { formatEntityResultMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -30,6 +31,7 @@ export default async function ManageAccountsPage({
   }
 
   const params = await searchParams;
+  const successMessage = formatEntityResultMessage("Account", params.status);
   const accounts = await prisma.user.findMany({
     where: { role: { in: ["TEACHER", "RECEPTION"] } },
     orderBy: [{ isActive: "desc" }, { role: "asc" }, { name: "asc" }],
@@ -79,11 +81,7 @@ export default async function ManageAccountsPage({
           </div>
         </section>
 
-        {params.status ? (
-          <p className="form-success">
-            Account {params.status === "created" ? "created" : "updated"}.
-          </p>
-        ) : null}
+        {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
         <section className="panel data-panel" aria-label="Staff accounts">
           <div className="table-wrap">
@@ -116,6 +114,11 @@ export default async function ManageAccountsPage({
                     </td>
                   </tr>
                 ))}
+                {accounts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>No staff accounts have been created yet.</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
