@@ -6,13 +6,22 @@ import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
+import { formatTeacherWorkErrorMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { teacherWorkCategories } from "@/lib/teacher-work";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewAdminActivityPage() {
+type NewAdminActivityPageProps = {
+  searchParams: Promise<{
+    error?: string;
+  }>;
+};
+
+export default async function NewAdminActivityPage({
+  searchParams,
+}: NewAdminActivityPageProps) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -23,6 +32,8 @@ export default async function NewAdminActivityPage() {
     redirect("/dashboard");
   }
 
+  const query = await searchParams;
+  const errorMessage = formatTeacherWorkErrorMessage(query.error);
   const [teachers, students] = await Promise.all([
     prisma.user.findMany({
       orderBy: { name: "asc" },
@@ -73,8 +84,14 @@ export default async function NewAdminActivityPage() {
         </section>
 
         <section className="panel data-panel" aria-label="Activity form">
+          {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
           <form action={createTeacherWorkLogAction} className="admin-form">
             <input name="redirectTo" type="hidden" value="/admin/work-summary" />
+            <input
+              name="errorRedirectTo"
+              type="hidden"
+              value="/admin/work-summary/new-activity"
+            />
             <label>
               <span>Teacher</span>
               <select name="teacherId" required>

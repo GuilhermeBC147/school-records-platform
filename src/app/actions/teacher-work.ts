@@ -16,12 +16,29 @@ const allowedRedirects = new Set([
   "/dashboard/work",
   "/dashboard/work/new",
 ]);
+const allowedErrorRedirects = new Set([
+  "/admin/work-summary/new-activity",
+  "/admin/work-summary/new-meeting",
+  "/dashboard/work/new",
+]);
 
-function readWorkDate(formData: FormData) {
+function readErrorRedirect(formData: FormData, fallback: string) {
+  const requestedRedirect = String(formData.get("errorRedirectTo") ?? fallback);
+
+  return allowedErrorRedirects.has(requestedRedirect)
+    ? requestedRedirect
+    : fallback;
+}
+
+function redirectWithWorkError(redirectTo: string, error: string): never {
+  redirect(`${redirectTo}?error=${error}`);
+}
+
+function readWorkDate(formData: FormData, errorRedirectTo: string) {
   const value = String(formData.get("workDate") ?? "");
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    throw new Error("Work date is required.");
+    redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
   const [year, month, day] = value.split("-").map(Number);
@@ -32,13 +49,13 @@ function readWorkDate(formData: FormData) {
     workDate.getUTCMonth() !== month - 1 ||
     workDate.getUTCDate() !== day
   ) {
-    throw new Error("Work date is invalid.");
+    redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
   return workDate;
 }
 
-function readDurationMinutes(formData: FormData) {
+function readDurationMinutes(formData: FormData, errorRedirectTo: string) {
   const durationMinutes = readDurationInputMinutes(formData.get("durationMinutes"));
 
   if (
@@ -46,7 +63,7 @@ function readDurationMinutes(formData: FormData) {
     durationMinutes <= 0 ||
     durationMinutes > 720
   ) {
-    throw new Error("Duration must be between 1 minute and 12 hours.");
+    redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
   return durationMinutes;
@@ -70,8 +87,9 @@ export async function createTeacherWorkLogAction(formData: FormData) {
     redirect("/login");
   }
 
+  const errorRedirectTo = readErrorRedirect(formData, "/dashboard/work/new");
   const category = String(formData.get("category") ?? "");
-  const durationMinutes = readDurationMinutes(formData);
+  const durationMinutes = readDurationMinutes(formData, errorRedirectTo);
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const requestedRedirect = String(
     formData.get("redirectTo") ?? "/dashboard/work",
@@ -83,18 +101,18 @@ export async function createTeacherWorkLogAction(formData: FormData) {
   const selectedStudentIds = readSelectedStudentIds(formData);
   const subject = String(formData.get("subject") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
-  const workDate = readWorkDate(formData);
+  const workDate = readWorkDate(formData, errorRedirectTo);
 
   if (!teacherWorkCategoryValues.includes(category as never)) {
-    throw new Error("Work category is invalid.");
+    redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
   if (!title) {
-    throw new Error("Work title is required.");
+    redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
   if (category === "BONUS_CLASS" && !subject) {
-    throw new Error("Bonus class subject is required.");
+    redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
   const teacherId =
@@ -112,7 +130,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
   });
 
   if (!teacher) {
-    throw new Error("Teacher account is required.");
+    redirectWithWorkError(errorRedirectTo, "teacher");
   }
 
   const selectedStudents =
@@ -127,7 +145,7 @@ export async function createTeacherWorkLogAction(formData: FormData) {
       : [];
 
   if (selectedStudents.length !== selectedStudentIds.length) {
-    throw new Error("Choose active students for this activity.");
+    redirectWithWorkError(errorRedirectTo, "students");
   }
 
   await prisma.teacherWorkLog.create({
@@ -163,7 +181,11 @@ export async function createTeacherMeetingAction(formData: FormData) {
     redirect("/dashboard");
   }
 
-  const durationMinutes = readDurationMinutes(formData);
+  const errorRedirectTo = readErrorRedirect(
+    formData,
+    "/admin/work-summary/new-meeting",
+  );
+  const durationMinutes = readDurationMinutes(formData, errorRedirectTo);
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const startTime = readOptionalStartTime(formData.get("startTime"));
   const teacherIds = formData
@@ -171,10 +193,10 @@ export async function createTeacherMeetingAction(formData: FormData) {
     .map((value) => String(value))
     .filter(Boolean);
   const title = String(formData.get("title") ?? "").trim();
-  const workDate = readWorkDate(formData);
+  const workDate = readWorkDate(formData, errorRedirectTo);
 
   if (!title || teacherIds.length === 0) {
-    throw new Error("Meeting title and teachers are required.");
+    redirectWithWorkError(errorRedirectTo, "teachers");
   }
 
   const teachers = await prisma.user.findMany({
@@ -187,7 +209,7 @@ export async function createTeacherMeetingAction(formData: FormData) {
   });
 
   if (teachers.length === 0) {
-    throw new Error("Choose at least one active teacher.");
+    redirectWithWorkError(errorRedirectTo, "teachers");
   }
 
   await prisma.teacherWorkLog.createMany({
