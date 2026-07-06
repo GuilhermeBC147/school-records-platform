@@ -5,12 +5,21 @@ import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
+import { formatTeacherWorkErrorMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewAdminMeetingPage() {
+type NewAdminMeetingPageProps = {
+  searchParams: Promise<{
+    error?: string;
+  }>;
+};
+
+export default async function NewAdminMeetingPage({
+  searchParams,
+}: NewAdminMeetingPageProps) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -21,6 +30,8 @@ export default async function NewAdminMeetingPage() {
     redirect("/dashboard");
   }
 
+  const query = await searchParams;
+  const errorMessage = formatTeacherWorkErrorMessage(query.error);
   const teachers = await prisma.user.findMany({
     orderBy: { name: "asc" },
     where: { isActive: true, role: "TEACHER" },
@@ -59,7 +70,13 @@ export default async function NewAdminMeetingPage() {
         </section>
 
         <section className="panel data-panel" aria-label="Meeting form">
+          {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
           <form action={createTeacherMeetingAction} className="admin-form">
+            <input
+              name="errorRedirectTo"
+              type="hidden"
+              value="/admin/work-summary/new-meeting"
+            />
             <label>
               <span>Teachers</span>
               <div className="roster-list compact-roster-list">

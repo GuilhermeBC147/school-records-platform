@@ -97,6 +97,7 @@ test("account management supports reset tokens and admin staff setup", async () 
   assert.match(accountActions, /isActive/);
   assert.match(messages, /formatEntityResultMessage/);
   assert.match(messages, /status !== "created" && status !== "updated"/);
+  assert.match(messages, /formatTeacherWorkErrorMessage/);
   assert.match(accountPage, /accountDateFormatOptions/);
   assert.match(accountPage, /name="dateFormat"/);
   assert.match(accountsPage, /Manage accounts/);
@@ -425,6 +426,8 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(workLib, /students:\s*{/);
   assert.match(workActions, /createTeacherWorkLogAction/);
   assert.match(workActions, /createTeacherMeetingAction/);
+  assert.match(workActions, /redirectWithWorkError/);
+  assert.match(workActions, /errorRedirectTo/);
   assert.match(workActions, /readOptionalStartTime/);
   assert.match(workActions, /readDurationInputMinutes/);
   assert.match(workActions, /readSelectedStudentIds/);
@@ -461,8 +464,12 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.doesNotMatch(adminWorkPage, /createTeacherMeetingAction/);
   assert.match(adminWorkPage, /workLog\.students/);
   assert.match(adminActivityPage, /createTeacherWorkLogAction/);
+  assert.match(adminActivityPage, /formatTeacherWorkErrorMessage/);
+  assert.match(adminActivityPage, /name="errorRedirectTo"/);
   assert.match(adminActivityPage, /RosterPicker/);
   assert.match(adminMeetingPage, /createTeacherMeetingAction/);
+  assert.match(adminMeetingPage, /formatTeacherWorkErrorMessage/);
+  assert.match(adminMeetingPage, /name="errorRedirectTo"/);
   assert.doesNotMatch(adminWorkPage, /type="time"/);
   assert.doesNotMatch(adminWorkPage, /type="number"/);
   assert.match(adminWorkPage, /All teachers/);

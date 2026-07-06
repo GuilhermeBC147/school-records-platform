@@ -6,13 +6,22 @@ import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
+import { formatTeacherWorkErrorMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { teacherWorkCategories } from "@/lib/teacher-work";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewTeacherActivityPage() {
+type NewTeacherActivityPageProps = {
+  searchParams: Promise<{
+    error?: string;
+  }>;
+};
+
+export default async function NewTeacherActivityPage({
+  searchParams,
+}: NewTeacherActivityPageProps) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -26,6 +35,8 @@ export default async function NewTeacherActivityPage() {
   const teacherCreatedCategories = teacherWorkCategories.filter(
     (category) => category.value !== "MEETING",
   );
+  const query = await searchParams;
+  const errorMessage = formatTeacherWorkErrorMessage(query.error);
   const students = await prisma.student.findMany({
     orderBy: { fullName: "asc" },
     where: { isActive: true },
@@ -66,8 +77,14 @@ export default async function NewTeacherActivityPage() {
         </section>
 
         <section className="panel data-panel" aria-label="Activity form">
+          {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
           <form action={createTeacherWorkLogAction} className="admin-form">
             <input name="redirectTo" type="hidden" value="/dashboard/work" />
+            <input
+              name="errorRedirectTo"
+              type="hidden"
+              value="/dashboard/work/new"
+            />
             <label>
               <span>Category</span>
               <select name="category" required>
