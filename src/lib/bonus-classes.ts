@@ -1,42 +1,73 @@
 import { prisma } from "@/lib/prisma";
+import type { AccountLocale } from "@/lib/locale";
+import { defaultUnauthenticatedLocale } from "@/lib/locale";
+import { translate } from "@/lib/translations";
 import {
   formatClockTimeFromMinutes,
   readDurationMinutes as readDurationInputMinutes,
 } from "@/lib/class-schedule";
 
-export function formatBonusClassStatus(status: string) {
-  return status
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+export function formatBonusClassStatus(
+  status: string,
+  locale: AccountLocale = defaultUnauthenticatedLocale,
+) {
+  switch (status) {
+    case "APPROVED":
+      return translate(locale, "option.statusApproved");
+    case "CANCELED":
+      return translate(locale, "option.statusCanceled");
+    case "COMPLETED":
+      return translate(locale, "option.statusCompleted");
+    case "PENDING":
+      return translate(locale, "option.statusPending");
+    case "PENDING_APPROVAL":
+      return translate(locale, "option.statusPendingApproval");
+    case "PRESENT":
+      return translate(locale, "option.attendancePresent");
+    case "ABSENT":
+      return translate(locale, "option.attendanceAbsent");
+    case "EXCUSED":
+      return translate(locale, "option.attendanceExcused");
+    case "REJECTED":
+      return translate(locale, "option.statusRejected");
+    case "SCHEDULED":
+      return translate(locale, "option.statusScheduled");
+    default:
+      return status;
+  }
 }
 
-export function formatBonusClassResultMessage(status: string | undefined) {
+export function formatBonusClassResultMessage(
+  status: string | undefined,
+  locale: AccountLocale = defaultUnauthenticatedLocale,
+) {
   switch (status) {
     case "attendance":
-      return "Bonus class attendance confirmed.";
+      return translate(locale, "message.bonusAttendanceConfirmed");
     case "canceled":
-      return "Bonus class canceled.";
+      return translate(locale, "message.bonusCanceled");
     case "completed":
-      return "Bonus class completed.";
+      return translate(locale, "message.bonusCompleted");
     case "created":
-      return "Bonus class scheduled.";
+      return translate(locale, "message.bonusCreated");
     case "updated":
-      return "Bonus class updated.";
+      return translate(locale, "message.bonusUpdated");
     default:
       return null;
   }
 }
 
-export function formatBonusClassErrorMessage(error: string | undefined) {
+export function formatBonusClassErrorMessage(
+  error: string | undefined,
+  locale: AccountLocale = defaultUnauthenticatedLocale,
+) {
   switch (error) {
     case "invalid":
-      return "Check the bonus class details and try again.";
+      return translate(locale, "message.bonusInvalid");
     case "missing":
-      return "That bonus class could not be found.";
+      return translate(locale, "message.bonusMissing");
     case "overlap":
-      return "This teacher already has a bonus class during that time.";
+      return translate(locale, "message.bonusOverlap");
     default:
       return null;
   }

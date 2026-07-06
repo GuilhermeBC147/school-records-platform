@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import { StudentProfilePanel } from "@/app/components/student-profile-panel";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ export default async function ReceptionStudentsPage({
     redirect("/dashboard");
   }
 
+  const t = getTranslations(currentUser.locale);
   const query = await searchParams;
   const studentSearch = query.studentSearch?.trim() || undefined;
   const students = await prisma.student.findMany({
@@ -45,48 +47,34 @@ export default async function ReceptionStudentsPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="students-title">
           <Link className="text-link" href="/reception">
-            Back to reception
+            {t("label.backToReception")}
           </Link>
-          <p className="eyebrow">Reception</p>
-          <h1 id="students-title">Students</h1>
-          <p className="lede">
-            Search active students and review class, attendance, and grade details.
-          </p>
+          <p className="eyebrow">{t("dashboard.reception")}</p>
+          <h1 id="students-title">{t("dashboard.students")}</h1>
+          <p className="lede">{t("receptionLookup.studentsCopy")}</p>
           {currentUser.role === "ADMIN" ? (
             <div className="action-row">
               <Link className="secondary-link" href="/dashboard">
-                Back to dashboard
+                {t("label.backToDashboard")}
               </Link>
             </div>
           ) : null}
         </section>
 
-        <section className="panel" aria-label="Student filters">
+        <section className="panel" aria-label={t("label.studentSearch")}>
           <form className="filter-form compact-filter-form">
             <label>
-              <span>Student search</span>
+              <span>{t("label.studentSearch")}</span>
               <input
                 defaultValue={studentSearch ?? ""}
                 list="reception-students"
                 name="studentSearch"
-                placeholder="Type a student name"
+                placeholder={t("receptionLookup.studentSearchPlaceholder")}
                 type="search"
               />
               <datalist id="reception-students">
@@ -97,10 +85,10 @@ export default async function ReceptionStudentsPage({
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Search
+                {t("label.search")}
               </button>
               <Link className="text-link" href="/reception/students">
-                Clear
+                {t("label.clear")}
               </Link>
             </div>
           </form>
@@ -109,9 +97,12 @@ export default async function ReceptionStudentsPage({
         <section className="panel data-panel" aria-labelledby="student-results-title">
           <div className="section-heading-row">
             <div>
-              <h2 id="student-results-title">Student results</h2>
+              <h2 id="student-results-title">{t("receptionLookup.studentResults")}</h2>
               <p className="muted-copy">
-                {students.length} active {students.length === 1 ? "student" : "students"} found.
+                {students.length}{" "}
+                {students.length === 1
+                  ? t("receptionLookup.activeStudentFound")
+                  : t("receptionLookup.activeStudentsFound")}
               </p>
             </div>
           </div>
@@ -124,13 +115,13 @@ export default async function ReceptionStudentsPage({
                 href={`/reception/students?studentId=${student.id}`}
                 key={student.id}
               >
-                <span>Student</span>
+                <span>{t("label.student")}</span>
                 <strong>{student.fullName}</strong>
-                <small>View class, attendance, and grade details</small>
+                <small>{t("receptionLookup.viewStudentDetails")}</small>
               </Link>
             ))}
             {students.length === 0 ? (
-              <p className="muted-copy">No active students match the current filters.</p>
+              <p className="muted-copy">{t("receptionLookup.noActiveStudentsFilter")}</p>
             ) : null}
           </div>
         </section>
@@ -139,6 +130,7 @@ export default async function ReceptionStudentsPage({
           <StudentProfilePanel
             basePath="/reception/students"
             dateFormat={currentUser.dateFormat}
+            locale={currentUser.locale}
             selectedClassId={query.gradeClassId}
             studentId={selectedStudentId}
           />

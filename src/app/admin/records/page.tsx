@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DateInput } from "@/app/components/date-input";
-import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate, formatShortDateTime } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations, type TranslationKey } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,26 @@ function buildExportHref(filters: {
   return query ? `/admin/records/export?${query}` : "/admin/records/export";
 }
 
+function formatAttendanceStatus(status: string, t: ReturnType<typeof getTranslations>) {
+  const labels: Record<string, TranslationKey> = {
+    ABSENT: "option.attendanceAbsent",
+    EXCUSED: "option.attendanceExcused",
+    LATE: "option.attendanceLate",
+    PRESENT: "option.attendancePresent",
+  };
+
+  return labels[status] ? t(labels[status]) : status;
+}
+
+function formatHomeworkStatus(status: string, t: ReturnType<typeof getTranslations>) {
+  const labels: Record<string, TranslationKey> = {
+    COMPLETED: "option.attendanceComplete",
+    INCOMPLETE: "option.attendanceNotDone",
+  };
+
+  return labels[status] ? t(labels[status]) : status;
+}
+
 export default async function AdminRecordsPage({
   searchParams,
 }: AdminRecordsPageProps) {
@@ -64,6 +85,7 @@ export default async function AdminRecordsPage({
     redirect("/dashboard");
   }
 
+  const t = getTranslations(currentUser.locale);
   const filters = await searchParams;
   const classId = readFilterValue(filters.classId);
   const dateRange = readFilterDate(filters.date);
@@ -163,43 +185,29 @@ export default async function AdminRecordsPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="records-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin review</p>
-          <h1 id="records-title">Submitted class records</h1>
-          <p className="lede">
-            Review the attendance and homework records teachers have submitted.
-          </p>
+          <p className="eyebrow">{t("label.adminReview")}</p>
+          <h1 id="records-title">{t("adminReview.submittedRecordsTitle")}</h1>
+          <p className="lede">{t("adminReview.recordsCopy")}</p>
           <div className="action-row">
             <Link className="primary-link" href={buildExportHref(filters)}>
-              Export CSV
+              {t("adminReview.exportCsv")}
             </Link>
           </div>
         </section>
 
-        <section className="panel" aria-label="Record filters">
+        <section className="panel" aria-label={t("adminReview.recordFilters")}>
           <form className="filter-form">
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={teacherId ?? ""} name="teacherId">
-                <option value="">All teachers</option>
+                <option value="">{t("label.allTeachers")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -208,9 +216,9 @@ export default async function AdminRecordsPage({
               </select>
             </label>
             <label>
-              <span>Class</span>
+              <span>{t("label.class")}</span>
               <select defaultValue={classId ?? ""} name="classId">
-                <option value="">All classes</option>
+                <option value="">{t("label.allClasses")}</option>
                 {classes.map((schoolClass) => (
                   <option key={schoolClass.id} value={schoolClass.id}>
                     {schoolClass.name}
@@ -219,9 +227,9 @@ export default async function AdminRecordsPage({
               </select>
             </label>
             <label>
-              <span>Student</span>
+              <span>{t("label.student")}</span>
               <select defaultValue={studentId ?? ""} name="studentId">
-                <option value="">All students</option>
+                <option value="">{t("label.allStudents")}</option>
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
                     {student.fullName}
@@ -230,8 +238,9 @@ export default async function AdminRecordsPage({
               </select>
             </label>
             <label>
-              <span>Date</span>
+              <span>{t("label.date")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={filters.date ?? ""}
                 name="date"
@@ -239,16 +248,16 @@ export default async function AdminRecordsPage({
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Apply filters
+                {t("label.applyFilters")}
               </button>
               <Link className="text-link" href="/admin/records">
-                Clear
+                {t("label.clear")}
               </Link>
             </div>
           </form>
         </section>
 
-        <section className="records-review" aria-label="Submitted records">
+        <section className="records-review" aria-label={t("adminReview.submittedRecords")}>
           {submittedLessons.map((lesson) => {
             const homeworkByStudentId = new Map(
               lesson.homeworkRecords.map((record) => [
@@ -261,18 +270,23 @@ export default async function AdminRecordsPage({
               <article className="panel data-panel record-review" key={lesson.id}>
                 <div className="record-review-header">
                   <div>
-                    <p className="eyebrow">Submitted record</p>
+                    <p className="eyebrow">{t("adminReview.submittedRecord")}</p>
                     <h2>{lesson.class.name}</h2>
-                    <p>Lesson name: {lesson.name ?? "Untitled lesson"}</p>
                     <p>
-                      Lesson: {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
-                      {" | "}
-                      Teacher: {lesson.class.teacher.name}
+                      {t("adminReview.lessonName")}:{" "}
+                      {lesson.name ?? t("adminReview.untitledLesson")}
                     </p>
                     <p>
-                      Submitted by {lesson.submittedBy?.name ?? "Unknown"}
+                      {t("label.lesson")}:{" "}
+                      {formatShortDate(lesson.lessonDate, currentUser.dateFormat)}
+                      {" | "}
+                      {t("label.teacher")}: {lesson.class.teacher.name}
+                    </p>
+                    <p>
+                      {t("adminReview.submittedBy")}{" "}
+                      {lesson.submittedBy?.name ?? t("adminReview.unknown")}
                       {lesson.submittedAt
-                        ? ` on ${formatShortDateTime(
+                        ? ` ${t("adminReview.onDate")} ${formatShortDateTime(
                             lesson.submittedAt,
                             currentUser.dateFormat,
                           )}`
@@ -281,7 +295,7 @@ export default async function AdminRecordsPage({
                   </div>
                   <div className="metric compact-metric">
                     <span>{lesson.attendanceRecords.length}</span>
-                    <strong>Students</strong>
+                    <strong>{t("label.students")}</strong>
                   </div>
                 </div>
 
@@ -289,7 +303,7 @@ export default async function AdminRecordsPage({
 
                 <div className="record-actions">
                   <Link className="primary-link" href={`/admin/records/${lesson.id}`}>
-                    View details
+                    {t("adminReview.viewDetails")}
                   </Link>
                 </div>
 
@@ -297,19 +311,22 @@ export default async function AdminRecordsPage({
                   <table>
                     <thead>
                       <tr>
-                        <th>Student</th>
-                        <th>Attendance</th>
-                        <th>Homework</th>
+                        <th>{t("label.student")}</th>
+                        <th>{t("label.attendance")}</th>
+                        <th>{t("label.homework")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {lesson.attendanceRecords.map((record) => (
                         <tr key={record.id}>
                           <td>{record.student.fullName}</td>
-                          <td>{record.status}</td>
+                          <td>{formatAttendanceStatus(record.status, t)}</td>
                           <td>
-                            {homeworkByStudentId.get(record.student.id) ??
-                              "INCOMPLETE"}
+                            {formatHomeworkStatus(
+                              homeworkByStudentId.get(record.student.id) ??
+                                "INCOMPLETE",
+                              t,
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -322,9 +339,9 @@ export default async function AdminRecordsPage({
 
           {submittedLessons.length === 0 ? (
             <article className="panel data-panel">
-              <h2>No submitted records yet</h2>
+              <h2>{t("adminReview.noSubmittedRecords")}</h2>
               <p className="muted-copy">
-                Submitted class records will appear here for admin review.
+                {t("adminReview.noSubmittedRecordsCopy")}
               </p>
             </article>
           ) : null}

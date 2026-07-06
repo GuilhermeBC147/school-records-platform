@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import {
   formatDuration,
   formatWeekdays,
@@ -9,7 +8,9 @@ import {
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 import type { Weekday } from "@/generated/prisma/client";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,7 @@ export default async function ReceptionClassesPage({
     redirect("/dashboard");
   }
 
+  const t = getTranslations(currentUser.locale);
   const query = await searchParams;
   const classSearch = query.classSearch?.trim() || undefined;
   const selectedTeacherId = query.teacherId?.trim() || undefined;
@@ -129,49 +131,34 @@ export default async function ReceptionClassesPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="classes-title">
           <Link className="text-link" href="/reception">
-            Back to reception
+            {t("label.backToReception")}
           </Link>
-          <p className="eyebrow">Reception</p>
-          <h1 id="classes-title">Classes</h1>
-          <p className="lede">
-            Filter active classes by name, teacher, or weekday and review roster
-            and recent lessons.
-          </p>
+          <p className="eyebrow">{t("dashboard.reception")}</p>
+          <h1 id="classes-title">{t("dashboard.classes")}</h1>
+          <p className="lede">{t("receptionLookup.classesCopy")}</p>
           {currentUser.role === "ADMIN" ? (
             <div className="action-row">
               <Link className="secondary-link" href="/dashboard">
-                Back to dashboard
+                {t("label.backToDashboard")}
               </Link>
             </div>
           ) : null}
         </section>
 
-        <section className="panel" aria-label="Class filters">
+        <section className="panel" aria-label={t("dashboard.classFilters")}>
           <form className="filter-form class-lookup-filter-form">
             <label>
-              <span>Class search</span>
+              <span>{t("receptionLookup.classSearch")}</span>
               <input
                 defaultValue={classSearch ?? ""}
                 list="reception-classes"
                 name="classSearch"
-                placeholder="Type a class name"
+                placeholder={t("receptionLookup.classSearchPlaceholder")}
                 type="search"
               />
               <datalist id="reception-classes">
@@ -181,9 +168,9 @@ export default async function ReceptionClassesPage({
               </datalist>
             </label>
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={selectedTeacherId ?? ""} name="teacherId">
-                <option value="">All teachers</option>
+                <option value="">{t("label.allTeachers")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -192,7 +179,7 @@ export default async function ReceptionClassesPage({
               </select>
             </label>
             <div className="weekday-filter">
-              <span className="form-section-label">Weekdays</span>
+              <span className="form-section-label">{t("receptionLookup.weekdays")}</span>
               <div className="weekday-picker compact-weekday-picker">
                 {weekdayOptions.map((weekday) => (
                   <label className="checkbox-label" key={weekday.value}>
@@ -202,17 +189,17 @@ export default async function ReceptionClassesPage({
                       type="checkbox"
                       value={weekday.value}
                     />
-                    <span>{weekday.shortLabel}</span>
+                    <span>{formatWeekdays([weekday.value], currentUser.locale)}</span>
                   </label>
                 ))}
               </div>
             </div>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Search
+                {t("label.search")}
               </button>
               <Link className="text-link" href="/reception/classes">
-                Clear
+                {t("label.clear")}
               </Link>
             </div>
           </form>
@@ -221,9 +208,12 @@ export default async function ReceptionClassesPage({
         <section className="panel data-panel" aria-labelledby="class-results-title">
           <div className="section-heading-row">
             <div>
-              <h2 id="class-results-title">Class results</h2>
+              <h2 id="class-results-title">{t("receptionLookup.classResults")}</h2>
               <p className="muted-copy">
-                {classes.length} active {classes.length === 1 ? "class" : "classes"} found.
+                {classes.length}{" "}
+                {classes.length === 1
+                  ? t("receptionLookup.activeClassFound")
+                  : t("receptionLookup.activeClassesFound")}
               </p>
             </div>
           </div>
@@ -243,15 +233,17 @@ export default async function ReceptionClassesPage({
               >
                 <span>{schoolClass.teacher.name}</span>
                 <strong>{schoolClass.name}</strong>
-                <small>{formatWeekdays(schoolClass.weekDays)}</small>
+                <small>{formatWeekdays(schoolClass.weekDays, currentUser.locale)}</small>
                 <div className="class-result-card-metrics">
-                  <span>{schoolClass.enrollments.length} students</span>
+                  <span>
+                    {schoolClass.enrollments.length} {t("label.students")}
+                  </span>
                   <span>{formatDuration(schoolClass.durationMinutes)}</span>
                 </div>
               </Link>
             ))}
             {classes.length === 0 ? (
-              <p className="muted-copy">No active classes match the current filters.</p>
+              <p className="muted-copy">{t("receptionLookup.noActiveClassesFilter")}</p>
             ) : null}
           </div>
         </section>
@@ -262,9 +254,9 @@ export default async function ReceptionClassesPage({
               <div>
                 <h2 id="class-summary-title">{selectedClass.name}</h2>
                 <p className="muted-copy">
-                  {selectedClass.book ?? "Class"}
+                  {selectedClass.book ?? t("receptionLookup.activeClassFallback")}
                   {selectedClass.semester && selectedClass.year
-                    ? ` | Semester ${selectedClass.semester}/${selectedClass.year}`
+                    ? ` | ${t("receptionLookup.semester")} ${selectedClass.semester}/${selectedClass.year}`
                     : ""}
                 </p>
               </div>
@@ -272,28 +264,28 @@ export default async function ReceptionClassesPage({
             <div className="metric-grid compact-metrics">
               <article className="metric">
                 <span>{selectedClass.enrollments.length}</span>
-                <strong>Active students</strong>
+                <strong>{t("dashboard.activeStudents")}</strong>
               </article>
               <article className="metric">
                 <span>{selectedClass.lessons.length}</span>
-                <strong>Recent lessons</strong>
+                <strong>{t("label.recentLessons")}</strong>
               </article>
             </div>
             <div className="class-detail-grid">
               <article className="class-detail-card">
-                <span>Teacher</span>
+                <span>{t("label.teacher")}</span>
                 <strong>{selectedClass.teacher.name}</strong>
                 <small>{selectedClass.teacher.email}</small>
               </article>
               <article className="class-detail-card">
-                <span>Schedule</span>
-                <strong>{formatWeekdays(selectedClass.weekDays)}</strong>
+                <span>{t("receptionLookup.schedule")}</span>
+                <strong>{formatWeekdays(selectedClass.weekDays, currentUser.locale)}</strong>
                 <small>{formatDuration(selectedClass.durationMinutes)}</small>
               </article>
             </div>
             <div className="data-grid class-detail-sections">
               <article className="data-panel">
-                <h2>Roster</h2>
+                <h2>{t("receptionLookup.roster")}</h2>
                 <div className="student-event-list">
                   {selectedClass.enrollments.map((enrollment) => (
                     <Link
@@ -302,16 +294,16 @@ export default async function ReceptionClassesPage({
                       key={enrollment.id}
                     >
                       <strong>{enrollment.student.fullName}</strong>
-                      <small>View student details</small>
+                      <small>{t("receptionLookup.viewStudentDetails")}</small>
                     </Link>
                   ))}
                   {selectedClass.enrollments.length === 0 ? (
-                    <p className="muted-copy">No active students.</p>
+                    <p className="muted-copy">{t("receptionLookup.noActiveStudents")}</p>
                   ) : null}
                 </div>
               </article>
               <article className="data-panel">
-                <h2>Recent lessons</h2>
+                <h2>{t("label.recentLessons")}</h2>
                 <div className="student-event-list">
                   {selectedClass.lessons.map((lesson) => (
                     <article className="student-event-row" key={lesson.id}>
@@ -321,11 +313,13 @@ export default async function ReceptionClassesPage({
                           currentUser.dateFormat,
                         )}
                       </span>
-                      <strong>{lesson.name ?? "Untitled lesson"}</strong>
+                      <strong>
+                        {lesson.name ?? t("adminReview.untitledLesson")}
+                      </strong>
                     </article>
                   ))}
                   {selectedClass.lessons.length === 0 ? (
-                    <p className="muted-copy">No submitted lessons.</p>
+                    <p className="muted-copy">{t("receptionLookup.noSubmittedLessons")}</p>
                   ) : null}
                 </div>
               </article>

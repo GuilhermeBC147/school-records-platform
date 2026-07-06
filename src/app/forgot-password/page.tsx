@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requestPasswordResetAction } from "@/app/actions/accounts";
+import { defaultUnauthenticatedLocale } from "@/lib/locale";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 
 type ForgotPasswordPageProps = {
   searchParams: Promise<{
@@ -20,6 +22,7 @@ export default async function ForgotPasswordPage({
   }
 
   const params = await searchParams;
+  const t = getTranslations(defaultUnauthenticatedLocale);
   const resetHref = params.token
     ? `/reset-password?token=${encodeURIComponent(params.token)}`
     : null;
@@ -27,47 +30,42 @@ export default async function ForgotPasswordPage({
   return (
     <main className="auth-page">
       <section className="auth-panel" aria-labelledby="forgot-title">
-        <p className="eyebrow">Account access</p>
-        <h1 id="forgot-title">Reset your password</h1>
-        <p className="lede">
-          Enter your school email. If the account exists, a reset link will be
-          prepared.
-        </p>
+        <p className="eyebrow">{t("auth.accountAccess")}</p>
+        <h1 id="forgot-title">{t("auth.resetPasswordTitle")}</h1>
+        <p className="lede">{t("auth.forgotResetCopy")}</p>
 
         {params.status === "sent" ? (
-          <p className="form-success">
-            If that email has an active account, a reset link is ready.
-          </p>
+          <p className="form-success">{t("auth.resetLinkReady")}</p>
         ) : null}
 
         {resetHref ? (
           <div className="dev-reset-link">
-            <strong>Development reset link</strong>
+            <strong>{t("auth.devResetLink")}</strong>
             <Link className="text-link" href={resetHref}>
-              Open reset page
+              {t("auth.openResetPage")}
             </Link>
           </div>
         ) : null}
 
         <form action={requestPasswordResetAction} className="form-stack">
           <label>
-            <span>Email</span>
+            <span>{t("auth.email")}</span>
             <input
               autoComplete="email"
               name="email"
-              placeholder="ana@example.com"
+              placeholder={t("auth.emailPlaceholder")}
               required
               type="email"
             />
           </label>
 
           <button className="primary-button" type="submit">
-            Request reset link
+            {t("auth.requestResetLink")}
           </button>
         </form>
 
         <Link className="text-link" href="/login">
-          Back to sign in
+          {t("auth.backToSignIn")}
         </Link>
       </section>
     </main>

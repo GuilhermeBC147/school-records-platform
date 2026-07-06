@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { normalizeAccountLocale } from "@/lib/locale";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { createSession, destroySession } from "@/lib/session";
@@ -10,9 +11,11 @@ export async function loginAction(formData: FormData) {
     .trim()
     .toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const locale = normalizeAccountLocale(formData.get("locale"));
+  const loginErrorUrl = (error: string) => `/login?locale=${locale}&error=${error}`;
 
   if (!email || !password) {
-    redirect("/login?error=missing");
+    redirect(loginErrorUrl("missing"));
   }
 
   const user = await prisma.user.findFirst({
@@ -27,7 +30,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (!user || !verifyPassword(password, user.passwordHash)) {
-    redirect("/login?error=invalid");
+    redirect(loginErrorUrl("invalid"));
   }
 
   await createSession(user.id);

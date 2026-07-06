@@ -8,6 +8,7 @@ import {
 import { useMemo, useState } from "react";
 
 type DateInputProps = {
+  calendarLabel: string;
   className?: string;
   dateFormat: AccountDateFormat;
   defaultValue?: string;
@@ -22,6 +23,7 @@ const inputLabels: Record<AccountDateFormat, string> = {
 };
 
 export function DateInput({
+  calendarLabel,
   className,
   dateFormat,
   defaultValue = "",
@@ -53,12 +55,11 @@ export function DateInput({
           }
           placeholder={inputLabels[dateFormat]}
           required={required}
-          title={`Use ${inputLabels[dateFormat]}.`}
           type="text"
           value={displayValue}
         />
         <input
-          aria-label="Choose date from calendar"
+          aria-label={calendarLabel}
           className="date-calendar-input"
           onChange={(event) =>
             setDisplayValue(formatIsoDateInput(event.target.value, dateFormat))

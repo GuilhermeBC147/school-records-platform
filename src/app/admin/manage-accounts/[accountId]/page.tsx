@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { updateAccountAction } from "@/app/actions/accounts";
-import { logoutAction } from "@/app/actions/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type EditAccountPageProps = {
   params: Promise<{
@@ -14,11 +15,21 @@ type EditAccountPageProps = {
   }>;
 };
 
-const errorMessages = {
-  duplicate: "A user with that email already exists.",
-  invalid: "Enter a name, email, account type, and optional password with at least 8 characters.",
-  self: "You cannot deactivate your own account.",
-};
+function formatAccountErrorMessage(
+  error: string | undefined,
+  t: ReturnType<typeof getTranslations>,
+) {
+  switch (error) {
+    case "duplicate":
+      return t("accountManagement.duplicateError");
+    case "invalid":
+      return t("accountManagement.invalidUpdateError");
+    case "self":
+      return t("accountManagement.selfDeactivateError");
+    default:
+      return null;
+  }
+}
 
 export default async function EditAccountPage({
   params,
@@ -36,6 +47,7 @@ export default async function EditAccountPage({
 
   const { accountId } = await params;
   const query = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const account = await prisma.user.findFirst({
     where: {
       id: accountId,
@@ -54,34 +66,19 @@ export default async function EditAccountPage({
     notFound();
   }
 
-  const errorMessage =
-    query.error && query.error in errorMessages
-      ? errorMessages[query.error as keyof typeof errorMessages]
-      : null;
+  const errorMessage = formatAccountErrorMessage(query.error, t);
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="edit-account-title">
           <Link className="text-link" href="/admin/manage-accounts">
-            Back to accounts
+            {t("accountManagement.backToAccounts")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="edit-account-title">Edit account</h1>
+          <p className="eyebrow">{t("accountManagement.adminSetup")}</p>
+          <h1 id="edit-account-title">{t("accountManagement.editAccount")}</h1>
         </section>
 
         <section className="panel">
@@ -89,11 +86,11 @@ export default async function EditAccountPage({
           <form action={updateAccountAction} className="admin-form">
             <input name="accountId" type="hidden" value={account.id} />
             <label>
-              <span>Name</span>
+              <span>{t("label.name")}</span>
               <input defaultValue={account.name} name="name" required type="text" />
             </label>
             <label>
-              <span>Email</span>
+              <span>{t("account.email")}</span>
               <input
                 autoComplete="email"
                 defaultValue={account.email}
@@ -103,19 +100,21 @@ export default async function EditAccountPage({
               />
             </label>
             <label>
-              <span>Account type</span>
+              <span>{t("accountManagement.accountType")}</span>
               <select defaultValue={account.role} name="role" required>
-                <option value="TEACHER">Teacher</option>
-                <option value="RECEPTION">Reception</option>
+                <option value="TEACHER">{t("accountManagement.teacher")}</option>
+                <option value="RECEPTION">
+                  {t("accountManagement.reception")}
+                </option>
               </select>
             </label>
             <label>
-              <span>New password</span>
+              <span>{t("accountManagement.newPassword")}</span>
               <input
                 autoComplete="new-password"
                 minLength={8}
                 name="password"
-                placeholder="Leave blank to keep current password"
+                placeholder={t("accountManagement.leavePasswordBlank")}
                 type="password"
               />
             </label>
@@ -125,14 +124,14 @@ export default async function EditAccountPage({
                 name="isActive"
                 type="checkbox"
               />
-              <span>Active account</span>
+              <span>{t("accountManagement.activeAccount")}</span>
             </label>
             <div className="record-actions">
               <Link className="text-link" href="/admin/manage-accounts">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Save account
+                {t("accountManagement.saveAccount")}
               </button>
             </div>
           </form>

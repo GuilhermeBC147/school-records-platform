@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createStudentAction } from "@/app/actions/students";
-import { logoutAction } from "@/app/actions/auth";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 type NewStudentPageProps = {
   searchParams: Promise<{
@@ -24,51 +25,40 @@ export default async function NewStudentPage({
   }
 
   const params = await searchParams;
+  const t = getTranslations(currentUser.locale);
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="new-student-title">
           <Link className="text-link" href="/admin/students">
-            Back to students
+            {t("adminStudents.backToStudents")}
           </Link>
-          <p className="eyebrow">Admin setup</p>
-          <h1 id="new-student-title">Create student</h1>
+          <p className="eyebrow">{t("adminStudents.adminSetup")}</p>
+          <h1 id="new-student-title">{t("adminStudents.createStudent")}</h1>
         </section>
 
         <section className="panel">
           {params.error === "invalid" ? (
-            <p className="form-error">Enter the student's full name.</p>
+            <p className="form-error">{t("adminStudents.invalidError")}</p>
           ) : null}
           <form action={createStudentAction} className="admin-form">
             <label>
-              <span>Full name</span>
+              <span>{t("adminStudents.fullName")}</span>
               <input name="fullName" required type="text" />
             </label>
             <label className="checkbox-label">
               <input defaultChecked name="isActive" type="checkbox" />
-              <span>Active student</span>
+              <span>{t("adminStudents.activeStudent")}</span>
             </label>
             <div className="record-actions">
               <Link className="text-link" href="/admin/students">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Create student
+                {t("adminStudents.createStudent")}
               </button>
             </div>
           </form>

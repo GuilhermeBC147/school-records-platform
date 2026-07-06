@@ -5,11 +5,12 @@ import {
 } from "@/app/actions/risk";
 import { redirect } from "next/navigation";
 import { DateInput } from "@/app/components/date-input";
-import { logoutAction } from "@/app/actions/auth";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { Prisma } from "@/generated/prisma/client";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -92,30 +93,52 @@ function buildRecordsHref(filters: {
   return `/admin/records?${params.toString()}`;
 }
 
-function getRiskLabels(record: RiskRecord) {
+function getRiskLabels(record: RiskRecord, t?: ReturnType<typeof getTranslations>) {
   const labels: string[] = [];
+  const formatRiskSignal = (key: Parameters<ReturnType<typeof getTranslations>>[0], count: number) =>
+    t ? t(key).replace("{count}", String(count)) : undefined;
 
   if (record.incompleteHomeworkCount >= RISK_THRESHOLDS.incompleteHomework) {
-    labels.push(`${record.incompleteHomeworkCount} incomplete homework`);
+    labels.push(
+      formatRiskSignal(
+        "riskSignal.incompleteHomework",
+        record.incompleteHomeworkCount,
+      ) ?? `riskSignal.incompleteHomework:${record.incompleteHomeworkCount}`,
+    );
   }
 
   if (record.lowTestTotalCount > 0) {
-    labels.push(`${record.lowTestTotalCount} test total below 7`);
+    labels.push(
+      formatRiskSignal("riskSignal.lowTestTotal", record.lowTestTotalCount) ??
+        `riskSignal.lowTestTotal:${record.lowTestTotalCount}`,
+    );
   }
 
   if (record.lowOralGradeCount > 0) {
-    labels.push(`${record.lowOralGradeCount} oral grade C or below`);
+    labels.push(
+      formatRiskSignal("riskSignal.lowOralGrade", record.lowOralGradeCount) ??
+        `riskSignal.lowOralGrade:${record.lowOralGradeCount}`,
+    );
   }
 
   if (record.missedClassCount >= RISK_THRESHOLDS.missedClasses) {
-    labels.push(`${record.missedClassCount} missed classes`);
+    labels.push(
+      formatRiskSignal("riskSignal.missedClasses", record.missedClassCount) ??
+        `riskSignal.missedClasses:${record.missedClassCount}`,
+    );
   }
 
   if (
     record.consecutiveMissedClassCount >=
     RISK_THRESHOLDS.consecutiveMissedClasses
   ) {
-    labels.push(`${record.consecutiveMissedClassCount} missed classes in a row`);
+    labels.push(
+      formatRiskSignal(
+        "riskSignal.consecutiveMissedClasses",
+        record.consecutiveMissedClassCount,
+      ) ??
+        `riskSignal.consecutiveMissedClasses:${record.consecutiveMissedClassCount}`,
+    );
   }
 
   return labels;
@@ -385,6 +408,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
   }
 
   const filters = await searchParams;
+  const t = getTranslations(currentUser.locale);
   const classId = readFilterValue(filters.classId);
   const teacherId = readFilterValue(filters.teacherId);
   const dateFrom = readFilterValue(filters.dateFrom);
@@ -568,61 +592,46 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="risk-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin review</p>
-          <h1 id="risk-title">Student risk review</h1>
-          <p className="lede">
-            Review students with repeated incomplete homework or missed classes
-            across submitted class records.
-          </p>
+          <p className="eyebrow">{t("label.adminReview")}</p>
+          <h1 id="risk-title">{t("dashboard.studentRisk")}</h1>
+          <p className="lede">{t("text.riskReviewCopy")}</p>
           <div className="metric-grid compact-metrics risk-metrics">
             <article className="metric">
               <span>{riskRecords.length}</span>
-              <strong>Flagged rows</strong>
+              <strong>{t("label.flaggedRows")}</strong>
             </article>
             <article className="metric">
               <span>{RISK_THRESHOLDS.incompleteHomework}</span>
-              <strong>Homework threshold</strong>
+              <strong>{t("label.homeworkThreshold")}</strong>
             </article>
             <article className="metric">
               <span>{"< 7"}</span>
-              <strong>Test total threshold</strong>
+              <strong>{t("label.testTotalThreshold")}</strong>
             </article>
             <article className="metric">
               <span>{RISK_THRESHOLDS.missedClasses}</span>
-              <strong>Missed threshold</strong>
+              <strong>{t("option.attendanceAbsent")}</strong>
             </article>
             <article className="metric">
               <span>{RISK_THRESHOLDS.consecutiveMissedClasses}</span>
-              <strong>Consecutive missed</strong>
+              <strong>{t("label.consecutiveMissed")}</strong>
             </article>
           </div>
         </section>
 
-        <section className="panel" aria-label="Risk filters">
+        <section className="panel" aria-label={t("label.riskFilters")}>
           <form className="filter-form">
             <label>
-              <span>Teacher</span>
+              <span>{t("label.teacher")}</span>
               <select defaultValue={teacherId ?? ""} name="teacherId">
-                <option value="">All teachers</option>
+                <option value="">{t("label.allTeachers")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.name}
@@ -631,9 +640,9 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
               </select>
             </label>
             <label>
-              <span>Class</span>
+              <span>{t("label.class")}</span>
               <select defaultValue={classId ?? ""} name="classId">
-                <option value="">All classes</option>
+                <option value="">{t("label.allClasses")}</option>
                 {classes.map((schoolClass) => (
                   <option key={schoolClass.id} value={schoolClass.id}>
                     {schoolClass.name}
@@ -642,51 +651,53 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
               </select>
             </label>
             <label>
-              <span>From</span>
+              <span>{t("label.from")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateFrom ?? ""}
                 name="dateFrom"
               />
             </label>
             <label>
-              <span>To</span>
+              <span>{t("label.to")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={dateTo ?? ""}
                 name="dateTo"
               />
             </label>
             <label>
-              <span>Situation</span>
+              <span>{t("label.resolutionStatus")}</span>
               <select defaultValue={resolutionStatus} name="resolutionStatus">
-                <option value="unresolved">Unresolved</option>
-                <option value="resolved">Resolved</option>
-                <option value="all">All</option>
+                <option value="unresolved">{t("label.unresolved")}</option>
+                <option value="resolved">{t("label.resolved")}</option>
+                <option value="all">{t("label.all")}</option>
               </select>
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
-                Apply filters
+                {t("label.applyFilters")}
               </button>
               <Link className="text-link" href="/admin/risk">
-                Clear
+                {t("label.clear")}
               </Link>
             </div>
           </form>
         </section>
 
-        <section className="panel data-panel" aria-label="Risk report">
+        <section className="panel data-panel" aria-label={t("label.riskReport")}>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Student</th>
-                  <th>Class</th>
-                  <th>Teacher</th>
-                  <th>Signals</th>
-                  <th>Latest signal</th>
-                  <th>Action</th>
+                  <th>{t("label.student")}</th>
+                  <th>{t("label.class")}</th>
+                  <th>{t("label.teacher")}</th>
+                  <th>{t("label.signals")}</th>
+                  <th>{t("label.latestSignal")}</th>
+                  <th>{t("label.action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -697,7 +708,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                     <td>{record.teacherName}</td>
                     <td>
                       <div className="risk-signal-list">
-                        {getRiskLabels(record).map((label) => (
+                        {getRiskLabels(record, t).map((label) => (
                           <span className="risk-signal" key={label}>
                             {label}
                           </span>
@@ -716,7 +727,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                           className="text-link compact-link"
                           href={`/admin/students/${record.studentId}`}
                         >
-                          Student
+                          {t("label.student")}
                         </Link>
                         <Link
                           className="text-link compact-link"
@@ -726,14 +737,14 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                             teacherId,
                           })}
                         >
-                          Records
+                          {t("label.records")}
                         </Link>
                         {record.recentLessonId ? (
                           <Link
                             className="text-link compact-link"
                             href={`/admin/records/${record.recentLessonId}`}
                           >
-                            Latest
+                            {t("label.latest")}
                           </Link>
                         ) : null}
                         {"resolvedThroughDate" in record &&
@@ -767,7 +778,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                               value={resolutionStatus}
                             />
                             <button className="text-link compact-link" type="submit">
-                              Undo resolve
+                              {t("label.undoResolve")}
                             </button>
                           </form>
                         ) : (
@@ -805,7 +816,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                               value={resolutionStatus}
                             />
                             <button className="text-link compact-link" type="submit">
-                              Resolve
+                              {t("label.resolved")}
                             </button>
                           </form>
                         )}
@@ -815,7 +826,7 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
                 ))}
                 {riskRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No students match the current risk filters.</td>
+                    <td colSpan={6}>{t("message.noRiskMatches")}</td>
                   </tr>
                 ) : null}
               </tbody>
@@ -824,19 +835,8 @@ export default async function AdminRiskPage({ searchParams }: RiskPageProps) {
         </section>
 
         <section className="panel data-panel" aria-labelledby="risk-rules-title">
-          <h2 id="risk-rules-title">Default risk rules</h2>
-          <p className="muted-copy">
-            The report flags active students with at least{" "}
-            {RISK_THRESHOLDS.incompleteHomework} incomplete homework records, at
-            least {RISK_THRESHOLDS.missedClasses} absent records, test totals
-            below {RISK_THRESHOLDS.lowTestTotalScore}, oral grades of{" "}
-            {RISK_THRESHOLDS.lowOralGradeMaximum} or below, or{" "}
-            {RISK_THRESHOLDS.consecutiveMissedClasses} or more absent records in
-            a row. Resolving a row clears signals through the latest signal date;
-            future submitted records can flag the student again. Excused
-            absences and late arrivals are not counted as missed classes by
-            default.
-          </p>
+          <h2 id="risk-rules-title">{t("label.defaultRiskRules")}</h2>
+          <p className="muted-copy">{t("text.riskRulesCopy")}</p>
         </section>
       </div>
     </main>

@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import type { AccountLocale } from "@/lib/locale";
+import { defaultUnauthenticatedLocale } from "@/lib/locale";
+import { translate } from "@/lib/translations";
 
 export const teacherWorkCategories = [
   { label: "Bonus Class", value: "BONUS_CLASS" },
@@ -10,11 +13,22 @@ export const teacherWorkCategories = [
 export type TeacherWorkCategoryValue =
   (typeof teacherWorkCategories)[number]["value"];
 
-export function formatTeacherWorkCategory(category: string) {
-  return (
-    teacherWorkCategories.find((option) => option.value === category)?.label ??
-    category
-  );
+export function formatTeacherWorkCategory(
+  category: string,
+  locale: AccountLocale = defaultUnauthenticatedLocale,
+) {
+  switch (category) {
+    case "BONUS_CLASS":
+      return translate(locale, "workCategory.BONUS_CLASS");
+    case "EXTRA_ACTIVITY":
+      return translate(locale, "workCategory.EXTRA_ACTIVITY");
+    case "MEETING":
+      return translate(locale, "workCategory.MEETING");
+    case "OTHER":
+      return translate(locale, "workCategory.OTHER");
+    default:
+      return category;
+  }
 }
 
 export function readMonth(value: string | undefined) {

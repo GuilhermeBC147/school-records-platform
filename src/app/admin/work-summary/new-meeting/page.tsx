@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTeacherMeetingAction } from "@/app/actions/teacher-work";
-import { logoutAction } from "@/app/actions/auth";
 import { DateInput } from "@/app/components/date-input";
 import { DurationInput } from "@/app/components/duration-input";
 import { TimeInput } from "@/app/components/time-input";
 import { formatTeacherWorkErrorMessage } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,11 @@ export default async function NewAdminMeetingPage({
   }
 
   const query = await searchParams;
-  const errorMessage = formatTeacherWorkErrorMessage(query.error);
+  const t = getTranslations(currentUser.locale);
+  const errorMessage = formatTeacherWorkErrorMessage(
+    query.error,
+    currentUser.locale,
+  );
   const teachers = await prisma.user.findMany({
     orderBy: { name: "asc" },
     where: { isActive: true, role: "TEACHER" },
@@ -43,33 +48,19 @@ export default async function NewAdminMeetingPage({
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="admin-meeting-title">
           <Link className="text-link" href="/dashboard">
-            Back to dashboard
+            {t("label.backToDashboard")}
           </Link>
-          <p className="eyebrow">Admin work</p>
-          <h1 id="admin-meeting-title">Create meeting</h1>
-          <p className="lede">
-            Count one meeting toward each selected teacher's monthly hours.
-          </p>
+          <p className="eyebrow">{t("label.adminWork")}</p>
+          <h1 id="admin-meeting-title">{t("dashboard.createMeeting")}</h1>
+          <p className="lede">{t("text.adminMeetingCopy")}</p>
         </section>
 
-        <section className="panel data-panel" aria-label="Meeting form">
+        <section className="panel data-panel" aria-label={t("dashboard.createMeeting")}>
           {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
           <form action={createTeacherMeetingAction} className="admin-form">
             <input
@@ -78,7 +69,7 @@ export default async function NewAdminMeetingPage({
               value="/admin/work-summary/new-meeting"
             />
             <label>
-              <span>Teachers</span>
+              <span>{t("label.teachers")}</span>
               <div className="roster-list compact-roster-list">
                 {teachers.map((teacher) => (
                   <label className="checkbox-label roster-student" key={teacher.id}>
@@ -89,35 +80,36 @@ export default async function NewAdminMeetingPage({
               </div>
             </label>
             <label>
-              <span>Title</span>
+              <span>{t("label.title")}</span>
               <input name="title" required type="text" />
             </label>
             <label>
-              <span>Date</span>
+              <span>{t("label.date")}</span>
               <DateInput
+                calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 name="workDate"
                 required
               />
             </label>
             <label>
-              <span>Start time</span>
+              <span>{t("label.startTime")}</span>
               <TimeInput name="startTime" />
             </label>
             <label>
-              <span>Duration</span>
+              <span>{t("label.duration")}</span>
               <DurationInput name="durationMinutes" required />
             </label>
             <label>
-              <span>Notes</span>
+              <span>{t("label.notes")}</span>
               <textarea name="notes" rows={3} />
             </label>
             <div className="record-actions">
               <Link className="text-link" href="/admin/work-summary">
-                Cancel
+                {t("label.cancel")}
               </Link>
               <button className="primary-button" type="submit">
-                Save meeting
+                {t("label.saveMeeting")}
               </button>
             </div>
           </form>

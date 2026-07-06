@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: integracao-sponte-postgres
+    container_name: school-records-platform-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: sponte_app

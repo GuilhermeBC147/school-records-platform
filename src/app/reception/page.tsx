@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
 import { formatStartTime } from "@/lib/bonus-classes";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
+import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -70,94 +71,80 @@ export default async function ReceptionDashboardPage() {
       },
     }),
   ]);
+  const t = getTranslations(currentUser.locale);
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <strong>Class Records Platform</strong>
-            <span>{currentUser.name}</span>
-          </div>
-          <form action={logoutAction}>
-            <button className="secondary-button" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppTopbar currentUser={currentUser} />
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="reception-title">
-          <p className="eyebrow">Reception dashboard</p>
-          <h1 id="reception-title">Reception</h1>
-          <p className="lede">
-            Schedule bonus classes, scan teacher availability, and answer
-            parent-facing student or class questions.
-          </p>
+          <p className="eyebrow">{t("dashboard.receptionDashboard")}</p>
+          <h1 id="reception-title">{t("dashboard.reception")}</h1>
+          <p className="lede">{t("dashboard.receptionLede")}</p>
           {currentUser.role === "ADMIN" ? (
             <div className="action-row">
               <Link className="secondary-link" href="/dashboard">
-                Back to dashboard
+                {t("dashboard.backToDashboard")}
               </Link>
             </div>
           ) : null}
         </section>
 
-        <section className="dashboard-metric-grid" aria-label="Reception overview">
+        <section className="dashboard-metric-grid" aria-label={t("dashboard.receptionOverview")}>
           <article className="metric">
             <span>{bonusClassesToday}</span>
-            <strong>Bonus classes today</strong>
+            <strong>{t("dashboard.bonusClassesToday")}</strong>
           </article>
           <article className="metric">
             <span>{pendingAttendance}</span>
-            <strong>Pending attendance</strong>
+            <strong>{t("dashboard.pendingAttendance")}</strong>
           </article>
           <article className="metric">
             <span>{activeStudents}</span>
-            <strong>Active students</strong>
+            <strong>{t("dashboard.activeStudents")}</strong>
           </article>
           <article className="metric">
             <span>{activeClasses}</span>
-            <strong>Active classes</strong>
+            <strong>{t("dashboard.activeClasses")}</strong>
           </article>
           <article className="metric">
             <span>{activeTeachers}</span>
-            <strong>Available teachers</strong>
+            <strong>{t("dashboard.availableTeachers")}</strong>
           </article>
         </section>
 
-        <section className="dashboard-action-grid" aria-label="Reception workflows">
+        <section className="dashboard-action-grid" aria-label={t("dashboard.receptionWorkflows")}>
           <Link className="dashboard-action-card" href="/reception/bonus-classes">
-            <span>Schedule</span>
-            <strong>Bonus classes</strong>
-            <small>Student, subject, teacher, date, time, and notes.</small>
+            <span>{t("dashboard.schedule")}</span>
+            <strong>{t("dashboard.bonusClasses")}</strong>
+            <small>{t("dashboard.scheduleBonusClassesCopy")}</small>
           </Link>
           <Link className="dashboard-action-card" href="/reception/calendar">
-            <span>Calendar</span>
-            <strong>Teacher availability</strong>
-            <small>Daily grid by teacher and time slot.</small>
+            <span>{t("dashboard.calendar")}</span>
+            <strong>{t("dashboard.teacherAvailability")}</strong>
+            <small>{t("dashboard.teacherAvailabilityCopy")}</small>
           </Link>
           <Link className="dashboard-action-card" href="/reception/students">
-            <span>Lookup</span>
-            <strong>Students</strong>
-            <small>Attendance, grades, active class, and recent class context.</small>
+            <span>{t("dashboard.lookup")}</span>
+            <strong>{t("dashboard.students")}</strong>
+            <small>{t("dashboard.studentsCopy")}</small>
           </Link>
           <Link className="dashboard-action-card" href="/reception/classes">
-            <span>Lookup</span>
-            <strong>Classes</strong>
-            <small>Roster, teacher, schedule, and recent submitted lessons.</small>
+            <span>{t("dashboard.lookup")}</span>
+            <strong>{t("dashboard.classes")}</strong>
+            <small>{t("dashboard.manageClassesCopy")}</small>
           </Link>
         </section>
 
         <section className="panel dashboard-feed" aria-labelledby="reception-feed-title">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">Schedule</p>
-              <h2 id="reception-feed-title">Next bonus classes</h2>
+              <p className="eyebrow">{t("dashboard.schedule")}</p>
+              <h2 id="reception-feed-title">{t("dashboard.nextBonusClasses")}</h2>
             </div>
             <Link className="text-link" href="/reception/bonus-classes">
-              View all
+              {t("dashboard.viewAll")}
             </Link>
           </div>
           <div className="dashboard-feed-list">
@@ -175,13 +162,13 @@ export default async function ReceptionDashboardPage() {
                   {formatStartTime(bonusClass.startTime)}
                 </strong>
                 <span>
-                  {bonusClass.student.fullName} with {bonusClass.teacher.name}
+                  {bonusClass.student.fullName} {t("dashboard.withTeacher")} {bonusClass.teacher.name}
                 </span>
                 <small>{bonusClass.subject}</small>
               </Link>
             ))}
             {upcomingBonusClasses.length === 0 ? (
-              <p className="muted-copy">No scheduled bonus classes coming up.</p>
+              <p className="muted-copy">{t("dashboard.noScheduledBonusClasses")}</p>
             ) : null}
           </div>
         </section>

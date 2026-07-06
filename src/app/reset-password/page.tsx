@@ -1,18 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { resetPasswordAction } from "@/app/actions/accounts";
+import { defaultUnauthenticatedLocale } from "@/lib/locale";
 import { getCurrentUser } from "@/lib/session";
+import { getTranslations } from "@/lib/translations";
 
 type ResetPasswordPageProps = {
   searchParams: Promise<{
     error?: string;
     token?: string;
   }>;
-};
-
-const errorMessages = {
-  expired: "This reset link is invalid or expired.",
-  invalid: "Enter matching passwords with at least 8 characters.",
 };
 
 export default async function ResetPasswordPage({
@@ -25,6 +22,11 @@ export default async function ResetPasswordPage({
   }
 
   const params = await searchParams;
+  const t = getTranslations(defaultUnauthenticatedLocale);
+  const errorMessages = {
+    expired: t("auth.resetExpired"),
+    invalid: t("auth.resetInvalid"),
+  };
   const errorMessage =
     params.error && params.error in errorMessages
       ? errorMessages[params.error as keyof typeof errorMessages]
@@ -33,12 +35,9 @@ export default async function ResetPasswordPage({
   return (
     <main className="auth-page">
       <section className="auth-panel" aria-labelledby="reset-title">
-        <p className="eyebrow">Account access</p>
-        <h1 id="reset-title">Choose a new password</h1>
-        <p className="lede">
-          Use at least 8 characters. Your old password will stop working after
-          this form succeeds.
-        </p>
+        <p className="eyebrow">{t("auth.accountAccess")}</p>
+        <h1 id="reset-title">{t("auth.resetTitle")}</h1>
+        <p className="lede">{t("auth.resetUseCopy")}</p>
 
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
@@ -46,7 +45,7 @@ export default async function ResetPasswordPage({
           <input name="token" type="hidden" value={params.token ?? ""} />
 
           <label>
-            <span>New password</span>
+            <span>{t("auth.newPassword")}</span>
             <input
               autoComplete="new-password"
               minLength={8}
@@ -57,7 +56,7 @@ export default async function ResetPasswordPage({
           </label>
 
           <label>
-            <span>Confirm password</span>
+            <span>{t("auth.confirmPassword")}</span>
             <input
               autoComplete="new-password"
               minLength={8}
@@ -68,12 +67,12 @@ export default async function ResetPasswordPage({
           </label>
 
           <button className="primary-button" type="submit">
-            Update password
+            {t("auth.resetSubmit")}
           </button>
         </form>
 
         <Link className="text-link" href="/login">
-          Back to sign in
+          {t("auth.backToSignIn")}
         </Link>
       </section>
     </main>
