@@ -388,7 +388,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   </Link>
                   <Link className="dashboard-action-card" href="/dashboard/work/new">
                     <span>Activity</span>
-                    <strong>Add event</strong>
+                    <strong>Add activity</strong>
                     <small>Record bonus classes, extra activities, or other paid work.</small>
                   </Link>
                   <Link

@@ -75,7 +75,7 @@ export default async function TeacherWorkPage({
           </p>
           <div className="action-row">
             <Link className="primary-link" href="/dashboard/work/new">
-              Add event
+              Add activity
             </Link>
           </div>
           <div className="metric-grid">

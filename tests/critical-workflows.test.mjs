@@ -440,7 +440,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(teacherWorkPage, /Monthly summary/);
   assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
   assert.doesNotMatch(teacherWorkPage, /createTeacherWorkLogAction/);
-  assert.match(newActivityPage, /Add event/);
+  assert.match(newActivityPage, /Add activity/);
   assert.match(newActivityPage, /createTeacherWorkLogAction/);
   assert.match(newActivityPage, /name="subject"/);
   assert.match(newActivityPage, /TimeInput/);
