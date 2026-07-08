@@ -710,6 +710,45 @@ input[type="time"],
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.admin-classes-filter-panel {
+  gap: 12px;
+  padding: 18px;
+}
+
+.admin-classes-filter-panel .filter-panel-heading {
+  align-items: center;
+  padding-bottom: 10px;
+}
+
+.admin-classes-filter-panel .filter-panel-heading h2 {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.admin-classes-filter-panel .muted-copy {
+  font-size: 13px;
+}
+
+.admin-classes-filter-panel .class-filter-form {
+  gap: 10px;
+  grid-template-columns: minmax(160px, 1.1fr) minmax(170px, 1.2fr) repeat(3, minmax(110px, 0.75fr)) minmax(210px, 1.35fr);
+}
+
+.admin-classes-filter-panel .wide-filter {
+  grid-column: span 1;
+}
+
+.admin-classes-filter-panel .compact-weekday-picker {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 4px;
+}
+
+.admin-classes-filter-panel .compact-weekday-picker .checkbox-label {
+  font-size: 12px;
+  min-height: 34px;
+  padding: 4px 6px;
+}
+
 .class-lookup-filter-form {
   align-items: start;
   grid-template-columns: minmax(220px, 1.1fr) minmax(190px, 0.8fr) minmax(320px, 1.4fr) auto;
@@ -762,6 +801,13 @@ input[type="time"],
   align-self: end;
   grid-column: span 2;
   justify-content: flex-end;
+}
+
+.admin-classes-filter-panel .class-filter-form .filter-actions {
+  grid-column: 1 / span 2;
+  gap: 8px;
+  justify-content: flex-start;
+  justify-self: start;
 }
 
 .table-actions {
@@ -1409,6 +1455,15 @@ input[type="time"],
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
+.class-result-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.student-result-grid {
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
 .class-result-card,
 .student-result-card {
   border: 1px solid var(--line);
@@ -1466,6 +1521,60 @@ input[type="time"],
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.admin-class-result-card {
+  gap: 12px;
+  min-height: 0;
+  padding: 18px;
+}
+
+.class-result-card-header {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.class-result-card-header div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.class-result-card-header strong {
+  font-size: 19px;
+}
+
+.class-result-card-details {
+  display: grid;
+  gap: 4px;
+}
+
+.class-status-badge {
+  border: 1px solid var(--accent-line);
+  border-radius: 999px;
+  color: var(--brand);
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+  text-transform: uppercase;
+}
+
+.admin-student-result-card {
+  gap: 5px;
+  min-height: 0;
+  padding: 11px 12px;
+}
+
+.admin-student-result-card strong {
+  font-size: 15px;
+}
+
+.admin-student-result-card > span,
+.admin-student-result-card small {
+  font-size: 12px;
 }
 
 .class-result-card-metrics span {
@@ -1810,6 +1919,19 @@ th {
   .wide-filter,
   .class-filter-form .filter-actions {
     grid-column: auto;
+  }
+
+  .admin-classes-filter-panel .class-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-classes-filter-panel .compact-weekday-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-classes-filter-panel .class-filter-form .filter-actions {
+    grid-column: auto;
+    justify-self: stretch;
   }
 
   .filter-panel-heading {

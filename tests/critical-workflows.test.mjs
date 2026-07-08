@@ -1230,7 +1230,7 @@ test("student and class imports preview duplicates and persist audit summaries",
 
   assert.match(studentsPage, /\/admin\/students\/import/);
   assert.match(studentsPage, /imports\.importStudents/);
-  assert.match(studentsPage, /enrollmentIdentifier: true/);
+  assert.doesNotMatch(studentsPage, /enrollmentIdentifier: true/);
   assert.match(classesPage, /\/admin\/classes\/import/);
   assert.match(classesPage, /imports\.importClasses/);
   assert.match(studentImportPage, /previewStudentImportAction/);

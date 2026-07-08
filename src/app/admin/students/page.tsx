@@ -59,7 +59,6 @@ export default async function AdminStudentsPage({
     },
     select: {
       id: true,
-      enrollmentIdentifier: true,
       fullName: true,
       isActive: true,
       _count: {
@@ -145,7 +144,7 @@ export default async function AdminStudentsPage({
           <div className="student-result-grid">
             {students.map((student) => (
               <Link
-                className="student-result-card"
+                className="student-result-card admin-student-result-card"
                 href={`/admin/students/${student.id}/view`}
                 key={student.id}
               >
@@ -155,10 +154,6 @@ export default async function AdminStudentsPage({
                     : t("adminStudents.inactiveStudent")}
                 </span>
                 <strong>{student.fullName}</strong>
-                <small>
-                  {student.enrollmentIdentifier ??
-                    t("adminStudents.noEnrollmentIdentifier")}
-                </small>
                 <small>
                   {t("adminStudents.enrolledIn")} {student._count.enrollments}{" "}
                   {student._count.enrollments === 1

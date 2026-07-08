@@ -28,6 +28,10 @@ type AdminClassesPageProps = {
 
 type ClassStatusFilter = "all" | "active" | "inactive";
 
+const adminClassWeekdayOptions = weekdayOptions.filter(
+  (option) => option.value !== "SUNDAY",
+);
+
 function formatTerm(
   semester: number | null,
   year: number | null,
@@ -77,7 +81,7 @@ function readClassStatusFilter(value: string | undefined): ClassStatusFilter {
 function readWeekdayFilters(value: string | string[] | undefined) {
   const values = Array.isArray(value) ? value : value ? [value] : [];
   const allowedWeekdays = new Set<string>(
-    weekdayOptions.map((option) => option.value),
+    adminClassWeekdayOptions.map((option) => option.value),
   );
 
   return values.filter((item): item is Weekday => allowedWeekdays.has(item));
@@ -230,7 +234,7 @@ export default async function AdminClassesPage({
         {successMessage ? <p className="form-success">{successMessage}</p> : null}
 
         <section
-          className="panel filter-panel"
+          className="panel filter-panel admin-classes-filter-panel"
           aria-label={t("dashboard.classFilters")}
         >
           <div className="filter-panel-heading">
@@ -302,7 +306,7 @@ export default async function AdminClassesPage({
             <div className="weekday-filter wide-filter">
               <span className="form-section-label">{t("adminClasses.days")}</span>
               <div className="weekday-picker compact-weekday-picker">
-                {weekdayOptions.map((weekday) => (
+                {adminClassWeekdayOptions.map((weekday) => (
                   <label className="checkbox-label" key={weekday.value}>
                     <input
                       defaultChecked={weekDays.includes(weekday.value)}
@@ -345,32 +349,38 @@ export default async function AdminClassesPage({
           <div className="class-result-grid">
             {classes.map((schoolClass) => (
               <Link
-                className="class-result-card"
+                className="class-result-card admin-class-result-card"
                 href={`/admin/classes/${schoolClass.id}`}
                 key={schoolClass.id}
               >
-                <span>{schoolClass.teacher.name}</span>
-                <strong>{schoolClass.name}</strong>
-                <small>
-                  {formatClassType(schoolClass.classType, t)} |{" "}
-                  {schoolClass.book ?? t("adminClasses.noBook")} |{" "}
-                  {formatTerm(schoolClass.semester, schoolClass.year, t)}
-                </small>
-                <small>
-                  {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
-                  {schoolClass.startTime ?? "-"}
-                </small>
-                <div className="class-result-card-metrics">
-                  <span>
+                <div className="class-result-card-header">
+                  <div>
+                    <span>{schoolClass.teacher.name}</span>
+                    <strong>{schoolClass.name}</strong>
+                  </div>
+                  <span className="class-status-badge">
                     {schoolClass.isActive ? t("label.active") : t("label.inactive")}
                   </span>
+                </div>
+                <div className="class-result-card-details">
+                  <small>
+                    {formatClassType(schoolClass.classType, t)} |{" "}
+                    {schoolClass.book ?? t("adminClasses.noBook")} |{" "}
+                    {formatTerm(schoolClass.semester, schoolClass.year, t)}
+                  </small>
+                  <small>
+                    {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
+                    {schoolClass.startTime ?? "-"} |{" "}
+                    {formatDuration(schoolClass.durationMinutes)}
+                  </small>
+                </div>
+                <div className="class-result-card-metrics">
                   <span>
                     {schoolClass._count.enrollments} {t("label.students")}
                   </span>
                   <span>
                     {schoolClass._count.lessons} {t("label.lessons")}
                   </span>
-                  <span>{formatDuration(schoolClass.durationMinutes)}</span>
                 </div>
               </Link>
             ))}
