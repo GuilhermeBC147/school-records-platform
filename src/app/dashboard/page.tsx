@@ -17,9 +17,14 @@ export const dynamic = "force-dynamic";
 
 type DashboardPageProps = {
   searchParams: Promise<{
-    day?: string;
+    day?: string | string[];
+    dayFilter?: string;
   }>;
 };
+
+const teacherWeekdayOptions = weekdayOptions.filter(
+  (option) => option.value !== "SATURDAY" && option.value !== "SUNDAY",
+);
 
 function getCurrentWeekday() {
   const weekday = new Intl.DateTimeFormat("en-US", {
@@ -29,17 +34,20 @@ function getCurrentWeekday() {
     .format(new Date())
     .toUpperCase();
 
-  return weekdayOptions.some((option) => option.value === weekday)
+  return teacherWeekdayOptions.some((option) => option.value === weekday)
     ? (weekday as Weekday)
     : undefined;
 }
 
-function readWeekday(value: string | undefined) {
-  if (weekdayOptions.some((option) => option.value === value)) {
-    return value as Weekday;
-  }
+function readWeekdays(value: string | string[] | undefined) {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+  const allowedWeekdays = new Set<string>(
+    teacherWeekdayOptions.map((option) => option.value),
+  );
 
-  return undefined;
+  return Array.from(
+    new Set(values.filter((item): item is Weekday => allowedWeekdays.has(item))),
+  );
 }
 
 function getTodayRange() {
@@ -74,12 +82,21 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const params = await searchParams;
   const t = getTranslations(currentUser.locale);
-  const selectedDay =
+  const submittedDayFilter = params.dayFilter === "custom" || params.day === "all";
+  const selectedDays =
     currentUser.role === "TEACHER"
-      ? params.day === "all"
-        ? undefined
-        : readWeekday(params.day) ?? getCurrentWeekday()
-      : undefined;
+      ? (() => {
+          const weekdays = readWeekdays(params.day);
+
+          if (weekdays.length > 0 || submittedDayFilter) {
+            return weekdays;
+          }
+
+          const currentWeekday = getCurrentWeekday();
+
+          return currentWeekday ? [currentWeekday] : [];
+        })()
+      : [];
   const dashboardTitle =
     currentUser.role === "ADMIN" ? t("dashboard.adminDashboard") : currentUser.name;
   const dashboardLede =
@@ -93,7 +110,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           where: {
             teacherId: currentUser.id,
             isActive: true,
-            ...(selectedDay ? { weekDays: { has: selectedDay } } : {}),
+            ...(selectedDays.length > 0 ? { weekDays: { hasSome: selectedDays } } : {}),
           },
           orderBy: { name: "asc" },
           select: {
@@ -118,13 +135,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         })
       : [];
   const allClassesHref = "/dashboard?day=all";
-  const dayFilterValue = params.day === "all" ? "all" : selectedDay ?? "";
   const visibleClassesLabel =
-    dayFilterValue === "all"
+    selectedDays.length === 0
       ? t("dashboard.allClasses")
-      : selectedDay
-        ? t(weekdayTranslationKeys[selectedDay])
-        : t("dashboard.today");
+      : selectedDays.length === 1
+        ? t(weekdayTranslationKeys[selectedDays[0]])
+        : formatWeekdays(selectedDays, currentUser.locale);
+  const selectedDaySet = new Set(selectedDays);
   const today = getTodayRange();
   const adminDashboard =
     currentUser.role === "ADMIN"
@@ -356,19 +373,25 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <>
             {teacherDashboard ? (
               <>
-                <section className="panel" aria-label={t("dashboard.classFilters")}>
-                  <form className="filter-form compact-filter-form">
-                    <label>
-                      <span>{t("dashboard.day")}</span>
-                      <select defaultValue={dayFilterValue} name="day">
-                        <option value="all">{t("dashboard.allDays")}</option>
-                        {weekdayOptions.map((weekday) => (
-                          <option key={weekday.value} value={weekday.value}>
+                <section className="panel teacher-classes-panel" aria-label={visibleClassesLabel}>
+                  <form className="filter-form compact-filter-form teacher-day-filter-form">
+                    <input name="dayFilter" type="hidden" value="custom" />
+                    <fieldset className="weekday-filter">
+                      <legend className="form-section-label">{t("dashboard.day")}</legend>
+                      <div className="weekday-picker compact-weekday-picker teacher-weekday-picker">
+                        {teacherWeekdayOptions.map((weekday) => (
+                          <label className="checkbox-label" key={weekday.value}>
+                            <input
+                              defaultChecked={selectedDaySet.has(weekday.value)}
+                              name="day"
+                              type="checkbox"
+                              value={weekday.value}
+                            />
                             {t(weekdayTranslationKeys[weekday.value])}
-                          </option>
+                          </label>
                         ))}
-                      </select>
-                    </label>
+                      </div>
+                    </fieldset>
                     <div className="filter-actions">
                       <button className="primary-button" type="submit">
                         {t("dashboard.apply")}
@@ -378,48 +401,50 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                       </Link>
                     </div>
                   </form>
-                </section>
 
-                <section className="class-grid" aria-label={visibleClassesLabel}>
-                  {classes.map((schoolClass) => (
-                    <Link
-                      className="panel class-card teacher-class-card"
-                      href={`/dashboard/classes/${schoolClass.id}`}
-                      key={schoolClass.id}
-                    >
-                      <div>
-                        <p className="eyebrow">
-                          {schoolClass.book ?? t("dashboard.classFallback")}
-                          {schoolClass.semester && schoolClass.year
-                            ? ` | ${t("dashboard.semester")} ${schoolClass.semester}/${schoolClass.year}`
-                            : ""}
-                        </p>
-                        <h2>{schoolClass.name}</h2>
-                        <p>
-                          {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
-                          {formatDuration(schoolClass.durationMinutes)}
-                        </p>
-                      </div>
-                      <dl>
+                  <div className="class-grid teacher-class-grid">
+                    {classes.map((schoolClass) => (
+                      <Link
+                        className="class-card teacher-class-card"
+                        href={`/dashboard/classes/${schoolClass.id}`}
+                        key={schoolClass.id}
+                      >
                         <div>
-                          <dt>{t("dashboard.students")}</dt>
-                          <dd>{schoolClass._count.enrollments}</dd>
+                          <p className="eyebrow">
+                            {schoolClass.book ?? t("dashboard.classFallback")}
+                            {schoolClass.semester && schoolClass.year
+                              ? ` | ${t("dashboard.semester")} ${schoolClass.semester}/${schoolClass.year}`
+                              : ""}
+                          </p>
+                          <h2>{schoolClass.name}</h2>
+                          <p>
+                            {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
+                            {formatDuration(schoolClass.durationMinutes)}
+                          </p>
                         </div>
-                        <div>
-                          <dt>{t("dashboard.lessons")}</dt>
-                          <dd>{schoolClass._count.lessons}</dd>
-                        </div>
-                      </dl>
-                    </Link>
-                  ))}
-                  {classes.length === 0 ? (
-                    <article className="panel class-card">
-                      <h2>{t("dashboard.noClassesFor")} {visibleClassesLabel.toLowerCase()}</h2>
-                      <Link className="text-link" href={allClassesHref}>
-                        {t("dashboard.showAllClasses")}
+                        <dl>
+                          <div>
+                            <dt>{t("dashboard.students")}</dt>
+                            <dd>{schoolClass._count.enrollments}</dd>
+                          </div>
+                          <div>
+                            <dt>{t("dashboard.lessons")}</dt>
+                            <dd>{schoolClass._count.lessons}</dd>
+                          </div>
+                        </dl>
                       </Link>
-                    </article>
-                  ) : null}
+                    ))}
+                    {classes.length === 0 ? (
+                      <article className="class-card teacher-empty-class-card">
+                        <h2>
+                          {t("dashboard.noClassesFor")} {visibleClassesLabel.toLowerCase()}
+                        </h2>
+                        <Link className="text-link" href={allClassesHref}>
+                          {t("dashboard.showAllClasses")}
+                        </Link>
+                      </article>
+                    ) : null}
+                  </div>
                 </section>
 
                 <section

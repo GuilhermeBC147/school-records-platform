@@ -754,6 +754,78 @@ input[type="time"],
   grid-template-columns: minmax(220px, 1.1fr) minmax(190px, 0.8fr) minmax(320px, 1.4fr) auto;
 }
 
+.teacher-classes-panel {
+  border-top: 4px solid var(--accent);
+  box-shadow: 0 10px 24px rgba(11, 31, 58, 0.08);
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.teacher-day-filter-form {
+  align-items: end;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.teacher-day-filter-form .weekday-filter {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.teacher-weekday-picker {
+  border: 1px solid var(--line);
+  gap: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 4px;
+}
+
+.teacher-weekday-picker .checkbox-label {
+  font-size: 13px;
+  min-height: 34px;
+  padding: 5px 7px;
+}
+
+.teacher-day-filter-form .filter-actions {
+  gap: 8px;
+}
+
+.teacher-day-filter-form .primary-button,
+.teacher-day-filter-form .text-link {
+  min-height: 36px;
+}
+
+.teacher-day-filter-form .primary-button {
+  padding: 8px 14px;
+}
+
+.teacher-day-filter-form .text-link {
+  padding: 8px 4px;
+}
+
+.teacher-class-grid {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.teacher-classes-panel .class-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.teacher-classes-panel .teacher-class-card {
+  border-left: 4px solid var(--brand);
+}
+
+.teacher-classes-panel .teacher-class-card:hover {
+  border-color: var(--brand);
+  box-shadow: 0 10px 24px rgba(11, 31, 58, 0.08);
+  text-decoration: none;
+}
+
 .weekday-filter {
   min-width: 0;
 }
@@ -1927,6 +1999,23 @@ th {
 
   .admin-classes-filter-panel .compact-weekday-picker {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-classes-panel {
+    padding: 14px;
+  }
+
+  .teacher-day-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-weekday-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-day-filter-form .filter-actions {
+    align-items: stretch;
+    flex-direction: row;
   }
 
   .admin-classes-filter-panel .class-filter-form .filter-actions {
