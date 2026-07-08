@@ -122,6 +122,11 @@ export default async function EditClassPage({
           </Link>
           <p className="eyebrow">{t("adminClasses.adminSetup")}</p>
           <h1 id="edit-class-title">{t("adminClasses.editClass")}</h1>
+          <div className="action-row">
+            <Link className="secondary-link" href={`/dashboard/classes/${schoolClass.id}`}>
+              {t("adminClasses.openClassPage")}
+            </Link>
+          </div>
         </section>
 
         <section className="panel">

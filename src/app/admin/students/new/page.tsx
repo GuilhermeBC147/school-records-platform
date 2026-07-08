@@ -44,19 +44,10 @@ export default async function NewStudentPage({
           {params.error === "invalid" ? (
             <p className="form-error">{t("adminStudents.invalidError")}</p>
           ) : null}
-          {params.error === "duplicate" ? (
-            <p className="form-error">
-              {t("adminStudents.duplicateIdentifierError")}
-            </p>
-          ) : null}
           <form action={createStudentAction} className="admin-form">
             <label>
               <span>{t("adminStudents.fullName")}</span>
               <input name="fullName" required type="text" />
-            </label>
-            <label>
-              <span>{t("adminStudents.enrollmentIdentifier")}</span>
-              <input name="enrollmentIdentifier" type="text" />
             </label>
             <label className="checkbox-label">
               <input defaultChecked name="isActive" type="checkbox" />

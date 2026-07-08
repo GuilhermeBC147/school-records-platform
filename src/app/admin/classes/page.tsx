@@ -71,7 +71,7 @@ function readClassStatusFilter(value: string | undefined): ClassStatusFilter {
     return value;
   }
 
-  return "all";
+  return value === "all" ? "all" : "active";
 }
 
 function readWeekdayFilters(value: string | string[] | undefined) {
@@ -98,12 +98,16 @@ export default async function AdminClassesPage({
 
   const params = await searchParams;
   const t = getTranslations(currentUser.locale);
+  const currentYear = new Date().getUTCFullYear();
   const classStatus = readClassStatusFilter(readFilterValue(params.classStatus));
   const semester = readNumberFilter(params.semester);
   const studentSearch = readFilterValue(params.student);
   const teacherId = readFilterValue(params.teacherId);
   const weekDays = readWeekdayFilters(params.weekDay);
-  const year = readNumberFilter(params.year);
+  const year =
+    readFilterValue(params.year) === undefined
+      ? currentYear
+      : readNumberFilter(params.year);
   const successMessage = formatEntityResultMessage(
     "Class",
     params.status,
@@ -192,6 +196,14 @@ export default async function AdminClassesPage({
       take: 200,
     }),
   ]);
+  const yearOptions = Array.from(
+    new Set([
+      currentYear,
+      ...years
+        .map((item) => item.year)
+        .filter((item): item is number => Boolean(item)),
+    ]),
+  ).sort((a, b) => b - a);
 
   return (
     <main className="app-shell">
@@ -272,13 +284,11 @@ export default async function AdminClassesPage({
               <span>{t("adminClasses.year")}</span>
               <select defaultValue={year ?? ""} name="year">
                 <option value="">{t("adminClasses.allYears")}</option>
-                {years.map((item) =>
-                  item.year ? (
-                    <option key={item.year} value={item.year}>
-                      {item.year}
-                    </option>
-                  ) : null,
-                )}
+                {yearOptions.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
               </select>
             </label>
             <label>

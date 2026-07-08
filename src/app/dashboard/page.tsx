@@ -276,11 +276,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <strong>{t("dashboard.manageStudents")}</strong>
                 <small>{t("dashboard.manageStudentsCopy")}</small>
               </Link>
-              <Link className="dashboard-action-card" href="/admin/records">
-                <span>{t("dashboard.records")}</span>
-                <strong>{t("dashboard.submittedRecords")}</strong>
-                <small>{t("dashboard.submittedRecordsCopy")}</small>
-              </Link>
               <Link className="dashboard-action-card" href="/admin/risk">
                 <span>{t("dashboard.review")}</span>
                 <strong>{t("dashboard.studentRisk")}</strong>

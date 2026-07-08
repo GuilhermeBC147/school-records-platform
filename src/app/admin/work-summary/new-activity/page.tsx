@@ -42,6 +42,12 @@ export default async function NewAdminActivityPage({
     query.error,
     currentUser.locale,
   );
+  const activityCategories = teacherWorkCategories.filter(
+    (category) => category.value !== "MEETING",
+  );
+  const datePlaceholderLabels = {
+    DD_MM_YY: t("label.dayMonthYearFormat"),
+  };
   const rosterLabels = {
     inactive: t("label.inactive"),
     noMatches: t("adminClasses.noStudentsMatchSearch"),
@@ -94,6 +100,7 @@ export default async function NewAdminActivityPage({
               type="hidden"
               value="/admin/work-summary/new-activity"
             />
+            <input name="requireCompleteActivity" type="hidden" value="1" />
             <label>
               <span>{t("label.teacher")}</span>
               <select name="teacherId" required>
@@ -108,7 +115,7 @@ export default async function NewAdminActivityPage({
             <label>
               <span>{t("label.category")}</span>
               <select name="category" required>
-                {teacherWorkCategories.map((category) => (
+                {activityCategories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {formatTeacherWorkCategory(category.value, currentUser.locale)}
                   </option>
@@ -124,6 +131,7 @@ export default async function NewAdminActivityPage({
               <input
                 name="subject"
                 placeholder={t("text.teacherWorkSubjectPlaceholder")}
+                required
                 type="text"
               />
             </label>
@@ -132,13 +140,15 @@ export default async function NewAdminActivityPage({
               <DateInput
                 calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
+                hideFormatHint
                 name="workDate"
+                placeholderLabels={datePlaceholderLabels}
                 required
               />
             </label>
             <label>
               <span>{t("label.startTime")}</span>
-              <TimeInput name="startTime" />
+              <TimeInput name="startTime" required />
             </label>
             <label>
               <span>{t("label.duration")}</span>

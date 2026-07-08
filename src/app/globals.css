@@ -1233,6 +1233,21 @@ input[type="time"],
   margin-top: 0;
 }
 
+.work-summary-details {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.work-summary-details summary {
+  color: var(--brand);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.work-summary-details .table-wrap {
+  margin-top: 14px;
+}
+
 .detail-list {
   display: grid;
   gap: 14px;

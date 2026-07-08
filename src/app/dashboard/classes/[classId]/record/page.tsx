@@ -74,7 +74,7 @@ export default async function ClassRecordPage({
       semester: true,
       year: true,
       teacher: {
-        select: { name: true },
+        select: { id: true, name: true },
       },
       enrollments: {
         where: {
@@ -108,6 +108,12 @@ export default async function ClassRecordPage({
           status: true,
           substitutionNotes: true,
           substitutionStatus: true,
+          submittedById: true,
+          submittedBy: {
+            select: {
+              name: true,
+            },
+          },
           attendanceRecords: {
             select: {
               studentId: true,
@@ -138,6 +144,33 @@ export default async function ClassRecordPage({
   const isEditingSubmitted = lessonRecord?.status === "SUBMITTED";
   const isPendingSubstitution =
     lessonRecord?.substitutionStatus === "PENDING_APPROVAL";
+  const teacherAccounts =
+    currentUser.role === "ADMIN"
+      ? await prisma.user.findMany({
+          orderBy: { name: "asc" },
+          where: { isActive: true, role: "TEACHER" },
+          select: {
+            id: true,
+            name: true,
+          },
+        })
+      : [];
+  const requestedSubmittedById = lessonRecord?.submittedById ?? schoolClass.teacher.id;
+  const submittedById =
+    currentUser.role === "ADMIN"
+      ? (teacherAccounts.some((teacher) => teacher.id === requestedSubmittedById)
+          ? requestedSubmittedById
+          : (teacherAccounts.find((teacher) => teacher.id === schoolClass.teacher.id)
+              ?.id ??
+            teacherAccounts[0]?.id ??
+            ""))
+      : currentUser.id;
+  const submittedByName =
+    currentUser.role === "ADMIN"
+      ? (teacherAccounts.find((teacher) => teacher.id === submittedById)?.name ??
+        lessonRecord?.submittedBy?.name ??
+        schoolClass.teacher.name)
+      : currentUser.name;
 
   return (
     <main className="app-shell">
@@ -203,6 +236,20 @@ export default async function ClassRecordPage({
                 name="lessonDate"
                 required
               />
+            </label>
+            <label>
+              <span>{t("adminReview.submittedBy")}</span>
+              {currentUser.role === "ADMIN" ? (
+                <select defaultValue={submittedById} name="submittedById" required>
+                  {teacherAccounts.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input readOnly type="text" value={submittedByName} />
+              )}
             </label>
             <label>
               <span>{t("label.notes")}</span>

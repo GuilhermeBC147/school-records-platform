@@ -44,6 +44,7 @@ async function persistClassRecord(
   const lessonName = String(formData.get("lessonName") ?? "").trim();
   const lessonDate = readLessonDate(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const requestedSubmittedById = String(formData.get("submittedById") ?? "");
   const substitutionNotes =
     String(formData.get("substitutionNotes") ?? "").trim() || null;
 
@@ -72,6 +73,23 @@ async function persistClassRecord(
   });
 
   if (!schoolClass) {
+    redirect("/dashboard");
+  }
+
+  const submittedById =
+    currentUser.role === "ADMIN"
+      ? requestedSubmittedById || schoolClass.teacherId
+      : currentUser.id;
+  const submittedBy = await prisma.user.findFirst({
+    where: {
+      id: submittedById,
+      isActive: true,
+      role: "TEACHER",
+    },
+    select: { id: true },
+  });
+
+  if (!submittedBy) {
     redirect("/dashboard");
   }
 
@@ -137,7 +155,7 @@ async function persistClassRecord(
       status === "SUBMITTED"
         ? {
             submittedAt: new Date(),
-            submittedById: currentUser.id,
+            submittedById: submittedBy.id,
           }
         : {
             submittedAt: null,

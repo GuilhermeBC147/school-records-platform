@@ -78,6 +78,7 @@ export const translationResources = {
     "adminClasses.noSemester": "No semester",
     "adminClasses.noStudentsCreated": "No students have been created yet.",
     "adminClasses.noStudentsMatchSearch": "No students match that search.",
+    "adminClasses.openClassPage": "Open class page",
     "adminClasses.rosterEmptyCreate":
       "No active students yet. Create students before assigning the roster.",
     "adminClasses.rosterSearchHint":
@@ -95,7 +96,9 @@ export const translationResources = {
     "adminClasses.shown": "shown",
     "adminClasses.year": "Year",
     "adminStudents.activeStudent": "Active student",
+    "adminStudents.activeStudents": "Active students",
     "adminStudents.adminSetup": "Admin setup",
+    "adminStudents.allStudents": "All students",
     "adminStudents.backToStudents": "Back to students",
     "adminStudents.createCopy":
       "Create students and deactivate learners who should no longer appear in new class records.",
@@ -107,6 +110,7 @@ export const translationResources = {
     "adminStudents.enrollmentIdentifier": "Enrollment identifier",
     "adminStudents.fullName": "Full name",
     "adminStudents.inactiveStudent": "Inactive student",
+    "adminStudents.inactiveStudents": "Inactive students",
     "adminStudents.invalidError": "Enter the student's full name.",
     "adminStudents.noEnrollmentIdentifier": "No enrollment identifier",
     "adminStudents.noMatches": "No students match the current filters.",
@@ -498,6 +502,7 @@ export const translationResources = {
     "label.clear": "Clear",
     "label.completedBonusClass": "Completed bonus class",
     "label.completedBonusClasses": "Completed bonus classes",
+    "label.completeList": "Complete list",
     "label.composition": "Composition / 2",
     "label.confirm": "Confirm",
     "label.confirmAttendance": "Confirm attendance",
@@ -506,6 +511,7 @@ export const translationResources = {
     "label.currentMonth": "Current month",
     "label.dailyTeacherCalendar": "Daily teacher calendar",
     "label.date": "Date",
+    "label.dayMonthYearFormat": "DD/MM/YY",
     "label.defaultRiskRules": "Default risk rules",
     "label.description": "Description",
     "label.duration": "Duration",
@@ -663,7 +669,7 @@ export const translationResources = {
     "text.riskReviewCopy":
       "Review students with repeated incomplete homework, missed classes, or grade risk signals across submitted records.",
     "text.riskRulesCopy":
-      "The report flags active students with repeated incomplete homework records, repeated absences, test totals below the threshold, oral grades of C or below, or consecutive absent records. Resolving a row clears signals through the latest signal date; future submitted records can flag the student again. Excused absences and late arrivals are not counted as missed classes by default.",
+      "The report flags active students with repeated incomplete homework records, repeated absences, test totals below the threshold, oral grades of C or below, or consecutive absent records. Resolving a row clears signals through the latest signal date; future submitted records can flag the student again.",
     "text.scheduleBonusCopy":
       "Create an independent bonus class with student, subject, teacher, date, time, duration, and notes.",
     "text.teacherActivityCopy":
@@ -765,6 +771,7 @@ export const translationResources = {
     "adminClasses.noStudentsCreated": "Nenhum aluno foi criado ainda.",
     "adminClasses.noStudentsMatchSearch":
       "Nenhum aluno corresponde a essa busca.",
+    "adminClasses.openClassPage": "Abrir página da turma",
     "adminClasses.rosterEmptyCreate":
       "Nenhum aluno ativo ainda. Crie alunos antes de montar a lista.",
     "adminClasses.rosterSearchHint":
@@ -782,7 +789,9 @@ export const translationResources = {
     "adminClasses.shown": "exibidos",
     "adminClasses.year": "Ano",
     "adminStudents.activeStudent": "Aluno ativo",
+    "adminStudents.activeStudents": "Alunos ativos",
     "adminStudents.adminSetup": "Configuração administrativa",
+    "adminStudents.allStudents": "Todos os alunos",
     "adminStudents.backToStudents": "Voltar aos alunos",
     "adminStudents.createCopy":
       "Crie alunos e desative estudantes que não devem mais aparecer em novos registros de aula.",
@@ -794,6 +803,7 @@ export const translationResources = {
     "adminStudents.enrollmentIdentifier": "Identificador de matrícula",
     "adminStudents.fullName": "Nome completo",
     "adminStudents.inactiveStudent": "Aluno inativo",
+    "adminStudents.inactiveStudents": "Alunos inativos",
     "adminStudents.invalidError": "Digite o nome completo do aluno.",
     "adminStudents.noEnrollmentIdentifier": "Sem identificador de matrícula",
     "adminStudents.noMatches": "Nenhum aluno corresponde aos filtros atuais.",
@@ -1186,6 +1196,7 @@ export const translationResources = {
     "label.clear": "Limpar",
     "label.completedBonusClass": "Aula bônus concluída",
     "label.completedBonusClasses": "Aulas bônus concluídas",
+    "label.completeList": "Lista completa",
     "label.composition": "Composição / 2",
     "label.confirm": "Confirmar",
     "label.confirmAttendance": "Confirmar presença",
@@ -1194,6 +1205,7 @@ export const translationResources = {
     "label.currentMonth": "Mês atual",
     "label.dailyTeacherCalendar": "Calendário diário dos professores",
     "label.date": "Data",
+    "label.dayMonthYearFormat": "DD/MM/AA",
     "label.defaultRiskRules": "Regras padrão de risco",
     "label.description": "Descrição",
     "label.duration": "Duração",
@@ -1352,7 +1364,7 @@ export const translationResources = {
     "text.riskReviewCopy":
       "Revise alunos com tarefas incompletas, faltas ou sinais de risco em notas nos registros enviados.",
     "text.riskRulesCopy":
-      "O relatório sinaliza alunos ativos com tarefas incompletas repetidas, faltas repetidas, totais de prova abaixo do limite, notas orais C ou menores, ou faltas consecutivas. Resolver uma linha limpa os sinais até a data do sinal mais recente; registros futuros enviados podem sinalizar o aluno novamente. Faltas justificadas e atrasos não contam como faltas por padrão.",
+      "O relatório sinaliza alunos ativos com tarefas incompletas repetidas, faltas repetidas, totais de prova abaixo do limite, notas orais C ou menores, ou faltas consecutivas. Resolver uma linha limpa os sinais até a data do sinal mais recente; registros futuros enviados podem sinalizar o aluno novamente.",
     "text.scheduleBonusCopy":
       "Crie uma aula bônus independente com aluno, assunto, professor, data, horário, duração e observações.",
     "text.teacherActivityCopy":
