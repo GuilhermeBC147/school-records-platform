@@ -11,7 +11,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 ## Main Tables
 
 - `User`: login account for admins and teachers.
-- `Class`: a school class assigned to one teacher, with book, semester, year, and active status.
+- `Class`: a school class assigned to one teacher, with type, book, semester, year, schedule, and active status.
 - `Student`: a learner who can be enrolled in one or more classes.
 - `Enrollment`: the connection between a student and a class.
 - `Lesson`: one named class session on a specific date.
@@ -21,13 +21,18 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - `TestGrade`: one student's Mid-term or Final test grade.
 - `TeacherWorkLog`: one paid non-class activity counted for a teacher's monthly work summary.
 - `BonusClass`: one independently scheduled bonus class assigned to a teacher.
+- `ImportBatch`: one admin CSV import preview or confirmed import, with audit-friendly summary counts.
+- `ImportRow`: one uploaded CSV row with normalized data, validation errors, duplicate warnings, and the created record id when imported.
 
 ## Important Rules
 
 - A class belongs to one teacher for the first version.
+- Classes can be regular, VIP, or personal. VIP and personal classes have one active roster student.
+- A teacher cannot have overlapping regular or VIP classes. Personal classes can overlap other personal classes for up to three distinct students.
 - Teachers only see active assigned classes.
 - Admins can keep inactive classes for historical record review.
 - A student can be enrolled in multiple classes.
+- A student can optionally have one unique enrollment identifier for import duplicate detection.
 - A class can have only one lesson record for the same date.
 - A student can have only one attendance record per lesson.
 - A student can have only one homework record per lesson.
@@ -52,6 +57,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Bonus class scheduling includes a day calendar with 30-minute time rows and one column per teacher.
 - Bonus class attendance can be confirmed as present, absent, or excused by the assigned teacher, reception, or admin.
 - Completed scheduled bonus classes count toward the assigned teacher's monthly work summary.
+- Student and class imports are previewed before confirmation. Invalid rows are not written, duplicate rows are skipped by default, and batch summaries keep created, skipped, duplicated, and failed counts.
 
 ## Teacher Work Summaries
 

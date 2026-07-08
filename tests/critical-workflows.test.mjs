@@ -242,7 +242,7 @@ test("date filters display account format while submitting ISO dates", async () 
 
   assert.match(session, /dateFormat: true/);
   assert.match(session, /locale: true/);
-  assert.match(prismaClient, /add_account_locale/);
+  assert.match(prismaClient, /add_class_types_and_schedule_time/);
   assert.match(dateFormat, /parseDateInputToIso/);
   assert.match(dateFormat, /formatIsoDateInput/);
   assert.match(dateInput, /"use client"/);
@@ -301,11 +301,24 @@ test("class management supports metadata and active teacher assignment", async (
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
 
   assert.match(schema, /book\s+String\?/);
+  assert.match(schema, /enum ClassType/);
+  assert.match(schema, /REGULAR/);
+  assert.match(schema, /VIP/);
+  assert.match(schema, /PERSONAL/);
+  assert.match(schema, /classType\s+ClassType\s+@default\(REGULAR\)/);
+  assert.match(schema, /startTime\s+String\?/);
   assert.match(schema, /semester\s+Int\?/);
   assert.match(schema, /year\s+Int\?/);
   assert.match(classActions, /createClassAction/);
   assert.match(classActions, /updateClassAction/);
   assert.match(classActions, /updateClassRosterAction/);
+  assert.match(classActions, /readClassType/);
+  assert.match(classActions, /readOptionalStartTime\(formData\.get\("startTime"\)\)/);
+  assert.match(classActions, /requiresSingleStudent/);
+  assert.match(classActions, /hasClassScheduleConflict/);
+  assert.match(classActions, /hasMoreThanThreeConcurrentPersonalStudents/);
+  assert.match(classActions, /segmentStart/);
+  assert.match(classActions, /segmentEnd/);
   assert.match(classActions, /readDurationMinutes\(formData\.get\("durationMinutes"\)\)/);
   assert.match(classActions, /studentIds/);
   assert.match(classActions, /role: "TEACHER"/);
@@ -314,6 +327,9 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classesPage, /adminClasses\.createClass/);
   assert.match(classesPage, /formatEntityResultMessage\(\s*"Class",\s*params\.status,\s*currentUser\.locale/s);
   assert.match(classesPage, /dashboard\.semester/);
+  assert.match(classesPage, /classType: true/);
+  assert.match(classesPage, /startTime: true/);
+  assert.match(classesPage, /formatClassType/);
   assert.match(classesPage, /classStatus/);
   assert.doesNotMatch(classesPage, /Active and inactive/);
   assert.match(classesPage, /teacherId/);
@@ -325,6 +341,9 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(newClassPage, /getTranslations\(currentUser\.locale\)/);
   assert.match(newClassPage, /adminClasses\.classRoster/);
   assert.match(newClassPage, /adminClasses\.invalidError/);
+  assert.match(newClassPage, /adminClasses\.scheduleError/);
+  assert.match(newClassPage, /classTypeOptions/);
+  assert.match(newClassPage, /TimeInput/);
   assert.match(newClassPage, /adminClasses\.namePlaceholder/);
   assert.match(newClassPage, /adminClasses\.bookPlaceholder/);
   assert.match(newClassPage, /DurationInput/);
@@ -334,6 +353,9 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(editClassPage, /getTranslations\(currentUser\.locale\)/);
   assert.match(editClassPage, /adminClasses\.editClass/);
   assert.match(editClassPage, /adminClasses\.classRosterUpdated/);
+  assert.match(editClassPage, /adminClasses\.scheduleError/);
+  assert.match(editClassPage, /classTypeOptions/);
+  assert.match(editClassPage, /TimeInput/);
   assert.match(editClassPage, /labels=\{rosterLabels\}/);
   assert.match(durationInput, /placeholder="HH:MM"/);
   assert.match(durationInput, /formatDuration\(valueMinutes\)/);
@@ -1040,4 +1062,200 @@ test("production handoff documents deployment, backups, and smoke tests", async 
   assert.match(backupDoc, /partial evaluation grades/);
   assert.match(backupDoc, /\/admin\/risk/);
   assert.doesNotMatch(backupDoc, /preferred name/);
+});
+
+test("student and class imports preview duplicates and persist audit summaries", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260706180000_add_student_class_imports/migration.sql",
+  );
+  const importLib = await readProjectFile("src/lib/imports.ts");
+  const importActions = await readProjectFile("src/app/actions/imports.ts");
+  const studentsPage = await readProjectFile("src/app/admin/students/page.tsx");
+  const classesPage = await readProjectFile("src/app/admin/classes/page.tsx");
+  const studentImportPage = await readProjectFile(
+    "src/app/admin/students/import/page.tsx",
+  );
+  const classImportPage = await readProjectFile(
+    "src/app/admin/classes/import/page.tsx",
+  );
+  const studentTemplateRoute = await readProjectFile(
+    "src/app/admin/students/import/template/route.ts",
+  );
+  const classTemplateRoute = await readProjectFile(
+    "src/app/admin/classes/import/template/route.ts",
+  );
+  const studentReportRoute = await readProjectFile(
+    "src/app/admin/students/import/error-report/route.ts",
+  );
+  const classReportRoute = await readProjectFile(
+    "src/app/admin/classes/import/error-report/route.ts",
+  );
+  const studentActions = await readProjectFile("src/app/actions/students.ts");
+  const newStudentPage = await readProjectFile("src/app/admin/students/new/page.tsx");
+  const editStudentPage = await readProjectFile(
+    "src/app/admin/students/[studentId]/page.tsx",
+  );
+  const docs = await readProjectFile("docs/imports.md");
+  const dataModelDoc = await readProjectFile("docs/data-model.md");
+  const translations = await readProjectFile("src/lib/translations.ts");
+
+  assert.match(schema, /enum ImportBatchType/);
+  assert.match(schema, /STUDENT/);
+  assert.match(schema, /CLASS/);
+  assert.match(schema, /enum ImportRowStatus/);
+  assert.match(schema, /VALID/);
+  assert.match(schema, /FAILED/);
+  assert.match(schema, /DUPLICATE/);
+  assert.match(schema, /CREATED/);
+  assert.match(schema, /model ImportBatch/);
+  assert.match(schema, /createdCount\s+Int\s+@default\(0\)/);
+  assert.match(schema, /skippedCount\s+Int\s+@default\(0\)/);
+  assert.match(schema, /duplicatedCount\s+Int\s+@default\(0\)/);
+  assert.match(schema, /failedCount\s+Int\s+@default\(0\)/);
+  assert.match(schema, /model ImportRow/);
+  assert.match(schema, /rawRow\s+Json/);
+  assert.match(schema, /normalizedRow\s+Json/);
+  assert.match(schema, /errors\s+String\[\]/);
+  assert.match(schema, /warnings\s+String\[\]/);
+  assert.match(schema, /enrollmentIdentifier\s+String\?\s+@unique/);
+  assert.match(migration, /CREATE TYPE "ImportBatchType"/);
+  assert.match(migration, /ALTER TABLE "Student" ADD COLUMN "enrollmentIdentifier"/);
+  assert.match(migration, /CREATE TABLE "ImportBatch"/);
+  assert.match(migration, /CREATE TABLE "ImportRow"/);
+
+  assert.match(importLib, /export function parseCsv/);
+  assert.match(importLib, /readAliasedValue/);
+  assert.match(importLib, /parseActiveStatus/);
+  assert.match(importLib, /buildStudentTemplateCsv/);
+  assert.match(importLib, /full_name/);
+  assert.match(importLib, /"nome"/);
+  assert.match(importLib, /"situação"/);
+  assert.match(importLib, /enrollment_identifier/);
+  assert.match(importLib, /buildClassTemplateCsv/);
+  assert.match(importLib, /teacher_email/);
+  assert.match(importLib, /teacher_name/);
+  assert.match(importLib, /"professor"/);
+  assert.match(importLib, /"estagio"/);
+  assert.match(importLib, /"modalidade"/);
+  assert.match(importLib, /parsePortugueseSchedule/);
+  assert.match(importLib, /parseTimeRange/);
+  assert.match(importLib, /portugueseWeekdayMap/);
+  assert.match(importLib, /parseTermFromText/);
+  assert.match(importLib, /\/0\?\(\[12\]\)/);
+  assert.match(importLib, /Object\.values\(values\)\.every/);
+  assert.match(importLib, /class_type/);
+  assert.match(importLib, /start_time/);
+  assert.match(importLib, /parseClassType/);
+  assert.match(importLib, /parseStartTime/);
+  assert.match(importLib, /REGULAR/);
+  assert.match(importLib, /duration_minutes/);
+  assert.match(importLib, /week_days/);
+  assert.match(importLib, /MONDAY;WEDNESDAY/);
+  assert.match(importLib, /previewStudentImport/);
+  assert.match(importLib, /Duplicate full_name in this file/);
+  assert.match(importLib, /Duplicate enrollment_identifier in this file/);
+  assert.match(importLib, /A student with this full_name already exists/);
+  assert.match(importLib, /A student with this enrollment_identifier already exists/);
+  assert.match(importLib, /previewClassImport/);
+  assert.match(importLib, /teacher_email or Professor must match an active teacher account/);
+  assert.match(importLib, /class_type must be REGULAR, VIP, PERSONAL, or blank/);
+  assert.match(importLib, /start_time must use HH:MM or be blank/);
+  assert.match(importLib, /duration_minutes must be an integer from 1 to 600/);
+  assert.match(importLib, /week_days must include at least one valid weekday/);
+  assert.match(importLib, /Duplicate class name\/book\/semester\/year\/teacher combination/);
+  assert.match(importLib, /confirmStudentImport/);
+  assert.match(importLib, /confirmClassImport/);
+  assert.match(importLib, /acceptedRowIds/);
+  assert.match(importLib, /acceptedRowIdSet/);
+  assert.match(importLib, /updateStudentImportRow/);
+  assert.match(importLib, /updateClassImportRow/);
+  assert.match(importLib, /readManualWeekdays/);
+  assert.match(importLib, /status: "CREATED"/);
+  assert.match(importLib, /skippedCount: rows\.length - createdCount/);
+  assert.match(importLib, /buildImportErrorReportCsv/);
+  assert.match(importLib, /errors\.join\("; "\)/);
+  assert.match(importLib, /warnings\.join\("; "\)/);
+
+  assert.match(importActions, /previewStudentImportAction/);
+  assert.match(importActions, /confirmStudentImportAction/);
+  assert.match(importActions, /updateStudentImportRowAction/);
+  assert.match(importActions, /previewClassImportAction/);
+  assert.match(importActions, /confirmClassImportAction/);
+  assert.match(importActions, /getAll\("acceptedRowIds"\)/);
+  assert.match(importActions, /updateClassImportRowAction/);
+  assert.match(importActions, /formData\.getAll\("weekDays"\)/);
+  assert.match(importActions, /currentUser\.role !== "ADMIN"/);
+  assert.match(importActions, /file instanceof File/);
+  assert.match(importActions, /\/admin\/students\/import\?batchId=/);
+  assert.match(importActions, /\/admin\/classes\/import\?batchId=/);
+
+  assert.match(studentsPage, /\/admin\/students\/import/);
+  assert.match(studentsPage, /imports\.importStudents/);
+  assert.match(studentsPage, /enrollmentIdentifier: true/);
+  assert.match(classesPage, /\/admin\/classes\/import/);
+  assert.match(classesPage, /imports\.importClasses/);
+  assert.match(studentImportPage, /previewStudentImportAction/);
+  assert.match(studentImportPage, /confirmStudentImportAction/);
+  assert.match(studentImportPage, /getViewMode/);
+  assert.match(studentImportPage, /acceptedRowIds/);
+  assert.match(studentImportPage, /imports\.acceptSelectedStudents/);
+  assert.match(studentImportPage, /updateStudentImportRowAction/);
+  assert.match(studentImportPage, /imports\.readyRows/);
+  assert.match(studentImportPage, /imports\.saveRow/);
+  assert.match(studentImportPage, /\/admin\/students\/import\/template/);
+  assert.match(studentImportPage, /\/admin\/students\/import\/error-report\?batchId=/);
+  assert.match(studentImportPage, /batch\.createdCount/);
+  assert.match(studentImportPage, /batch\.skippedCount/);
+  assert.match(studentImportPage, /batch\.duplicatedCount/);
+  assert.match(studentImportPage, /batch\.failedCount/);
+  assert.match(studentImportPage, /imports\.recentImports/);
+  assert.match(studentImportPage, /formatShortDateTime/);
+  assert.match(classImportPage, /previewClassImportAction/);
+  assert.match(classImportPage, /confirmClassImportAction/);
+  assert.match(classImportPage, /getViewMode/);
+  assert.match(classImportPage, /acceptedRowIds/);
+  assert.match(classImportPage, /imports\.acceptSelectedRows/);
+  assert.match(classImportPage, /imports\.readyRows/);
+  assert.match(classImportPage, /\/admin\/classes\/import\/template/);
+  assert.match(classImportPage, /\/admin\/classes\/import\/error-report\?batchId=/);
+  assert.match(classImportPage, /adminClasses\.classType/);
+  assert.match(classImportPage, /label\.startTime/);
+  assert.match(classImportPage, /activeTeachers/);
+  assert.match(classImportPage, /imports\.saveRow/);
+  assert.match(classImportPage, /imports\.recentImports/);
+  assert.match(classImportPage, /formatShortDateTime/);
+
+  for (const source of [
+    studentTemplateRoute,
+    classTemplateRoute,
+    studentReportRoute,
+    classReportRoute,
+  ]) {
+    assert.match(source, /getCurrentUser/);
+    assert.match(source, /currentUser\.role !== "ADMIN"/);
+    assert.match(source, /Content-Type": "text\/csv; charset=utf-8"/);
+  }
+  assert.match(studentReportRoute, /status: \{ in: \["FAILED", "DUPLICATE"\] \}/);
+  assert.match(classReportRoute, /status: \{ in: \["FAILED", "DUPLICATE"\] \}/);
+
+  assert.match(studentActions, /enrollmentIdentifier/);
+  assert.match(studentActions, /error=duplicate/);
+  assert.match(newStudentPage, /adminStudents\.enrollmentIdentifier/);
+  assert.match(editStudentPage, /adminStudents\.enrollmentIdentifier/);
+  assert.match(translations, /imports\.studentImportTitle/);
+  assert.match(translations, /imports\.classImportTitle/);
+  assert.match(translations, /adminStudents\.duplicateIdentifierError/);
+  assert.match(docs, /Student Import Template/);
+  assert.match(docs, /Class Import Template/);
+  assert.match(docs, /failed rows by default/);
+  assert.match(docs, /Submit selected classes/);
+  assert.match(docs, /Students\.csv/);
+  assert.match(docs, /Classes\.csv/);
+  assert.match(docs, /Horario/);
+  assert.match(docs, /Professor/);
+  assert.match(docs, /Duplicate detection checks normalized full names/);
+  assert.match(docs, /name, book, semester, year, and teacher combination/);
+  assert.match(dataModelDoc, /ImportBatch/);
+  assert.match(dataModelDoc, /ImportRow/);
 });

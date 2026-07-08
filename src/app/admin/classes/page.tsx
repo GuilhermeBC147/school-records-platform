@@ -40,6 +40,20 @@ function formatTerm(
   return `${t("dashboard.semester")} ${semester}/${year}`;
 }
 
+function formatClassType(
+  classType: string,
+  t: ReturnType<typeof getTranslations>,
+) {
+  switch (classType) {
+    case "VIP":
+      return t("classType.vip");
+    case "PERSONAL":
+      return t("classType.personal");
+    default:
+      return t("classType.regular");
+  }
+}
+
 function readFilterValue(value: string | undefined) {
   return value?.trim() || undefined;
 }
@@ -125,9 +139,11 @@ export default async function AdminClassesPage({
     select: {
       id: true,
       name: true,
+      classType: true,
       book: true,
       semester: true,
       year: true,
+      startTime: true,
       durationMinutes: true,
       weekDays: true,
       isActive: true,
@@ -190,6 +206,9 @@ export default async function AdminClassesPage({
           <h1 id="classes-title">{t("dashboard.classes")}</h1>
           <p className="lede">{t("adminClasses.createCopy")}</p>
           <div className="action-row">
+            <Link className="secondary-link" href="/admin/classes/import">
+              {t("imports.importClasses")}
+            </Link>
             <Link className="primary-link" href="/admin/classes/new">
               {t("adminClasses.createClass")}
             </Link>
@@ -323,11 +342,13 @@ export default async function AdminClassesPage({
                 <span>{schoolClass.teacher.name}</span>
                 <strong>{schoolClass.name}</strong>
                 <small>
+                  {formatClassType(schoolClass.classType, t)} |{" "}
                   {schoolClass.book ?? t("adminClasses.noBook")} |{" "}
                   {formatTerm(schoolClass.semester, schoolClass.year, t)}
                 </small>
                 <small>
-                  {formatWeekdays(schoolClass.weekDays, currentUser.locale)}
+                  {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
+                  {schoolClass.startTime ?? "-"}
                 </small>
                 <div className="class-result-card-metrics">
                   <span>

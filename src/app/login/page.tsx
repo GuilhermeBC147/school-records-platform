@@ -55,7 +55,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </header>
 
       <section className="auth-panel" aria-labelledby="login-title">
-        <p className="eyebrow">{t("auth.teacherAccess")}</p>
+        <p className="eyebrow">{t("auth.Access")}</p>
         <h1 id="login-title">{t("auth.signInTitle")}</h1>
         <p className="lede">{t("auth.loginCopy")}</p>
 
@@ -100,9 +100,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="demo-credentials">
           <strong>{t("auth.devAccounts")}</strong>
           <span>admin@example.com / password123</span>
-          <span>reception@example.com / password123</span>
-          <span>ana@example.com / password123</span>
-          <span>bruno@example.com / password123</span>
+          <span>reception1@example.com / password123</span>
+          <span>teacher1@example.com / password123</span>
+          <span>teacher2@example.com / password123</span>
         </div>
       </section>
     </main>

@@ -361,69 +361,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <>
             {teacherDashboard ? (
               <>
-                <section
-                  className="dashboard-metric-grid"
-                  aria-label={t("dashboard.teacherOverview")}
-                >
-                  <article className="metric">
-                    <span>{classes.length}</span>
-                    <strong>{visibleClassesLabel}</strong>
-                  </article>
-                  <article className="metric">
-                    <span>{visibleClassStudentCount}</span>
-                    <strong>{t("dashboard.visibleStudents")}</strong>
-                  </article>
-                  <article className="metric">
-                    <span>{visibleClassLessonCount}</span>
-                    <strong>{t("dashboard.submittedLessons")}</strong>
-                  </article>
-                  <article className="metric">
-                    <span>{teacherDashboard.bonusClassesToday}</span>
-                    <strong>{t("dashboard.bonusClassesToday")}</strong>
-                  </article>
-                  <article className="metric">
-                    <span>{teacherDashboard.pendingBonusAttendance}</span>
-                    <strong>{t("dashboard.pendingBonusAttendance")}</strong>
-                  </article>
-                </section>
-
-                <section
-                  className="dashboard-action-grid teacher-action-grid"
-                  aria-label={t("dashboard.teacherWorkflows")}
-                >
-                  <Link className="dashboard-action-card" href="/dashboard/work">
-                    <span>{t("dashboard.payroll")}</span>
-                    <strong>{t("dashboard.monthlySummary")}</strong>
-                    <small>{t("dashboard.monthlySummaryCopy")}</small>
-                  </Link>
-                  <Link className="dashboard-action-card" href="/dashboard/work/new">
-                    <span>{t("dashboard.activity")}</span>
-                    <strong>{t("dashboard.addActivity")}</strong>
-                    <small>{t("dashboard.addActivityCopy")}</small>
-                  </Link>
-                  <Link
-                    className="dashboard-action-card"
-                    href="/dashboard/bonus-classes"
-                  >
-                    <span>{t("dashboard.attendance")}</span>
-                    <strong>{t("dashboard.bonusClasses")}</strong>
-                    <small>{t("dashboard.confirmBonusAttendanceCopy")}</small>
-                  </Link>
-                  <Link
-                    className="dashboard-action-card"
-                    href="/dashboard/substitutions/new"
-                  >
-                    <span>{t("dashboard.substitution")}</span>
-                    <strong>{t("dashboard.substituteLesson")}</strong>
-                    <small>{t("dashboard.substituteLessonCopy")}</small>
-                  </Link>
-                  <Link className="dashboard-action-card" href="/dashboard/account">
-                    <span>{t("dashboard.account")}</span>
-                    <strong>{t("dashboard.accountSettings")}</strong>
-                    <small>{t("dashboard.accountSettingsCopy")}</small>
-                  </Link>
-                </section>
-
                 <section className="panel" aria-label={t("dashboard.classFilters")}>
                   <form className="filter-form compact-filter-form">
                     <label>
@@ -488,6 +425,69 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                       </Link>
                     </article>
                   ) : null}
+                </section>
+
+                <section
+                  className="dashboard-metric-grid"
+                  aria-label={t("dashboard.teacherOverview")}
+                >
+                  <article className="metric">
+                    <span>{classes.length}</span>
+                    <strong>{visibleClassesLabel}</strong>
+                  </article>
+                  <article className="metric">
+                    <span>{visibleClassStudentCount}</span>
+                    <strong>{t("dashboard.visibleStudents")}</strong>
+                  </article>
+                  <article className="metric">
+                    <span>{visibleClassLessonCount}</span>
+                    <strong>{t("dashboard.submittedLessons")}</strong>
+                  </article>
+                  <article className="metric">
+                    <span>{teacherDashboard.bonusClassesToday}</span>
+                    <strong>{t("dashboard.bonusClassesToday")}</strong>
+                  </article>
+                  <article className="metric">
+                    <span>{teacherDashboard.pendingBonusAttendance}</span>
+                    <strong>{t("dashboard.pendingBonusAttendance")}</strong>
+                  </article>
+                </section>
+
+                <section
+                  className="dashboard-action-grid teacher-action-grid"
+                  aria-label={t("dashboard.teacherWorkflows")}
+                >
+                  <Link className="dashboard-action-card" href="/dashboard/work">
+                    <span>{t("dashboard.payroll")}</span>
+                    <strong>{t("dashboard.monthlySummary")}</strong>
+                    <small>{t("dashboard.monthlySummaryCopy")}</small>
+                  </Link>
+                  <Link className="dashboard-action-card" href="/dashboard/work/new">
+                    <span>{t("dashboard.activity")}</span>
+                    <strong>{t("dashboard.addActivity")}</strong>
+                    <small>{t("dashboard.addActivityCopy")}</small>
+                  </Link>
+                  <Link
+                    className="dashboard-action-card"
+                    href="/dashboard/bonus-classes"
+                  >
+                    <span>{t("dashboard.attendance")}</span>
+                    <strong>{t("dashboard.bonusClasses")}</strong>
+                    <small>{t("dashboard.confirmBonusAttendanceCopy")}</small>
+                  </Link>
+                  <Link
+                    className="dashboard-action-card"
+                    href="/dashboard/substitutions/new"
+                  >
+                    <span>{t("dashboard.substitution")}</span>
+                    <strong>{t("dashboard.substituteLesson")}</strong>
+                    <small>{t("dashboard.substituteLessonCopy")}</small>
+                  </Link>
+                  <Link className="dashboard-action-card" href="/dashboard/account">
+                    <span>{t("dashboard.account")}</span>
+                    <strong>{t("dashboard.accountSettings")}</strong>
+                    <small>{t("dashboard.accountSettingsCopy")}</small>
+                  </Link>
                 </section>
               </>
             ) : null}

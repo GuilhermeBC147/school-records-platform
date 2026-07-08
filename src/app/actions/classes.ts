@@ -2,8 +2,12 @@
 
 import { redirect } from "next/navigation";
 import {
+  classTypeOptions,
+  hasTimeOverlap,
   readDurationMinutes,
+  readOptionalStartTime,
   weekdayOptions,
+  type ClassTypeValue,
   type WeekdayValue,
 } from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
@@ -43,6 +47,16 @@ function readWeekdays(formData: FormData) {
   );
 }
 
+function readClassType(formData: FormData): ClassTypeValue | null {
+  const classType = readRequiredString(formData, "classType");
+
+  if (classTypeOptions.some((option) => option.value === classType)) {
+    return classType as ClassTypeValue;
+  }
+
+  return null;
+}
+
 function readSelectedStudentIds(formData: FormData) {
   return Array.from(
     new Set(
@@ -52,6 +66,10 @@ function readSelectedStudentIds(formData: FormData) {
         .filter(Boolean),
     ),
   );
+}
+
+function buildEditClassUrl(classId: string, error: string) {
+  return `/admin/classes/${classId}?error=${error}`;
 }
 
 async function requireAdmin() {
@@ -84,11 +102,176 @@ async function hasInvalidStudents(studentIds: string[], activeOnly: boolean) {
   return students.length !== studentIds.length;
 }
 
+function requiresSingleStudent(classType: ClassTypeValue) {
+  return classType === "VIP" || classType === "PERSONAL";
+}
+
+function hasSharedWeekday(left: string[], right: string[]) {
+  return left.some((weekday) => right.includes(weekday));
+}
+
+function readTimeMinutesForSchedule(startTime: string) {
+  const [hours, minutes] = startTime.split(":").map(Number);
+
+  return hours * 60 + minutes;
+}
+
+function hasMoreThanThreeConcurrentPersonalStudents(
+  intervals: Array<{
+    endMinutes: number;
+    startMinutes: number;
+    studentIds: string[];
+    weekday: string;
+  }>,
+) {
+  for (const weekday of new Set(intervals.map((interval) => interval.weekday))) {
+    const weekdayIntervals = intervals.filter(
+      (interval) => interval.weekday === weekday,
+    );
+    const checkpoints = Array.from(
+      new Set(
+        weekdayIntervals.flatMap((interval) => [
+          interval.startMinutes,
+          interval.endMinutes,
+        ]),
+      ),
+    ).sort((left, right) => left - right);
+
+    for (let index = 0; index < checkpoints.length - 1; index += 1) {
+      const segmentStart = checkpoints[index];
+      const segmentEnd = checkpoints[index + 1];
+
+      if (segmentStart === segmentEnd) {
+        continue;
+      }
+
+      const concurrentStudentIds = new Set<string>();
+
+      for (const interval of weekdayIntervals) {
+        if (interval.startMinutes < segmentEnd && segmentStart < interval.endMinutes) {
+          for (const studentId of interval.studentIds) {
+            concurrentStudentIds.add(studentId);
+          }
+        }
+      }
+
+      if (concurrentStudentIds.size > 3) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+async function hasClassScheduleConflict({
+  classId,
+  classType,
+  durationMinutes,
+  selectedStudentIds,
+  startTime,
+  teacherId,
+  weekDays,
+}: {
+  classId?: string;
+  classType: ClassTypeValue;
+  durationMinutes: number;
+  selectedStudentIds: string[];
+  startTime: string | null;
+  teacherId: string;
+  weekDays: WeekdayValue[];
+}) {
+  if (!startTime) {
+    return false;
+  }
+
+  const overlappingClasses = await prisma.class.findMany({
+    where: {
+      isActive: true,
+      startTime: { not: null },
+      teacherId,
+      weekDays: { hasSome: weekDays },
+      ...(classId ? { NOT: { id: classId } } : {}),
+    },
+    select: {
+      classType: true,
+      durationMinutes: true,
+      startTime: true,
+      weekDays: true,
+      enrollments: {
+        where: { status: "ACTIVE", student: { isActive: true } },
+        select: { studentId: true },
+      },
+    },
+  });
+  const timeOverlaps = overlappingClasses.filter((schoolClass) => {
+    if (!schoolClass.startTime || !hasSharedWeekday(weekDays, schoolClass.weekDays)) {
+      return false;
+    }
+
+    return hasTimeOverlap({
+      durationMinutes,
+      existingDurationMinutes: schoolClass.durationMinutes,
+      existingStartTime: schoolClass.startTime,
+      startTime,
+    });
+  });
+
+  if (timeOverlaps.length === 0) {
+    return false;
+  }
+
+  if (classType !== "PERSONAL") {
+    return true;
+  }
+
+  if (timeOverlaps.some((schoolClass) => schoolClass.classType !== "PERSONAL")) {
+    return true;
+  }
+
+  const startMinutes = readTimeMinutesForSchedule(startTime);
+  const intervals = weekDays.map((weekday) => ({
+    endMinutes: startMinutes + durationMinutes,
+    startMinutes,
+    studentIds: selectedStudentIds,
+    weekday,
+  }));
+
+  for (const schoolClass of timeOverlaps) {
+    const existingStartTime = schoolClass.startTime;
+
+    if (!existingStartTime) {
+      continue;
+    }
+
+    const existingStartMinutes = readTimeMinutesForSchedule(existingStartTime);
+    const studentIds = schoolClass.enrollments.map(
+      (enrollment) => enrollment.studentId,
+    );
+
+    for (const weekday of schoolClass.weekDays.filter((weekday) =>
+      weekDays.includes(weekday),
+    )) {
+      intervals.push({
+        endMinutes: existingStartMinutes + schoolClass.durationMinutes,
+        startMinutes: existingStartMinutes,
+        studentIds,
+        weekday,
+      });
+    }
+  }
+
+  return hasMoreThanThreeConcurrentPersonalStudents(intervals);
+}
+
 async function readClassForm(formData: FormData) {
   const name = readRequiredString(formData, "name");
+  const classType = readClassType(formData);
   const book = readOptionalString(formData, "book");
   const semester = readTermNumber(formData, "semester");
   const year = readTermNumber(formData, "year");
+  const rawStartTime = String(formData.get("startTime") ?? "").trim();
+  const startTime = readOptionalStartTime(formData.get("startTime"));
   const durationMinutes = readDurationMinutes(formData.get("durationMinutes"));
   const weekDays = readWeekdays(formData);
   const teacherId = readRequiredString(formData, "teacherId");
@@ -96,7 +279,9 @@ async function readClassForm(formData: FormData) {
 
   if (
     !name ||
+    !classType ||
     !teacherId ||
+    (rawStartTime && !startTime) ||
     durationMinutes === null ||
     durationMinutes < 1 ||
     durationMinutes > 600 ||
@@ -122,10 +307,12 @@ async function readClassForm(formData: FormData) {
 
   return {
     book,
+    classType,
     durationMinutes,
     isActive,
     name,
     semester,
+    startTime,
     teacherId,
     weekDays,
     year,
@@ -140,6 +327,16 @@ export async function createClassAction(formData: FormData) {
 
   if (!classData || (await hasInvalidStudents(selectedStudentIds, true))) {
     redirect("/admin/classes/new?error=invalid");
+  }
+
+  if (
+    (requiresSingleStudent(classData.classType) && selectedStudentIds.length !== 1) ||
+    (await hasClassScheduleConflict({
+      ...classData,
+      selectedStudentIds,
+    }))
+  ) {
+    redirect("/admin/classes/new?error=schedule");
   }
 
   await prisma.class.create({
@@ -165,16 +362,40 @@ export async function updateClassAction(formData: FormData) {
   const classData = await readClassForm(formData);
 
   if (!classId || !classData) {
-    redirect(`/admin/classes/${classId}?error=invalid`);
+    redirect(buildEditClassUrl(classId, "invalid"));
   }
 
   const schoolClass = await prisma.class.findUnique({
     where: { id: classId },
-    select: { id: true },
+    select: {
+      id: true,
+      enrollments: {
+        where: { status: "ACTIVE", student: { isActive: true } },
+        select: { studentId: true },
+      },
+    },
   });
 
   if (!schoolClass) {
     redirect("/admin/classes");
+  }
+
+  const activeStudentIds = schoolClass.enrollments.map(
+    (enrollment) => enrollment.studentId,
+  );
+
+  if (requiresSingleStudent(classData.classType) && activeStudentIds.length !== 1) {
+    redirect(buildEditClassUrl(classId, "class-roster-size"));
+  }
+
+  if (
+    await hasClassScheduleConflict({
+      ...classData,
+      classId,
+      selectedStudentIds: activeStudentIds,
+    })
+  ) {
+    redirect(buildEditClassUrl(classId, "schedule"));
   }
 
   await prisma.class.update({
@@ -197,11 +418,43 @@ export async function updateClassRosterAction(formData: FormData) {
 
   const schoolClass = await prisma.class.findUnique({
     where: { id: classId },
-    select: { id: true },
+    select: {
+      classType: true,
+      durationMinutes: true,
+      id: true,
+      startTime: true,
+      teacherId: true,
+      weekDays: true,
+    },
   });
 
-  if (!schoolClass || (await hasInvalidStudents(selectedStudentIds, false))) {
-    redirect(`/admin/classes/${classId}?error=roster`);
+  if (
+    !schoolClass ||
+    (await hasInvalidStudents(selectedStudentIds, true))
+  ) {
+    redirect(buildEditClassUrl(classId, "roster"));
+  }
+
+  if (
+    requiresSingleStudent(schoolClass.classType) &&
+    selectedStudentIds.length !== 1
+  ) {
+    redirect(buildEditClassUrl(classId, "roster-size"));
+  }
+
+  if (
+    schoolClass.classType === "PERSONAL" &&
+    await hasClassScheduleConflict({
+      classId,
+      classType: schoolClass.classType,
+      durationMinutes: schoolClass.durationMinutes,
+      selectedStudentIds,
+      startTime: schoolClass.startTime,
+      teacherId: schoolClass.teacherId,
+      weekDays: schoolClass.weekDays,
+    })
+  ) {
+    redirect(buildEditClassUrl(classId, "roster-schedule"));
   }
 
   await prisma.$transaction([

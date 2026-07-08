@@ -8,6 +8,10 @@ function readRequiredString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
+function readOptionalString(formData: FormData, key: string) {
+  return readRequiredString(formData, key) || null;
+}
+
 async function requireAdmin() {
   const currentUser = await getCurrentUser();
 
@@ -26,14 +30,26 @@ export async function createStudentAction(formData: FormData) {
   await requireAdmin();
 
   const fullName = readRequiredString(formData, "fullName");
+  const enrollmentIdentifier = readOptionalString(
+    formData,
+    "enrollmentIdentifier",
+  );
   const isActive = formData.get("isActive") === "on";
 
   if (!fullName) {
     redirect("/admin/students/new?error=invalid");
   }
 
+  if (
+    enrollmentIdentifier &&
+    (await prisma.student.findUnique({ where: { enrollmentIdentifier } }))
+  ) {
+    redirect("/admin/students/new?error=duplicate");
+  }
+
   await prisma.student.create({
     data: {
+      enrollmentIdentifier,
       fullName,
       isActive,
     },
@@ -47,6 +63,10 @@ export async function updateStudentAction(formData: FormData) {
 
   const studentId = readRequiredString(formData, "studentId");
   const fullName = readRequiredString(formData, "fullName");
+  const enrollmentIdentifier = readOptionalString(
+    formData,
+    "enrollmentIdentifier",
+  );
   const isActive = formData.get("isActive") === "on";
 
   if (!studentId || !fullName) {
@@ -62,9 +82,21 @@ export async function updateStudentAction(formData: FormData) {
     redirect("/admin/students");
   }
 
+  if (enrollmentIdentifier) {
+    const duplicate = await prisma.student.findUnique({
+      where: { enrollmentIdentifier },
+      select: { id: true },
+    });
+
+    if (duplicate && duplicate.id !== studentId) {
+      redirect(`/admin/students/${studentId}?error=duplicate`);
+    }
+  }
+
   await prisma.student.update({
     where: { id: studentId },
     data: {
+      enrollmentIdentifier,
       fullName,
       isActive,
     },

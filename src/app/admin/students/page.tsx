@@ -45,6 +45,7 @@ export default async function AdminStudentsPage({
     },
     select: {
       id: true,
+      enrollmentIdentifier: true,
       fullName: true,
       isActive: true,
       _count: {
@@ -66,6 +67,9 @@ export default async function AdminStudentsPage({
           <h1 id="students-title">{t("dashboard.students")}</h1>
           <p className="lede">{t("adminStudents.createCopy")}</p>
           <div className="action-row">
+            <Link className="secondary-link" href="/admin/students/import">
+              {t("imports.importStudents")}
+            </Link>
             <Link className="primary-link" href="/admin/students/new">
               {t("adminStudents.createStudent")}
             </Link>
@@ -125,6 +129,10 @@ export default async function AdminStudentsPage({
                     : t("adminStudents.inactiveStudent")}
                 </span>
                 <strong>{student.fullName}</strong>
+                <small>
+                  {student.enrollmentIdentifier ??
+                    t("adminStudents.noEnrollmentIdentifier")}
+                </small>
                 <small>
                   {t("adminStudents.enrolledIn")} {student._count.enrollments}{" "}
                   {student._count.enrollments === 1
