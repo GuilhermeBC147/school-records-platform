@@ -24,6 +24,11 @@ enum AccountLocale {
   PT_BR
 }
 
+enum AccountTheme {
+  LIGHT
+  DARK
+}
+
 enum EnrollmentStatus {
   ACTIVE
   INACTIVE
@@ -139,6 +144,7 @@ model User {
   role         UserRole @default(TEACHER)
   dateFormat   AccountDateFormat @default(DD_MM_YY)
   locale       AccountLocale @default(PT_BR)
+  theme        AccountTheme @default(LIGHT)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

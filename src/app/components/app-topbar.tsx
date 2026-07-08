@@ -3,13 +3,16 @@
 import { updateOwnLocaleAction } from "@/app/actions/accounts";
 import { logoutAction } from "@/app/actions/auth";
 import { accountLocaleOptions, type AccountLocale } from "@/lib/locale";
+import { formatThemeAttribute, type AccountTheme } from "@/lib/theme";
 import { getTranslations } from "@/lib/translations";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 type AppTopbarProps = {
   currentUser: {
     locale: AccountLocale;
     name: string;
+    theme: AccountTheme;
   };
 };
 
@@ -19,6 +22,10 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
   const t = getTranslations(currentUser.locale);
   const queryString = searchParams.toString();
   const redirectTo = queryString ? `${pathname}?${queryString}` : pathname;
+
+  useEffect(() => {
+    document.body.dataset.theme = formatThemeAttribute(currentUser.theme);
+  }, [currentUser.theme]);
 
   return (
     <header className="topbar">

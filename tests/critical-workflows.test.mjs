@@ -1047,6 +1047,7 @@ test("locale selection persists and critical workflows use translated text", asy
   assert.match(appTopbar, /accountLocaleOptions\.map\(\(option\) =>/);
   assert.match(appTopbar, /form action=\{updateOwnLocaleAction\}/);
   assert.match(appTopbar, /name="redirectTo"/);
+  assert.match(appTopbar, /document\.body\.dataset\.theme = formatThemeAttribute\(currentUser\.theme\)/);
   assert.match(globalStyles, /\.auth-topbar/);
   assert.match(globalStyles, /justify-content: flex-end/);
   assert.match(accountPage, /params\.locale === "updated"/);
@@ -1076,6 +1077,60 @@ test("locale selection persists and critical workflows use translated text", asy
   assert.match(receptionDashboard, /t\("dashboard\.receptionDashboard"\)/);
   assert.match(receptionStudentsPage, /const t = getTranslations\(currentUser\.locale\)/);
   assert.match(receptionStudentsPage, /t\("receptionLookup\.studentResults"\)/);
+});
+
+test("account theme selection persists and applies globally", async () => {
+  const schema = await readProjectFile("prisma/schema.prisma");
+  const migration = await readProjectFile(
+    "prisma/migrations/20260708120000_add_account_theme/migration.sql",
+  );
+  const theme = await readProjectFile("src/lib/theme.ts");
+  const session = await readProjectFile("src/lib/session.ts");
+  const accountActions = await readProjectFile("src/app/actions/accounts.ts");
+  const accountPage = await readProjectFile("src/app/dashboard/account/page.tsx");
+  const appLayout = await readProjectFile("src/app/layout.tsx");
+  const appTopbar = await readProjectFile("src/app/components/app-topbar.tsx");
+  const globalStyles = await readProjectFile("src/app/globals.css");
+  const translations = await readProjectFile("src/lib/translations.ts");
+
+  assert.match(schema, /enum AccountTheme\s*{\s*LIGHT\s*DARK\s*}/s);
+  assert.match(schema, /theme\s+AccountTheme\s+@default\(LIGHT\)/);
+  assert.match(migration, /CREATE TYPE "AccountTheme" AS ENUM \('LIGHT', 'DARK'\)/);
+  assert.match(migration, /ADD COLUMN "theme" "AccountTheme" NOT NULL DEFAULT 'LIGHT'/);
+
+  assert.match(theme, /accountThemeOptions/);
+  assert.match(theme, /value: "LIGHT"/);
+  assert.match(theme, /value: "DARK"/);
+  assert.match(theme, /defaultAccountTheme:\s*AccountTheme\s*=\s*"LIGHT"/);
+  assert.match(theme, /return accountThemeOptions\.some\(\(option\) => option\.value === value\)/);
+  assert.match(theme, /return theme === "DARK" \? "dark" : "light"/);
+
+  assert.match(session, /theme: true/);
+  assert.match(appLayout, /getCurrentUser\(\)/);
+  assert.match(appLayout, /currentUser\?\.theme \?\? defaultAccountTheme/);
+  assert.match(appLayout, /data-theme=\{formatThemeAttribute\(theme\)\}/);
+  assert.match(appTopbar, /type AccountTheme/);
+  assert.match(appTopbar, /useEffect/);
+  assert.match(appTopbar, /document\.body\.dataset\.theme = formatThemeAttribute\(currentUser\.theme\)/);
+
+  assert.match(accountActions, /export async function updateOwnThemeAction\(formData: FormData\)/);
+  assert.match(accountActions, /normalizeAccountTheme\(formData\.get\("theme"\)\)/);
+  assert.match(accountActions, /redirect\("\/dashboard\/account\?theme=updated"\)/);
+  assert.match(accountPage, /accountThemeOptions/);
+  assert.match(accountPage, /params\.theme === "updated"/);
+  assert.match(accountPage, /name="theme"/);
+  assert.match(accountPage, /t\(option\.labelKey\)/);
+  assert.match(accountPage, /t\("account\.themeUpdated"\)/);
+
+  assert.match(translations, /"account\.appearance"/);
+  assert.match(translations, /"account\.preferredTheme"/);
+  assert.match(translations, /"account\.lightMode"/);
+  assert.match(translations, /"account\.darkMode"/);
+  assert.match(translations, /"account\.saveTheme"/);
+  assert.match(globalStyles, /body\[data-theme="dark"\]/);
+  assert.match(globalStyles, /\.segmented-control/);
+  assert.match(globalStyles, /--danger-soft/);
+  assert.match(globalStyles, /--warning-soft/);
 });
 
 test("production handoff documents deployment, backups, and smoke tests", async () => {

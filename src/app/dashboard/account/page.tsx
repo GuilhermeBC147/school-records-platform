@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import {
   changeOwnPasswordAction,
   updateOwnDateFormatAction,
+  updateOwnThemeAction,
 } from "@/app/actions/accounts";
 import { accountDateFormatOptions } from "@/lib/date-format";
 import { getCurrentUser } from "@/lib/session";
+import { accountThemeOptions } from "@/lib/theme";
 import { getTranslations } from "@/lib/translations";
 import { AppTopbar } from "@/app/components/app-topbar";
 
@@ -14,6 +16,7 @@ type AccountPageProps = {
     dateFormat?: string;
     locale?: string;
     password?: string;
+    theme?: string;
   }>;
 };
 
@@ -38,6 +41,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const isSuccess = params.password === "updated";
   const dateFormatUpdated = params.dateFormat === "updated";
   const localeUpdated = params.locale === "updated";
+  const themeUpdated = params.theme === "updated";
 
   return (
     <main className="app-shell">
@@ -75,6 +79,36 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             <div className="record-actions">
               <button className="primary-button" type="submit">
                 {t("account.saveDateFormat")}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="panel">
+          <h2>{t("account.appearance")}</h2>
+          {themeUpdated ? (
+            <p className="form-success">{t("account.themeUpdated")}</p>
+          ) : null}
+          <form action={updateOwnThemeAction} className="admin-form">
+            <fieldset className="segmented-field">
+              <legend>{t("account.preferredTheme")}</legend>
+              <div className="segmented-control">
+                {accountThemeOptions.map((option) => (
+                  <label className="segmented-option" key={option.value}>
+                    <input
+                      defaultChecked={currentUser.theme === option.value}
+                      name="theme"
+                      type="radio"
+                      value={option.value}
+                    />
+                    <span>{t(option.labelKey)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div className="record-actions">
+              <button className="primary-button" type="submit">
+                {t("account.saveTheme")}
               </button>
             </div>
           </form>

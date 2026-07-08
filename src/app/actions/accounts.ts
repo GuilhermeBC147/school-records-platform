@@ -8,6 +8,7 @@ import { defaultAccountLocale, normalizeAccountLocale } from "@/lib/locale";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { normalizeAccountTheme } from "@/lib/theme";
 
 const RESET_TOKEN_BYTES = 32;
 const RESET_TOKEN_MINUTES = 30;
@@ -201,6 +202,23 @@ export async function updateOwnDateFormatAction(formData: FormData) {
   });
 
   redirect("/dashboard/account?dateFormat=updated");
+}
+
+export async function updateOwnThemeAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  await prisma.user.update({
+    where: { id: currentUser.id },
+    data: {
+      theme: normalizeAccountTheme(formData.get("theme")),
+    },
+  });
+
+  redirect("/dashboard/account?theme=updated");
 }
 
 export async function updateOwnLocaleAction(formData: FormData) {
