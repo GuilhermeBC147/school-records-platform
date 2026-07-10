@@ -41,6 +41,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - A student can have only one homework record per lesson.
 - A student can have only one partial evaluation grade per class and partial period.
 - A student can have only one test grade per class and test period.
+- A bonus class overlapping a regular class schedule should produce a warning and may be explicitly saved; overlapping bonus classes remain rejected. This is a workflow rule, not a database uniqueness rule.
 - Letter grades use `D-`, `D`, `D+`, `C-`, `C`, `C+`, `B-`, `B`, `B+`, `A-`, and `A`; there is no `A+`.
 - Partial evaluations happen on the 7th and 23rd class.
 - Test grades are split into Mid-term and Final periods.
@@ -101,6 +102,6 @@ Only `ABSENT` attendance records count as missed classes by default. `EXCUSED` a
 
 ## Open Questions
 
-- Which school-owned email provider should deliver password-reset links?
-- Should bonus classes also be blocked when they overlap regular class schedules?
-- What backup retention, restore testing, and additional exports does the school require?
+- Which Hostinger mailbox/sender address and SMTP credentials should production use?
+- What backup retention and off-VPS storage policy will production use?
+- What warning wording and confirmation UX should the regular-class overlap warning use?

@@ -4,25 +4,38 @@ Use this checklist before handing the class records platform to the school for d
 
 ## Environment
 
-- Use a hosted PostgreSQL database owned by the school.
-- Set `DATABASE_URL` to the hosted PostgreSQL connection string.
+- Use a Hostinger VPS in Brazil, owned and controlled by the school, with PostgreSQL hosted alongside the application.
+- Run the application and PostgreSQL through a documented Docker Compose/deployment setup.
+- Set `DATABASE_URL` to the production PostgreSQL connection string.
 - Set `AUTH_SECRET` to a long random value that is different from local development.
 - Keep `.env`, `.env.local`, and production secrets out of Git.
 - Run `npm.cmd run build` before deployment.
 - Run `npm.cmd test`, `npm.cmd run typecheck`, and `npm.cmd run prisma:validate` before deployment.
 - Run database migrations with `npm.cmd exec prisma migrate deploy`.
 
-## Hosted PostgreSQL
+## Hostinger VPS automation
+
+The VPS is self-managed, so the handoff should provide automation for:
+
+- Deploying from the protected production branch and restarting the application.
+- Running Prisma migrations before the application restart.
+- Restarting the application/container after a crash or host reboot.
+- HTTPS setup and automatic certificate renewal.
+- Scheduled security updates or a clearly documented maintenance window.
+- Monitoring uptime, CPU, memory, disk, database health, deploy failures, and backup failures.
+
+Keep an operator runbook and recovery credentials under school ownership. These are planned handoff requirements and are not implemented yet.
+
+## PostgreSQL on the VPS
 
 The production database should support:
 
-- automated daily backups
-- point-in-time recovery if the provider offers it
+- Keep automated backups enabled: use Hostinger VPS backups plus a separate logical PostgreSQL backup routine.
 - encrypted connections
 - separate credentials for the app
 - a documented owner account controlled by the school
 
-After provisioning the hosted database:
+After provisioning the VPS and PostgreSQL:
 
 ```powershell
 npm.cmd exec prisma migrate deploy
@@ -36,10 +49,13 @@ Database backups protect the whole app, including grades and risk-review data. C
 
 Recommended routine:
 
-- Keep hosted PostgreSQL automated backups enabled.
+- Enable Hostinger VPS automatic backups (weekly at minimum; daily if selected and available for the plan).
+- Run a nightly logical PostgreSQL backup with `pg_dump` and store it outside the VPS.
+- Alert when a dump is missing or fails. Start with a 30-day rolling logical-backup window, then confirm the school's retention policy and storage cost.
+- Test restoring a backup into a temporary database before launch and periodically afterward.
 - Export class records from `/admin/records` at the end of each week.
 - Store CSV exports in the school's normal document storage.
-- Treat hosted PostgreSQL backups as the recovery source for grades, class rosters, and `/admin/risk` signals.
+- Treat the layered PostgreSQL backups as the recovery source for grades, class rosters, and `/admin/risk` signals.
 - Before any production migration, confirm there is a recent database backup.
 - After any production migration, open `/admin/records` and export a small filtered CSV as a smoke test.
 - After grade or risk-review changes, open one class grade table and `/admin/risk` as part of the smoke test.
@@ -49,10 +65,11 @@ Recommended routine:
 For the first production version, keep monitoring simple and explicit:
 
 - record the hosting provider dashboard URL
-- record the database provider dashboard URL
+- record the Hostinger dashboard URL
 - check failed deployment logs after every release
 - check application logs if login, dashboard, or record submission fails
 - verify disk/storage usage for CSV exports if exports are stored on the server
+- alert on resource exhaustion, failed deployments, failed database backups, and missing backup reports
 
 ## Release Smoke Test
 
@@ -80,9 +97,9 @@ Also smoke-test the current role-specific scope:
 
 ## Known launch blockers
 
-- Production password-reset email delivery is not configured.
-- Backup retention, restore testing, and ownership must be confirmed with the school.
-- Bonus classes currently prevent overlap with other bonus classes; regular-class schedule overlap remains an open decision and implementation item.
+- Production password-reset email delivery still needs Hostinger SMTP configuration and a delivery test.
+- Hostinger VPS deployment automation, the operator runbook, and a successful restore test must be completed.
+- The regular-class overlap warning still needs implementation and focused tests; it should warn and allow an explicit save rather than block the bonus class.
 
 ## Recovery Notes
 

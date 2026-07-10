@@ -55,13 +55,24 @@ Future tasks should start from the current schema, routes, actions, tests, and a
 
 ---
 
-## 2026-07-10 - Keep bonus and regular schedule overlap open
+## 2026-07-10 - Warn about bonus and regular schedule overlap
 
 Decision:
-Do not claim that bonus classes are checked against regular class schedules. The current implementation prevents overlapping non-canceled bonus classes for the same teacher; regular-class overlap remains an explicit open item.
+If a bonus class overlaps a teacher's regular class schedule, show a clear warning with the conflicting class/time and allow the user to cancel or explicitly save anyway. Keep overlapping non-canceled bonus classes blocked.
 
 Reason:
-The current bonus-class conflict helper only queries bonus-class records. The product requirement needs a separate decision about how regular class schedules should interact with independent bonus sessions.
+The school wants the conflict to be visible without preventing legitimate exceptions. Bonus-vs-bonus conflicts remain a hard scheduling error.
 
 Consequences:
-Keep this item visible in the backlog and production-readiness notes until the behavior is decided, implemented, and tested.
+Implement conflict detection and warning UX, add focused tests, and do not add a database uniqueness rule for the regular-class overlap.
+
+## 2026-07-10 - Use Hostinger VPS for production
+
+Decision:
+Host the Next.js application and PostgreSQL on a Hostinger VPS in Brazil, preferably with Docker Compose.
+
+Reason:
+This keeps the application and PostgreSQL under one provider while providing a Brazil deployment location. Hostinger's standard web/cloud hosting does not provide PostgreSQL, while its VPS offering supports a self-managed PostgreSQL setup.
+
+Consequences:
+The VPS remains self-managed, so the handoff must include automation for deployment, restart/recovery, HTTPS renewal, migrations, security updates, monitoring, and backup-failure alerts. Use Hostinger VPS backups as one layer and nightly logical PostgreSQL dumps stored outside the VPS as another. Keep the account, billing, credentials, and runbook under school ownership.

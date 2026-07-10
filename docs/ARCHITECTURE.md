@@ -9,6 +9,12 @@ Current snapshot: 2026-07-10. The current code and Prisma schema are the source 
 - Docker Compose provides the local PostgreSQL database.
 - There is no separate backend service. Pages, server actions, and route handlers live in `src/app/`.
 
+## Production target and operations
+
+The planned production target is a Hostinger VPS in Brazil, with the Next.js application and PostgreSQL running together, preferably through Docker Compose. The VPS is self-managed; the handoff should therefore automate deployment, Prisma migrations, process/container restart, HTTPS renewal, security updates, and health/resource monitoring.
+
+Use Hostinger VPS backups plus a nightly logical PostgreSQL dump stored outside the VPS. Alert on failed or missing backups and test restores before launch and periodically afterward. Keep `DATABASE_URL`, `AUTH_SECRET`, and SMTP credentials in VPS environment configuration, not in the repository. These are deployment requirements; the automation is not implemented yet.
+
 ## Repository structure
 
 - `src/app/` - App Router pages, layouts, role-specific workflows, and CSV/template route handlers.

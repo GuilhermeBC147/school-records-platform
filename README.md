@@ -91,7 +91,11 @@ Delete the local database data and start fresh:
 docker compose down -v
 ```
 
-Do not use the local development password in production. Production will use a hosted PostgreSQL database with its own `DATABASE_URL`.
+Do not use the local development password in production. Production will use PostgreSQL on the school-owned Hostinger VPS with its own `DATABASE_URL`.
+
+## Production target
+
+The current production plan is a Hostinger VPS in Brazil running the Next.js application and PostgreSQL together. Deployment, backups, monitoring, and handoff requirements are documented in [docs/production-readiness.md](docs/production-readiness.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Seed sample data:
 

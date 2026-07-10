@@ -64,15 +64,17 @@ Recommended stack:
 - PostgreSQL for the database.
 - Prisma for database access.
 - Credentials-based authentication is implemented with signed sessions and an `AUTH_SECRET`.
-- Deployment target remains open; the app is designed for a hosted PostgreSQL database and a Node-compatible host.
+- Production target: a Hostinger VPS in Brazil running the Next.js application and PostgreSQL together.
+- The handoff should use automation for deployment, restarts, HTTPS renewal, security updates, monitoring, and layered backups so routine operation does not require extensive server knowledge.
 
 ## Key Risks
 
 - Teacher accounts and class assignments need careful access control.
 - Password reset needs a production-ready email path before school use.
 - Admin setup screens need enough validation to avoid broken class rosters.
-- Reception scheduling needs conflict checks to avoid assigning one teacher to two sessions at the same time.
-- The current bonus-class conflict check covers overlapping non-canceled bonus classes; overlap with regular class schedules still needs an explicit decision and implementation.
+- Reception scheduling needs conflict checks to avoid assigning one teacher to two sessions at the same time. Bonus-vs-bonus conflicts should remain blocked; a bonus class overlapping a regular class should warn and allow an explicit save.
+- The regular-class overlap warning still needs implementation and focused tests.
+- Hostinger VPS operations, password-reset email delivery, and layered backup/restore procedures must be automated and documented before handoff.
 - Payroll counts need to distinguish the teacher who submitted a record from the teacher who should be paid for it.
 - The app needs a clear backup/export strategy before production use.
 - The current workflow tests are static source checks; browser and production database checks are still needed.
@@ -85,7 +87,8 @@ Recommended stack:
 - An admin can see submitted records.
 - Submitted records are stored and reviewable in the app.
 - Admins can manage the school data needed for normal class record workflows.
-- Reception can schedule bonus classes without double-booking teachers.
+- Reception can schedule bonus classes while blocking bonus-vs-bonus double-booking and receiving a warning for regular-class overlap.
+- The deployed system can be restarted or recovered through documented automation without routine manual server expertise.
 - Admins can review monthly teacher work counts for lessons, substitutions, bonus classes, and extra activities.
 - Admins can import students and classes with validation and duplicate warnings.
 - Staff can use the supported language, date-format, and theme preferences.

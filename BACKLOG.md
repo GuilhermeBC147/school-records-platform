@@ -3,15 +3,17 @@
 ## Now
 
 - Complete production-readiness checks across admin, teacher, and reception workflows.
-- Confirm the production password-reset email path.
-- Confirm PostgreSQL backup ownership, retention, and restore testing.
-- Decide whether bonus classes must conflict with regular class schedules.
+- Prepare Hostinger VPS deployment automation for the application and PostgreSQL.
+- Configure the Hostinger SMTP password-reset email path.
+- Configure layered PostgreSQL backups, failure alerts, and restore testing.
+- Implement and test the regular-class overlap warning with an explicit save-anyway path.
 
 ## Next
 
 - Add browser and production-database checks for critical workflows.
 - Run a full quality-control pass for imports, localization, grading, risk review, scheduling, substitutions, exports, and work summaries.
-- Document any remaining launch blockers and follow-up work.
+- Document any remaining launch blockers, the operator runbook, and handoff steps.
+- Verify a restore from the off-VPS logical PostgreSQL backup.
 
 ## Later
 
@@ -22,10 +24,17 @@
 
 ## Open Questions
 
-- Which school-owned email provider should deliver password-reset links?
-- Should bonus classes be blocked when they overlap a teacher's regular class schedule?
-- What backup retention and restore-test schedule does the school require?
+- Which Hostinger mailbox/sender address and SMTP credentials should production use?
+- What backup retention and off-VPS storage policy should production use?
+- What warning wording and confirmation UX should the regular-class overlap warning use?
 - Should the school require additional exports for grades, imports, bonus classes, or payroll review?
+
+## Production decisions
+
+- Use a Hostinger VPS in Brazil for production, with the Next.js application and PostgreSQL hosted together, preferably through Docker Compose.
+- Keep blocking conflicts between overlapping non-canceled bonus classes. A bonus class overlapping a teacher's regular class should show a warning and allow an explicit save.
+- Use a dedicated Hostinger Email SMTP mailbox for low-volume password-reset messages, with credentials stored only in VPS environment configuration.
+- Use Hostinger VPS backups plus nightly logical PostgreSQL dumps stored outside the VPS. Alert on failures and test restores before launch and periodically afterward.
 
 ## Decisions already reflected in code
 

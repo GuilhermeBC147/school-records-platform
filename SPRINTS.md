@@ -23,14 +23,15 @@ Keep the repository documentation synchronized with the implemented platform bef
 
 ## Known issues / questions
 
-- Production password-reset email delivery is still required before school use.
-- The current bonus-class overlap check covers other bonus classes, not regular class schedules.
-- Database backup ownership, retention, and restore testing still need production confirmation.
+- Production password-reset email delivery still requires a Hostinger SMTP mailbox and configuration.
+- The intended regular-class overlap behavior is a warning with an explicit “save anyway” path; implementation and focused tests remain.
+- The production target is a Hostinger VPS in Brazil; deployment, restart, monitoring, security-update, and backup automation plus an operator runbook still need implementation.
+- Layered backup ownership, retention, off-VPS storage, and restore testing still need production confirmation.
 - The current test suite is a static source-level critical-workflow suite, not browser or production database coverage.
 
 ## Next recommended task
 
-Complete the production-readiness checklist and decide whether bonus classes must also be blocked against regular class schedules.
+Implement and test the regular-class overlap warning, then prepare the Hostinger VPS deployment automation and complete the production-readiness checklist.
 
 ---
 # Sprint Plan
@@ -447,7 +448,7 @@ Tasks:
 - Add an independent bonus class/session model separate from regular classes.
 - Store student, subject, assigned teacher, date, start time, duration, status, and notes for each bonus class.
 - Prevent two bonus classes from being scheduled for the same teacher at overlapping times.
-- Prevent bonus classes from overlapping with regular class schedules for the same teacher when schedule data is available.
+- Warn when a bonus class overlaps a regular class schedule for the same teacher, while allowing an explicit save.
 - Let reception assign or reassign the teacher before the bonus class happens.
 - Let the assigned teacher record or confirm that the bonus class happened.
 - Keep teacher-created bonus classes from the dashboard Add event flow aligned with reception-created bonus classes, including subject, date, start time, duration, and notes.
@@ -468,7 +469,8 @@ Done when:
 
 - Reception can schedule bonus classes and assign teachers.
 - Reception cannot access admin-only or teacher-only management areas.
-- The app blocks teacher double-booking for bonus classes.
+- The app blocks teacher double-booking between bonus classes.
+- The app warns about regular-class conflicts without blocking an explicitly confirmed bonus class.
 - Reception can answer student and class schedule questions without admin access.
 - Reception can visually scan a teacher-by-time bonus class calendar.
 - Bonus calendar entries open to edit details or confirm attendance.
@@ -616,8 +618,10 @@ Tasks:
 - Test English and Brazilian Portuguese language selection across critical screens.
 - Test student and class imports with valid files, invalid rows, duplicated data, and partial-failure cases.
 - Add production environment checklist.
-- Add hosted PostgreSQL setup notes.
+- Add Hostinger VPS-in-Brazil setup notes for the application and PostgreSQL.
+- Add automated deployment, restart, HTTPS renewal, security-update, and health/resource monitoring guidance.
 - Add backup/export routine.
+- Add layered Hostinger-plus-off-VPS PostgreSQL backup guidance, failure alerts, and restore testing.
 - Add basic monitoring/logging guidance.
 - Add tests for critical teacher, grading, account, and admin review workflows.
 - Confirm exports still include the records the school needs after grading, risk review, bonus classes, substitutions, and teacher work summaries are added.

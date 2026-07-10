@@ -36,7 +36,7 @@ Grades and risk-review inputs depend on database tables that are not represented
 - submitted attendance and homework history used by `/admin/risk`
 - risk-resolution, substitution, bonus-class, work-log, and import records
 
-Use hosted PostgreSQL backups as the source of truth for recovering grades and risk-review data. Before any production migration, confirm a recent database backup exists and that it includes the whole database, not only exported CSV files.
+Use the layered PostgreSQL backups as the source of truth for recovering grades and risk-review data. Before any production migration, confirm a recent database backup exists and that it includes the whole database, not only exported CSV files.
 
 After restoring a backup, verify:
 
@@ -44,10 +44,22 @@ After restoring a backup, verify:
 - `/admin/risk` still shows expected student risk signals
 - `/admin/records` can still export submitted class records
 
+## Hostinger VPS backup routine
+
+Hostinger VPS backups protect the full server, but restoring one rolls the VPS back as a unit. Use them as one layer rather than the only database backup.
+
+- Enable Hostinger's automatic VPS backups (weekly at minimum; daily if selected and available for the plan).
+- Run a nightly logical PostgreSQL backup with `pg_dump` and store it outside the VPS.
+- Alert on failed or missing dumps and keep a rolling retention window; 30 daily logical backups is a practical starting recommendation.
+- Test restoring a dump into a temporary PostgreSQL database before launch and periodically afterward.
+- Document the account owner, storage location, retention, restore steps, and who is responsible for responding to failures.
+
+See [Hostinger's VPS backup and restore guide](https://support.hostinger.com/en/articles/1583232-how-to-back-up-or-restore-a-vps) for provider-level backup behavior.
+
 ## Local Backup Routine
 
 For local development, keep the PostgreSQL Docker volume intact unless you intentionally want to reset sample data.
 
 Before resetting local data, export submitted class records from the admin page and store the CSV somewhere outside the project folder.
 
-For production, use the hosted PostgreSQL provider's scheduled database backup feature in addition to CSV exports for school reporting.
+For production, use Hostinger VPS backups and the separate logical PostgreSQL backup routine in addition to CSV exports for school reporting.

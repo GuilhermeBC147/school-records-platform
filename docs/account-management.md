@@ -41,11 +41,17 @@ In production, the app should send the reset link through a school-approved emai
 
 ## Production Email Requirement
 
-Before production use, choose one password reset delivery path:
+The current plan is to use a dedicated Hostinger Email mailbox for low-volume password-reset messages. The current development flow exposes the reset token in the response for testing, so production must replace that path with real email delivery before launch.
 
-- hosting provider email integration
-- SMTP account owned by the school
-- transactional email provider
+Configure the application with:
+
+- SMTP host `smtp.hostinger.com`;
+- port `465` with SSL, or `587` with STARTTLS;
+- the full mailbox address as the username;
+- an app password if the mailbox supports one;
+- credentials stored only in the VPS environment configuration.
+
+Before launch, verify the sender address, SPF/DKIM/DMARC configuration, delivery to common providers, and the password-reset link. If deliverability is inadequate, use a dedicated transactional email provider without changing the reset workflow.
 
 The email should include only the reset link and its expiry window. It should not include the user's current password.
 
