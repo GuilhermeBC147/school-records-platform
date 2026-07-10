@@ -66,6 +66,19 @@ The school wants the conflict to be visible without preventing legitimate except
 Consequences:
 Implement conflict detection and warning UX, add focused tests, and do not add a database uniqueness rule for the regular-class overlap.
 
+---
+
+## 2026-07-10 - Project existing schedules into role-specific calendars
+
+Decision:
+Use the existing `Class` recurring schedule and `BonusClass` dated session records to render calendar views. Teachers receive a weekly personal view; admins and reception use a daily teacher-column view. Calendar events link to existing protected pages for editing, lookup, or attendance confirmation.
+
+Reason:
+The current data model already contains the information needed for the first calendar increment. A projection keeps the change reversible and avoids introducing a second scheduling write path or schema migration.
+
+Consequences:
+The first calendar increment does not model holidays, date ranges, recurring exceptions, or drag-and-drop editing. Classes without start times are shown outside the time grid, and the staff grid preserves the existing 07:00–22:00 range.
+
 ## 2026-07-10 - Use Hostinger VPS for production
 
 Decision:

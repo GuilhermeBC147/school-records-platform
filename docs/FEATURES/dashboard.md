@@ -7,10 +7,13 @@ blue visual system with light and dark account themes.
 The dashboard redirects users into role-specific workflows:
 
 - Teachers see their active assigned classes, default weekday filtering, recent
-  records, grades, work summaries, bonus classes, and substitute workflows.
+  records, grades, work summaries, bonus classes, substitute workflows, and a
+  weekly calendar for their recurring and bonus classes.
 - Admins see account, class, student, record, grade, risk, import, substitution,
-  and work-summary entry points.
-- Reception sees bonus scheduling, calendar, student lookup, and class lookup.
+  work-summary, and all-teacher calendar entry points. Calendar events open the
+  existing protected class or bonus-class edit workflows.
+- Reception sees bonus scheduling, a combined class and bonus-class calendar,
+  student lookup, and class lookup.
 
 All signed-in dashboards also expose a compact, role-aware shortcut row in the
 shared topbar. It provides direct links to the most common workflows while the
@@ -18,3 +21,8 @@ dashboard cards continue to provide contextual actions and status information.
 
 Dashboard text and date/time labels use the signed-in account's locale and date
 format. Account theme preferences apply across the application.
+
+Calendar views project existing records rather than creating a new event table.
+Active classes repeat on their configured weekdays, while non-canceled bonus
+classes appear on their scheduled dates. Classes without a start time remain in
+an unscheduled list instead of the 07:00–22:00 time grid.

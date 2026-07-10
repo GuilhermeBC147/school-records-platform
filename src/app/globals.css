@@ -2414,6 +2414,69 @@ input[type="time"],
   color: var(--brand);
 }
 
+.schedule-event-class {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+}
+
+.schedule-event-bonus {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.calendar-controls {
+  display: grid;
+  gap: 14px;
+}
+
+.calendar-week-nav {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.calendar-week-nav strong {
+  color: var(--brand);
+}
+
+.calendar-unscheduled-list {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.calendar-unscheduled-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  text-decoration: none;
+}
+
+.calendar-unscheduled-item:hover {
+  border-color: var(--brand);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+}
+
+.calendar-unscheduled-item span,
+.calendar-unscheduled-item small,
+.calendar-note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.calendar-grid-table .schedule-cell {
+  vertical-align: top;
+}
+
+.week-calendar-grid .schedule-cell {
+  min-width: 150px;
+}
+
 .bonus-calendar {
   display: grid;
   gap: 16px;

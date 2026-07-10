@@ -278,6 +278,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </section>
 
             <section className="dashboard-action-grid" aria-label={t("dashboard.adminWorkflows")}>
+              <Link className="dashboard-action-card" href="/admin/calendar">
+                <span>{t("dashboard.schedule")}</span>
+                <strong>{t("dashboard.calendar")}</strong>
+                <small>{t("calendar.staffCopy")}</small>
+              </Link>
               <Link className="dashboard-action-card" href="/admin/manage-accounts">
                 <span>{t("dashboard.staff")}</span>
                 <strong>{t("dashboard.manageAccounts")}</strong>
@@ -481,6 +486,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     <span>{t("dashboard.payroll")}</span>
                     <strong>{t("dashboard.monthlySummary")}</strong>
                     <small>{t("dashboard.monthlySummaryCopy")}</small>
+                  </Link>
+                  <Link className="dashboard-action-card" href="/dashboard/calendar">
+                    <span>{t("dashboard.schedule")}</span>
+                    <strong>{t("dashboard.calendar")}</strong>
+                    <small>{t("calendar.weeklyCopy")}</small>
                   </Link>
                   <Link className="dashboard-action-card" href="/dashboard/work/new">
                     <span>{t("dashboard.activity")}</span>

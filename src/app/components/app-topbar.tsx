@@ -19,6 +19,7 @@ type Shortcut = {
 const shortcutsByRole: Record<AppRole, readonly Shortcut[]> = {
   ADMIN: [
     { href: "/dashboard", labelKey: "dashboard.home" },
+    { href: "/admin/calendar", labelKey: "dashboard.calendar" },
     { href: "/admin/manage-accounts", labelKey: "dashboard.manageAccounts" },
     { href: "/admin/classes", labelKey: "dashboard.manageClasses" },
     { href: "/admin/students", labelKey: "dashboard.manageStudents" },
@@ -28,6 +29,7 @@ const shortcutsByRole: Record<AppRole, readonly Shortcut[]> = {
   ],
   TEACHER: [
     { href: "/dashboard", labelKey: "dashboard.home" },
+    { href: "/dashboard/calendar", labelKey: "dashboard.calendar" },
     { href: "/dashboard/work", labelKey: "dashboard.monthlySummary" },
     { href: "/dashboard/bonus-classes", labelKey: "dashboard.bonusClasses" },
     { href: "/dashboard/substitutions/new", labelKey: "dashboard.substituteLesson" },

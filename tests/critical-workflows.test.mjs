@@ -262,6 +262,13 @@ test("date filters display account format while submitting ISO dates", async () 
   const receptionCalendarPage = await readProjectFile(
     "src/app/reception/calendar/page.tsx",
   );
+  const staffCalendarPage = await readProjectFile(
+    "src/app/components/staff-calendar-page.tsx",
+  );
+  const calendarLib = await readProjectFile("src/lib/calendar.ts");
+  const teacherCalendarPage = await readProjectFile(
+    "src/app/dashboard/calendar/page.tsx",
+  );
 
   assert.match(session, /dateFormat: true/);
   assert.match(session, /locale: true/);
@@ -287,7 +294,7 @@ test("date filters display account format while submitting ISO dates", async () 
   assert.match(riskPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(teacherBonusPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(receptionBonusPage, /AppTopbar currentUser=\{currentUser\}/);
-  assert.match(receptionCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
+  assert.match(staffCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.doesNotMatch(classRecordPage, /Semester \$\{schoolClass\.semester\}/);
   assert.doesNotMatch(classDetailPage, /Semester \$\{schoolClass\.semester\}/);
   assert.doesNotMatch(classRecordPage, /currentUser\.locale === "PT_BR" \? "com" : "with"/);
@@ -302,7 +309,8 @@ test("date filters display account format while submitting ISO dates", async () 
     teacherBonusPage,
     receptionBonusPage,
     receptionEditPage,
-    receptionCalendarPage,
+    staffCalendarPage,
+    teacherCalendarPage,
   ]) {
     assert.match(source, /DateInput/);
     assert.match(source, /dateFormat=\{currentUser\.dateFormat\}/);
@@ -863,6 +871,16 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   const receptionCalendarPage = await readProjectFile(
     "src/app/reception/calendar/page.tsx",
   );
+  const adminCalendarPage = await readProjectFile(
+    "src/app/admin/calendar/page.tsx",
+  );
+  const staffCalendarPage = await readProjectFile(
+    "src/app/components/staff-calendar-page.tsx",
+  );
+  const calendarLib = await readProjectFile("src/lib/calendar.ts");
+  const teacherCalendarPage = await readProjectFile(
+    "src/app/dashboard/calendar/page.tsx",
+  );
   const receptionStudentsPage = await readProjectFile(
     "src/app/reception/students/page.tsx",
   );
@@ -935,11 +953,23 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.doesNotMatch(receptionPage, /Bonus class \{query\.status\}/);
   assert.match(receptionPage, /formatBonusClassResultMessage/);
   assert.match(receptionPage, /formatBonusClassErrorMessage/);
-  assert.match(receptionCalendarPage, /label\.dailyTeacherCalendar/);
-  assert.match(receptionCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
-  assert.match(receptionCalendarPage, /timeSlots/);
-  assert.match(receptionCalendarPage, /formatTimeFromMinutes/);
-  assert.match(receptionCalendarPage, /formatStartTime/);
+  assert.match(receptionCalendarPage, /StaffCalendarPage/);
+  assert.match(adminCalendarPage, /StaffCalendarPage/);
+  assert.match(staffCalendarPage, /label\.dailyTeacherCalendar/);
+  assert.match(staffCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
+  assert.match(staffCalendarPage, /CalendarGrid/);
+  assert.match(staffCalendarPage, /weekDays: \{ has: selectedWeekday \}/);
+  assert.match(staffCalendarPage, /\/reception\/classes\?classId=/);
+  assert.match(staffCalendarPage, /\/admin\/classes\//);
+  assert.match(staffCalendarPage, /status: \{ not: "CANCELED" \}/);
+  assert.match(teacherCalendarPage, /CalendarGrid/);
+  assert.match(teacherCalendarPage, /getCalendarWeekDates/);
+  assert.match(teacherCalendarPage, /\/dashboard\/classes\//);
+  assert.match(teacherCalendarPage, /\/dashboard\/bonus-classes\?/);
+  assert.match(teacherCalendarPage, /currentUser\.role !== "TEACHER"/);
+  assert.match(calendarLib, /calendarTimeSlots/);
+  assert.match(calendarLib, /getCalendarWeekStart/);
+  assert.match(calendarLib, /weekdayByJavaScriptDay/);
   assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);
   assert.match(receptionPage, /TimeInput/);
   assert.match(receptionPage, /DurationInput/);
@@ -1011,6 +1041,8 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(dashboardPage, /getTranslations\(currentUser\.locale\)/);
   assert.match(dashboardPage, /\/reception/);
   assert.match(dashboardPage, /\/dashboard\/bonus-classes/);
+  assert.match(dashboardPage, /\/dashboard\/calendar/);
+  assert.match(dashboardPage, /\/admin\/calendar/);
   assert.match(workLib, /bonusClasses/);
   assert.match(workLib, /status: "COMPLETED"/);
   assert.match(dataModelDoc, /Reception accounts can schedule independent bonus classes/);

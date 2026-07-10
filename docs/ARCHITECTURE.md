@@ -52,12 +52,14 @@ Teacher and admin dashboard routes:
 - `/dashboard/account`
 - `/dashboard/classes/[classId]`
 - `/dashboard/classes/[classId]/record`
+- `/dashboard/calendar`
 - `/dashboard/work`, `/dashboard/work/new`
 - `/dashboard/bonus-classes`
 - `/dashboard/substitutions/new`
 
 Admin routes:
 
+- `/admin/calendar`
 - `/admin/manage-accounts`
 - `/admin/classes` and `/admin/classes/[classId]`
 - `/admin/students` and student profile/view routes
@@ -96,8 +98,11 @@ Important invariants:
 
 - Teachers and admins create class records with attendance, homework, notes, drafts, and submissions.
 - Teachers enter partial and test grades for their assigned classes.
+- Teachers can view a weekly calendar of their active recurring classes and assigned bonus classes.
 - Admins review records, exports, grades, risk signals, substitutions, imports, and work summaries.
+- Admins can view all-teacher daily class and bonus-class schedules and open existing edit forms.
 - Reception schedules bonus classes, uses student/class lookup, and confirms bonus attendance.
+- Reception can view regular and bonus classes together in the daily teacher calendar.
 - Users can select English or Brazilian Portuguese, a date format, and a light/dark theme.
 
 ## Development and verification
