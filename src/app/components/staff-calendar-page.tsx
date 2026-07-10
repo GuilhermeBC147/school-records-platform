@@ -28,6 +28,48 @@ type StaffCalendarPageProps = {
   }>;
 };
 
+type StaffMeetingRecord = {
+  createdAt: Date;
+  createdById: string;
+  durationMinutes: number;
+  id: string;
+  startTime: string | null;
+  teacherId: string;
+  teacherNames: string[];
+  title: string;
+  workDate: Date;
+};
+
+function collapseAdminMeetings(meetings: StaffMeetingRecord[]) {
+  const groups = new Map<string, StaffMeetingRecord>();
+
+  for (const meeting of meetings) {
+    const key = [
+      meeting.createdById,
+      meeting.createdAt.toISOString(),
+      meeting.title,
+      meeting.workDate.toISOString(),
+      meeting.startTime ?? "",
+      meeting.durationMinutes,
+    ].join("|");
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.teacherNames = [
+        ...new Set([...existing.teacherNames, ...meeting.teacherNames]),
+      ];
+      continue;
+    }
+
+    groups.set(key, {
+      ...meeting,
+      teacherNames: [...meeting.teacherNames],
+    });
+  }
+
+  return Array.from(groups.values());
+}
+
 export async function StaffCalendarPage({
   pageRole,
   searchParams,
@@ -67,7 +109,7 @@ export async function StaffCalendarPage({
   const teachers = selectedTeacherId
     ? allTeachers.filter((teacher) => teacher.id === selectedTeacherId)
     : allTeachers;
-  const [classes, bonusClasses] = await Promise.all([
+  const [classes, bonusClasses, meetings] = await Promise.all([
     prisma.class.findMany({
       orderBy: [{ startTime: "asc" }, { name: "asc" }],
       where: {
@@ -106,8 +148,46 @@ export async function StaffCalendarPage({
         teacher: { select: { name: true } },
       },
     }),
+    prisma.teacherWorkLog.findMany({
+      orderBy: [{ workDate: "asc" }, { startTime: "asc" }, { title: "asc" }],
+      where: {
+        category: "MEETING",
+        createdBy: { role: "ADMIN" },
+        workDate: { gte: weekStart, lt: weekEnd },
+        ...(selectedTeacherId ? { teacherId: selectedTeacherId } : {}),
+      },
+      select: {
+        createdAt: true,
+        createdById: true,
+        durationMinutes: true,
+        id: true,
+        startTime: true,
+        teacher: { select: { name: true } },
+        teacherId: true,
+        title: true,
+        workDate: true,
+      },
+    }),
   ]);
   const canEditClasses = currentUser.role === "ADMIN";
+  const meetingHref = canEditClasses
+    ? "/admin/work-summary"
+    : "/reception/calendar";
+  const meetingRecords: StaffMeetingRecord[] = meetings.map((meeting) => ({
+    createdAt: meeting.createdAt,
+    createdById: meeting.createdById,
+    durationMinutes: meeting.durationMinutes,
+    id: meeting.id,
+    startTime: meeting.startTime,
+    teacherId: meeting.teacherId,
+    teacherNames: [meeting.teacher.name],
+    title: meeting.title,
+    workDate: meeting.workDate,
+  }));
+  const calendarMeetings =
+    pageRole === "ADMIN"
+      ? collapseAdminMeetings(meetingRecords)
+      : meetingRecords;
   const classEvents: CalendarEvent[] = [];
 
   for (const date of weekDates) {
@@ -149,8 +229,22 @@ export async function StaffCalendarPage({
     teacherId: bonusClass.teacherId,
     teacherName: bonusClass.teacher.name,
   }));
-  const events = [...classEvents, ...bonusEvents];
+  const meetingEvents: CalendarEvent[] = calendarMeetings.map((meeting) => ({
+    kind: "MEETING",
+    date: meeting.workDate,
+    durationMinutes: meeting.durationMinutes,
+    href: meetingHref,
+    id: meeting.id,
+    startTime: meeting.startTime,
+    teacherId: meeting.teacherId,
+    teacherName: meeting.teacherNames.join(", "),
+    title: meeting.title,
+  }));
+  const events = [...classEvents, ...bonusEvents, ...meetingEvents];
   const unscheduledClasses = classes.filter((schoolClass) => !schoolClass.startTime);
+  const unscheduledMeetings = calendarMeetings.filter(
+    (meeting) => !meeting.startTime,
+  );
   const backHref = currentUser.role === "ADMIN" ? "/dashboard" : "/reception";
   const backLabel =
     currentUser.role === "ADMIN"
@@ -258,7 +352,7 @@ export async function StaffCalendarPage({
           ) : null}
         </section>
 
-        {unscheduledClasses.length > 0 ? (
+        {unscheduledClasses.length + unscheduledMeetings.length > 0 ? (
           <section className="panel data-panel" aria-labelledby="unscheduled-classes-title">
             <div className="section-heading-row">
               <div>
@@ -283,6 +377,21 @@ export async function StaffCalendarPage({
                     {formatWeekdays(schoolClass.weekDays, currentUser.locale)}
                   </span>
                   <small>{formatDuration(schoolClass.durationMinutes)}</small>
+                </Link>
+              ))}
+              {unscheduledMeetings.map((meeting) => (
+                <Link
+                  className="calendar-unscheduled-item"
+                  href={meetingHref}
+                  key={`meeting-${meeting.id}`}
+                >
+                  <strong>{meeting.title}</strong>
+                  <span>
+                    {meeting.teacherNames.join(", ")} |{" "}
+                    {formatShortDate(meeting.workDate, currentUser.dateFormat)} |{" "}
+                    {t("workCategory.MEETING")}
+                  </span>
+                  <small>{formatDuration(meeting.durationMinutes)}</small>
                 </Link>
               ))}
             </div>

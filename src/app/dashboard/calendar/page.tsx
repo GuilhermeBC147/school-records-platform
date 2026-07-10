@@ -46,7 +46,7 @@ export default async function TeacherCalendarPage({
   const weekStart = getCalendarWeekStart(calendarDate.date);
   const weekDates = getCalendarWeekDates(weekStart);
   const weekEnd = addCalendarDays(weekStart, 7);
-  const [classes, bonusClasses] = await Promise.all([
+  const [classes, bonusClasses, meetings] = await Promise.all([
     prisma.class.findMany({
       orderBy: [{ startTime: "asc" }, { name: "asc" }],
       where: {
@@ -79,6 +79,22 @@ export default async function TeacherCalendarPage({
         status: true,
         subject: true,
         student: { select: { fullName: true } },
+      },
+    }),
+    prisma.teacherWorkLog.findMany({
+      orderBy: [{ workDate: "asc" }, { startTime: "asc" }, { title: "asc" }],
+      where: {
+        category: "MEETING",
+        createdBy: { role: "ADMIN" },
+        teacherId: currentUser.id,
+        workDate: { gte: weekStart, lt: weekEnd },
+      },
+      select: {
+        durationMinutes: true,
+        id: true,
+        startTime: true,
+        title: true,
+        workDate: true,
       },
     }),
   ]);
@@ -124,8 +140,20 @@ export default async function TeacherCalendarPage({
     teacherId: currentUser.id,
     teacherName: currentUser.name,
   }));
-  const events = [...classEvents, ...bonusEvents];
+  const meetingEvents: CalendarEvent[] = meetings.map((meeting) => ({
+    kind: "MEETING",
+    date: meeting.workDate,
+    durationMinutes: meeting.durationMinutes,
+    href: "/dashboard/work",
+    id: meeting.id,
+    startTime: meeting.startTime,
+    teacherId: currentUser.id,
+    teacherName: currentUser.name,
+    title: meeting.title,
+  }));
+  const events = [...classEvents, ...bonusEvents, ...meetingEvents];
   const unscheduledClasses = classes.filter((schoolClass) => !schoolClass.startTime);
+  const unscheduledMeetings = meetings.filter((meeting) => !meeting.startTime);
   const previousWeekHref = `/dashboard/calendar?date=${dateKey(
     addCalendarDays(weekStart, -7),
   )}`;
@@ -203,7 +231,7 @@ export default async function TeacherCalendarPage({
           ) : null}
         </section>
 
-        {unscheduledClasses.length > 0 ? (
+        {unscheduledClasses.length + unscheduledMeetings.length > 0 ? (
           <section className="panel data-panel" aria-labelledby="teacher-unscheduled-title">
             <div className="section-heading-row">
               <div>
@@ -221,6 +249,20 @@ export default async function TeacherCalendarPage({
                   <strong>{schoolClass.name}</strong>
                   <span>{formatWeekdays(schoolClass.weekDays, currentUser.locale)}</span>
                   <small>{formatDuration(schoolClass.durationMinutes)}</small>
+                </Link>
+              ))}
+              {unscheduledMeetings.map((meeting) => (
+                <Link
+                  className="calendar-unscheduled-item"
+                  href="/dashboard/work"
+                  key={`meeting-${meeting.id}`}
+                >
+                  <strong>{meeting.title}</strong>
+                  <span>
+                    {formatShortDate(meeting.workDate, currentUser.dateFormat)} |{" "}
+                    {t("workCategory.MEETING")}
+                  </span>
+                  <small>{formatDuration(meeting.durationMinutes)}</small>
                 </Link>
               ))}
             </div>

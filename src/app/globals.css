@@ -2453,6 +2453,11 @@ input[type="time"],
   border-left: 3px solid var(--accent);
 }
 
+.schedule-event-meeting {
+  border-color: var(--brand-line);
+  border-left: 3px solid var(--muted);
+}
+
 .calendar-grid-board {
   --calendar-row-height: 70px;
   display: grid;
@@ -2464,8 +2469,28 @@ input[type="time"],
   width: 100%;
 }
 
-.calendar-grid-wrap {
+.calendar-grid-shell,
+.calendar-grid-header-scroll,
+.calendar-grid-body-scroll {
   max-width: 100%;
+  min-width: 0;
+}
+
+.calendar-grid-header-scroll {
+  background: var(--panel);
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: sticky;
+  scrollbar-width: none;
+  top: 0;
+  z-index: 6;
+}
+
+.calendar-grid-header-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.calendar-grid-body-scroll {
   overflow-x: auto;
 }
 
@@ -2480,15 +2505,14 @@ input[type="time"],
   min-width: 0;
   overflow-wrap: anywhere;
   padding: 12px 10px;
-  position: sticky;
   text-align: left;
-  top: 0;
   z-index: 3;
 }
 
 .calendar-grid-corner {
   border-left: 0;
   left: 0;
+  position: sticky;
   z-index: 4;
 }
 

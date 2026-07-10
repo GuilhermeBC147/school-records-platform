@@ -11,7 +11,7 @@ Keep the repository documentation synchronized with the implemented platform bef
 - Core class records, accounts, classes, students, grades, risk review, teacher work summaries, substitutions, reception workflows, localization, and imports are present in the current source.
 - Sprint 17 localization and Sprint 18 student/class imports are implemented and covered by the current critical-workflow checks.
 - Account theme preferences were added after the Sprint 18 plan and are implemented.
-- Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular and bonus classes across a Monday-to-Sunday week, with teachers shown on event cards.
+- Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular classes, bonus classes, and admin-created meetings across a Monday-to-Sunday week, with teachers shown on staff event cards. The admin view shows one card per meeting, and all calendar views keep the weekday header visible while scrolling.
 - Sprint 19 production readiness is not complete.
 
 ## Completed workflow decisions

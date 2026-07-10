@@ -6,17 +6,20 @@ export const translationResources = {
     "app.name": "School Records Platform",
     "calendar.currentWeek": "Current week",
     "calendar.expandGroup": "Expand to see all",
-    "calendar.groupedEvents": "classes at this time",
+    "calendar.groupedEvents": "events at this time",
     "calendar.nextWeek": "Next week",
     "calendar.noBook": "No book",
-    "calendar.noEvents": "No classes or bonus classes scheduled for this view.",
+    "calendar.noEvents":
+      "No classes, bonus classes, or meetings scheduled for this view.",
     "calendar.previousWeek": "Previous week",
-    "calendar.staffCopy": "See active classes and bonus classes by teacher and time.",
+    "calendar.staffCopy":
+      "See active classes, bonus classes, and admin-created meetings by teacher and time.",
     "calendar.timeRangeCopy": "The grid shows scheduled starts from",
     "calendar.unscheduledEyebrow": "Needs schedule",
-    "calendar.unscheduledTitle": "Classes without a start time",
+    "calendar.unscheduledTitle": "Classes or meetings without a start time",
     "calendar.weekOf": "Week of",
-    "calendar.weeklyCopy": "See your recurring classes and bonus classes across the week.",
+    "calendar.weeklyCopy":
+      "See your recurring classes, bonus classes, and included admin meetings across the week.",
     "calendar.weeklyTitle": "Weekly calendar",
     "landing.adminRole": "Administrators",
     "landing.adminRoleCopy":
@@ -756,17 +759,20 @@ export const translationResources = {
     "app.name": "School Records Platform",
     "calendar.currentWeek": "Semana atual",
     "calendar.expandGroup": "Expandir para ver todas",
-    "calendar.groupedEvents": "turmas neste horário",
+    "calendar.groupedEvents": "eventos neste horário",
     "calendar.nextWeek": "Próxima semana",
     "calendar.noBook": "Sem livro",
-    "calendar.noEvents": "Não há turmas ou aulas bônus agendadas para esta visualização.",
+    "calendar.noEvents":
+      "Não há turmas, aulas bônus ou reuniões agendadas para esta visualização.",
     "calendar.previousWeek": "Semana anterior",
-    "calendar.staffCopy": "Veja turmas ativas e aulas bônus por professor e horário.",
+    "calendar.staffCopy":
+      "Veja turmas ativas, aulas bônus e reuniões administrativas por professor e horário.",
     "calendar.timeRangeCopy": "A grade mostra inícios agendados de",
     "calendar.unscheduledEyebrow": "Precisa de horário",
-    "calendar.unscheduledTitle": "Turmas sem horário inicial",
+    "calendar.unscheduledTitle": "Turmas ou reuniões sem horário inicial",
     "calendar.weekOf": "Semana de",
-    "calendar.weeklyCopy": "Veja suas turmas recorrentes e aulas bônus ao longo da semana.",
+    "calendar.weeklyCopy":
+      "Veja suas turmas recorrentes, aulas bônus e reuniões incluídas ao longo da semana.",
     "calendar.weeklyTitle": "Calendário semanal",
     "landing.adminRole": "Administradores",
     "landing.adminRoleCopy":

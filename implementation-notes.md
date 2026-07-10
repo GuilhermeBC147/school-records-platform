@@ -72,3 +72,19 @@ None yet.
 - Edge cases found: opaque event backgrounds and elevated stacking keep timeline rules behind cards; grouped summaries reserve space for the expand icon.
 - Verification: typecheck, 20 critical workflow tests, production build, and diff checks passed; the in-app browser could not connect to the local development server for a visual smoke check.
 - Next session should read first: this file, `src/app/components/calendar-grid.tsx`, and the calendar styles in `src/app/globals.css`.
+
+## Admin meeting calendar projection
+
+- Deviations: 0; the existing per-teacher MEETING work-log rows are reused as calendar events, so no schema change was needed.
+- Most likely to revisit: reception meeting cards currently return to the reception calendar because reception has no work-log editor.
+- Edge cases found: meetings without a start time are retained in the unscheduled list; selected-teacher filters apply to meetings as well as classes and bonus classes; admin cards collapse the per-teacher rows while reception retains teacher-specific meeting rows.
+- Verification: typecheck, 20 critical workflow tests, production build, and diff checks passed.
+- Next session should read first: this file, `src/app/components/staff-calendar-page.tsx`, and `src/app/dashboard/calendar/page.tsx`.
+
+## Sticky calendar weekday header
+
+- Deviations: 0; the shared calendar now separates its sticky weekday strip from the vertically long event grid without changing data or schema.
+- Most likely to revisit: the mobile minimum board width may need tuning if the calendar is later optimized for phone-sized screens.
+- Edge cases found: the header and body need synchronized horizontal scroll positions because the event grid retains contained mobile scrolling; the header remains sticky until the calendar shell ends.
+- Verification: typecheck, critical workflow tests, production build, and mobile in-app browser smoke checks passed for admin and reception calendar routes.
+- Next session should read first: this file, `src/app/components/calendar-grid.tsx`, `src/app/components/calendar-grid-scroll-sync.tsx`, and `src/app/globals.css`.

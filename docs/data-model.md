@@ -59,9 +59,10 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Scheduled bonus classes cannot overlap another non-canceled bonus class for the same teacher on the same date.
 - Reception accounts can use separate student and class lookup pages for parent-facing questions. Student lookup shows active class context, absences, and grades by class; class lookup shows teacher, schedule, roster, and recent submitted lessons.
 - Bonus class scheduling includes a date-filtered calendar list with 30-minute time information and edit or attendance actions.
-- Calendar pages project active `Class` records onto their configured weekdays and `BonusClass` records onto their scheduled dates; calendar events are not persisted separately.
-- Teachers, admins, and reception use a Monday-to-Sunday calendar combining regular and bonus classes. Admin and reception event cards include the assigned teacher instead of using one column per teacher.
-- Calendar classes without a start time are listed separately because they cannot be placed on the time grid.
+- Calendar pages project active `Class` records onto their configured weekdays, `BonusClass` records onto their scheduled dates, and admin-created `MEETING` `TeacherWorkLog` records onto the selected teachers' dates; calendar events are not persisted separately.
+- Teachers, admins, and reception use a Monday-to-Sunday calendar combining regular classes, bonus classes, and admin-created meetings. Admin and reception event cards include the assigned teacher instead of using one column per teacher.
+- The admin calendar collapses the per-teacher MEETING work-log rows from one admin action into one card and combines the included teacher names.
+- Calendar classes and meetings without a start time are listed separately because they cannot be placed on the time grid.
 - Bonus class attendance can be confirmed as present, absent, or excused by the assigned teacher, reception, or admin.
 - Completed scheduled bonus classes count toward the assigned teacher's monthly work summary.
 - Student and class imports are previewed before confirmation. Invalid rows are not written, duplicate rows are skipped by default, and batch summaries keep created, skipped, duplicated, and failed counts.

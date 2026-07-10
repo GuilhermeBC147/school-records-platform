@@ -969,7 +969,13 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(staffCalendarPage, /\/reception\/classes\?classId=/);
   assert.match(staffCalendarPage, /\/admin\/classes\//);
   assert.match(staffCalendarPage, /status: \{ not: "CANCELED" \}/);
+  assert.match(staffCalendarPage, /teacherWorkLog\.findMany/);
+  assert.match(staffCalendarPage, /category: "MEETING"/);
+  assert.match(staffCalendarPage, /createdBy: \{ role: "ADMIN" \}/);
+  assert.match(staffCalendarPage, /collapseAdminMeetings/);
+  assert.match(staffCalendarPage, /teacherNames\.join\(", "\)/);
   assert.match(calendarGrid, /schedule-event-meta">\{event\.teacherName\}/);
+  assert.match(calendarGrid, /event\.kind === "MEETING"/);
   assert.match(calendarGrid, /groupEventsByStartTime/);
   assert.match(calendarGrid, /schedule-event-group/);
   assert.match(calendarGrid, /event\.book/);
@@ -981,7 +987,11 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(teacherCalendarPage, /\/dashboard\/classes\//);
   assert.match(teacherCalendarPage, /\/dashboard\/bonus-classes\?/);
   assert.match(teacherCalendarPage, /currentUser\.role !== "TEACHER"/);
+  assert.match(teacherCalendarPage, /teacherWorkLog\.findMany/);
+  assert.match(teacherCalendarPage, /category: "MEETING"/);
+  assert.match(teacherCalendarPage, /createdBy: \{ role: "ADMIN" \}/);
   assert.match(calendarLib, /calendarTimeSlots/);
+  assert.match(calendarLib, /CalendarMeetingEvent/);
   assert.match(calendarLib, /getCalendarWeekStart/);
   assert.match(calendarLib, /weekdayByJavaScriptDay/);
   assert.match(receptionPage, /\/reception\/bonus-classes\/\$\{bonusClass\.id\}/);

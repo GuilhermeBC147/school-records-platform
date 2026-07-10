@@ -45,7 +45,22 @@ export type CalendarBonusEvent = {
   href: string;
 };
 
-export type CalendarEvent = CalendarClassEvent | CalendarBonusEvent;
+export type CalendarMeetingEvent = {
+  kind: "MEETING";
+  id: string;
+  date: Date;
+  teacherId: string;
+  teacherName: string;
+  title: string;
+  startTime: string | null;
+  durationMinutes: number;
+  href: string;
+};
+
+export type CalendarEvent =
+  | CalendarClassEvent
+  | CalendarBonusEvent
+  | CalendarMeetingEvent;
 
 export function dateKey(date: Date) {
   return date.toISOString().slice(0, 10);

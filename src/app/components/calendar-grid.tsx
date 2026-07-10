@@ -17,6 +17,7 @@ import type { AccountLocale } from "@/lib/locale";
 import { getTranslations, type TranslationKey } from "@/lib/translations";
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { CalendarGridScrollSync } from "./calendar-grid-scroll-sync";
 
 const calendarRowHeight = 70;
 const calendarStartMinutes = calendarTimeSlots[0];
@@ -93,6 +94,20 @@ function eventLabel(
         </span>
         <span className="schedule-event-meta">
           {formatClassType(event.classType, t)} / {event.teacherName}
+        </span>
+      </>
+    );
+  }
+
+  if (event.kind === "MEETING") {
+    return (
+      <>
+        <strong>
+          {formatStartTime(event.startTime)} | {formatDuration(event.durationMinutes)}
+        </strong>
+        <span className="schedule-event-title">{event.title}</span>
+        <span className="schedule-event-meta">
+          {t("workCategory.MEETING")} / {event.teacherName}
         </span>
       </>
     );
@@ -256,87 +271,106 @@ export function CalendarGrid({
   } as CSSProperties;
 
   return (
-    <div className="table-wrap calendar-grid-wrap">
+    <div
+      className="calendar-grid-shell calendar-grid-wrap"
+      data-calendar-grid-shell
+    >
       <div
-        className={`schedule-table calendar-grid-board ${mode}-calendar-grid`}
-        style={boardStyle}
+        className="calendar-grid-header-scroll"
+        data-calendar-grid-header-scroll
       >
-        <div className="calendar-grid-corner">{t("label.time")}</div>
-        {columns.map((column) => (
-          <div className="calendar-grid-header" key={column.key}>
-            {column.label}
-          </div>
-        ))}
-        <div className="calendar-grid-time-column">
-          {calendarTimeSlots.map((slotStartMinutes) => (
-            <div className="calendar-grid-time-slot" key={slotStartMinutes}>
-              {formatClockTimeFromMinutes(slotStartMinutes)}
+        <div
+          className={`schedule-table calendar-grid-board calendar-grid-header-board ${mode}-calendar-grid`}
+          style={boardStyle}
+        >
+          <div className="calendar-grid-corner">{t("label.time")}</div>
+          {columns.map((column) => (
+            <div className="calendar-grid-header" key={column.key}>
+              {column.label}
             </div>
           ))}
         </div>
-        {columns.map((column) => {
-          const columnEvents = events.filter(
-            (event) => eventColumnKey(event, mode) === column.key,
-          );
-          const items = buildCalendarItems(columnEvents, collapseSameStart);
-          const laneCount = Math.max(
-            1,
-            ...items.map((item) => item.lane + 1),
-          );
+      </div>
+      <div
+        className="calendar-grid-body-scroll"
+        data-calendar-grid-body-scroll
+      >
+        <div
+          className={`schedule-table calendar-grid-board calendar-grid-body-board ${mode}-calendar-grid`}
+          style={boardStyle}
+        >
+          <div className="calendar-grid-time-column">
+            {calendarTimeSlots.map((slotStartMinutes) => (
+              <div className="calendar-grid-time-slot" key={slotStartMinutes}>
+                {formatClockTimeFromMinutes(slotStartMinutes)}
+              </div>
+            ))}
+          </div>
+          {columns.map((column) => {
+            const columnEvents = events.filter(
+              (event) => eventColumnKey(event, mode) === column.key,
+            );
+            const items = buildCalendarItems(columnEvents, collapseSameStart);
+            const laneCount = Math.max(
+              1,
+              ...items.map((item) => item.lane + 1),
+            );
 
-          return (
-            <div className="calendar-grid-column" key={column.key}>
-              {items.map((item) => {
-                const style = getEventStyle(item, laneCount);
+            return (
+              <div className="calendar-grid-column" key={column.key}>
+                {items.map((item) => {
+                  const style = getEventStyle(item, laneCount);
 
-                if (item.events.length === 1) {
-                  const event = item.events[0];
+                  if (item.events.length === 1) {
+                    const event = item.events[0];
+
+                    return (
+                      <CalendarEventCard
+                        className={`schedule-event schedule-event-positioned schedule-event-${event.kind.toLowerCase()}`}
+                        event={event}
+                        key={`${event.kind}-${event.id}`}
+                        locale={locale}
+                        style={style}
+                        t={t}
+                      />
+                    );
+                  }
 
                   return (
-                    <CalendarEventCard
-                      className={`schedule-event schedule-event-positioned schedule-event-${event.kind.toLowerCase()}`}
-                      event={event}
-                      key={`${event.kind}-${event.id}`}
-                      locale={locale}
+                    <details
+                      className="schedule-event-group schedule-event-positioned"
+                      key={`group-${item.startMinutes}`}
                       style={style}
-                      t={t}
-                    />
+                    >
+                      <summary className="schedule-event-group-summary">
+                        <strong>
+                          {item.events.length} {t("calendar.groupedEvents")}
+                        </strong>
+                        <span>
+                          {formatStartTime(item.events[0].startTime)} |{" "}
+                          {t("calendar.expandGroup")}
+                        </span>
+                      </summary>
+                      <div className="schedule-event-group-items">
+                        {item.events.map((event) => (
+                          <CalendarEventCard
+                            className={`schedule-event schedule-event-nested schedule-event-${event.kind.toLowerCase()}`}
+                            event={event}
+                            key={`${event.kind}-${event.id}`}
+                            locale={locale}
+                            t={t}
+                          />
+                        ))}
+                      </div>
+                    </details>
                   );
-                }
-
-                return (
-                  <details
-                    className="schedule-event-group schedule-event-positioned"
-                    key={`group-${item.startMinutes}`}
-                    style={style}
-                  >
-                    <summary className="schedule-event-group-summary">
-                      <strong>
-                        {item.events.length} {t("calendar.groupedEvents")}
-                      </strong>
-                      <span>
-                        {formatStartTime(item.events[0].startTime)} |{" "}
-                        {t("calendar.expandGroup")}
-                      </span>
-                    </summary>
-                    <div className="schedule-event-group-items">
-                      {item.events.map((event) => (
-                        <CalendarEventCard
-                          className={`schedule-event schedule-event-nested schedule-event-${event.kind.toLowerCase()}`}
-                          event={event}
-                          key={`${event.kind}-${event.id}`}
-                          locale={locale}
-                          t={t}
-                        />
-                      ))}
-                    </div>
-                  </details>
-                );
-              })}
-            </div>
-          );
-        })}
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
+      <CalendarGridScrollSync />
     </div>
   );
 }

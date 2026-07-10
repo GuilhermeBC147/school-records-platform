@@ -79,6 +79,17 @@ The current data model already contains the information needed for the first cal
 Consequences:
 The first calendar increment does not model holidays, date ranges, recurring exceptions, or drag-and-drop editing. Classes without start times are shown outside the time grid, and the week view preserves the existing 07:00–22:00 range.
 
+## 2026-07-10 - Project admin meetings into role-scoped calendars
+
+Decision:
+Reuse the existing TeacherWorkLog records created by the admin meeting workflow as calendar events. The workflow already writes one MEETING work log per selected teacher, so each teacher calendar can query its own record while admin and reception views can project all matching teacher records into the shared week.
+
+Reason:
+This keeps the work-summary record and the calendar projection aligned. It shows a meeting to every included teacher without adding a second shared-event table or changing the database schema.
+
+Consequences:
+Only admin-created MEETING work logs are projected. Meetings without a start time appear in the calendar's unscheduled list, while timed meetings use the existing duration and overlap layout. The admin view collapses the per-teacher rows from one admin action into one card and combines the teacher names; reception retains its teacher-specific view. Teacher cards link to teacher work; admin cards link to the admin work summary, and reception cards remain view-only within its calendar flow.
+
 ## 2026-07-10 - Make calendar cards duration-aware and scannable
 
 Decision:
