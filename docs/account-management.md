@@ -19,11 +19,13 @@ Admins can:
 Inactive accounts cannot log in because login only accepts active users.
 
 Each account also stores a preferred date format, locale, and theme. Staff can
-update these preferences from `/dashboard/account`; filter fields display the
-account date format while still submitting ISO date values for server-side
-queries and database consistency. The supported locales are English and
-Brazilian Portuguese, with Brazilian Portuguese as the default. The supported
-themes are light and dark, with light as the default.
+update these preferences from `/dashboard/account`; the signed-in language
+selector is grouped with the other account settings instead of the global
+topbar. Filter fields display the account date format while still submitting
+ISO date values for server-side queries and database consistency. The
+supported locales are English and Brazilian Portuguese, with Brazilian
+Portuguese as the default. The supported themes are light and dark, with
+light as the default.
 
 ## Password Reset
 

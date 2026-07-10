@@ -20,9 +20,10 @@ export default async function RootLayout({
 }>) {
   const currentUser = await getCurrentUser();
   const theme = currentUser?.theme ?? defaultAccountTheme;
+  const locale = currentUser?.locale ?? defaultUnauthenticatedLocale;
 
   return (
-    <html lang={formatHtmlLang(defaultUnauthenticatedLocale)}>
+    <html lang={formatHtmlLang(locale)}>
       <body data-theme={formatThemeAttribute(theme)} suppressHydrationWarning>
         {children}
       </body>

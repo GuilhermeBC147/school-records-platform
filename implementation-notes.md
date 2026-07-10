@@ -88,3 +88,27 @@ None yet.
 - Edge cases found: the header and body need synchronized horizontal scroll positions because the event grid retains contained mobile scrolling; the header remains sticky until the calendar shell ends.
 - Verification: typecheck, critical workflow tests, production build, and mobile in-app browser smoke checks passed for admin and reception calendar routes.
 - Next session should read first: this file, `src/app/components/calendar-grid.tsx`, `src/app/components/calendar-grid-scroll-sync.tsx`, and `src/app/globals.css`.
+
+## Navigation and locale redesign
+
+### Deviations
+
+None yet.
+
+### Discovered edge cases
+
+- The expanded admin shortcut row is 1,635px wide at a 375px viewport; the right/left hint state makes the hidden links discoverable and the active shortcut is scrolled into view.
+- Parent and nested shortcuts can both match a path, so only the longest matching route is marked active.
+- Public locale selection is URL-based; signed-in document language follows the account, while public query-string content retains the root layout's unauthenticated default `lang` attribute.
+
+### Questions for review
+
+None yet.
+
+### End-of-session summary
+
+- Deviations: 0 from the approved plan.
+- Most likely to revisit: the public page `<html lang>` remains the unauthenticated default when the locale is selected through a query string.
+- Edge cases found: nested routes use the most-specific active shortcut; mobile overflow exposes hidden links; public locale selection is URL-based.
+- Verification: `npm.cmd test`, `npm.cmd run typecheck`, `npm.cmd run build`, and in-app browser smoke checks passed.
+- Next session should read first: this section, `src/app/components/app-topbar.tsx`, and `src/app/globals.css`.

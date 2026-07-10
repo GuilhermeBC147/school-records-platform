@@ -157,8 +157,7 @@ button {
   font-size: 13px;
 }
 
-.topbar-actions,
-.topbar-locale-form {
+.topbar-actions {
   align-items: center;
   display: flex;
   gap: 12px;
@@ -168,30 +167,78 @@ button {
   justify-content: flex-end;
 }
 
-.topbar-locale-form label {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-}
-
-.topbar-locale-form span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.topbar-locale-form select {
-  min-height: 44px;
-  min-width: 170px;
+.shortcut-nav-shell {
+  min-width: 0;
+  position: relative;
 }
 
 .shortcut-nav {
   align-items: center;
   border-top: 1px solid var(--line);
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
+  overflow-x: auto;
   padding-top: 12px;
+  scrollbar-color: var(--brand-line) transparent;
+  scrollbar-width: thin;
+}
+
+.shortcut-nav::-webkit-scrollbar {
+  height: 6px;
+}
+
+.shortcut-nav::-webkit-scrollbar-thumb {
+  background: var(--brand-line);
+  border-radius: 999px;
+}
+
+.shortcut-nav-shell.has-left-overflow::before,
+.shortcut-nav-shell.has-right-overflow::after {
+  bottom: 0;
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 12px;
+  width: 42px;
+  z-index: 2;
+}
+
+.shortcut-nav-shell.has-left-overflow::before {
+  background: linear-gradient(90deg, var(--panel), transparent);
+  left: 0;
+}
+
+.shortcut-nav-shell.has-right-overflow::after {
+  background: linear-gradient(270deg, var(--panel), transparent);
+  right: 0;
+}
+
+.shortcut-scroll-hint {
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--brand);
+  display: inline-flex;
+  font-size: 20px;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  z-index: 3;
+}
+
+.shortcut-scroll-hint-left {
+  left: 4px;
+}
+
+.shortcut-scroll-hint-right {
+  right: 4px;
 }
 
 .shortcut-link {
@@ -200,6 +247,7 @@ button {
   border-radius: 999px;
   color: var(--muted);
   display: inline-flex;
+  flex: 0 0 auto;
   font-size: 13px;
   font-weight: 800;
   justify-content: center;
@@ -331,6 +379,38 @@ body[data-theme="dark"] .public-topbar {
   margin: 0 auto;
   padding: 18px 0;
   width: min(1120px, calc(100% - 32px));
+}
+
+.public-topbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.public-locale-toggle {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+}
+
+.locale-toggle-link {
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  min-height: 30px;
+  padding: 6px 8px;
+  text-decoration: none;
+}
+
+.locale-toggle-link:hover,
+.locale-toggle-link[aria-current="page"] {
+  background: var(--brand-soft);
+  color: var(--brand);
+  text-decoration: none;
 }
 
 .public-brand {
@@ -2775,27 +2855,14 @@ th {
     flex-direction: column;
   }
 
-  .topbar-actions,
-  .topbar-locale-form {
+  .topbar-actions {
     align-items: stretch;
     flex-direction: column;
     width: 100%;
   }
 
-  .topbar-locale-form label {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
   .shortcut-nav {
-    flex-wrap: nowrap;
-    overflow-x: auto;
     padding-bottom: 4px;
-    scrollbar-width: thin;
-  }
-
-  .shortcut-link {
-    flex: 0 0 auto;
   }
 
   .public-topbar-inner {
@@ -2803,8 +2870,13 @@ th {
     flex-direction: column;
   }
 
-  .public-topbar-inner .primary-link {
+  .public-topbar-actions {
+    justify-content: space-between;
     width: 100%;
+  }
+
+  .public-topbar-actions .primary-link {
+    flex: 1;
   }
 
   .public-main {

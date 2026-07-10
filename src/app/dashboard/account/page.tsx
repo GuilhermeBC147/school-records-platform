@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import {
   changeOwnPasswordAction,
   updateOwnDateFormatAction,
+  updateOwnLocaleAction,
   updateOwnThemeAction,
 } from "@/app/actions/accounts";
 import { accountDateFormatOptions } from "@/lib/date-format";
+import { accountLocaleOptions } from "@/lib/locale";
 import { getCurrentUser } from "@/lib/session";
 import { accountThemeOptions } from "@/lib/theme";
 import { getTranslations } from "@/lib/translations";
@@ -42,6 +44,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const dateFormatUpdated = params.dateFormat === "updated";
   const localeUpdated = params.locale === "updated";
   const themeUpdated = params.theme === "updated";
+  const dashboardHref = currentUser.role === "RECEPTION" ? "/reception" : "/dashboard";
 
   return (
     <main className="app-shell">
@@ -49,15 +52,41 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="account-title">
-          <Link className="text-link" href="/dashboard">
+          <Link className="text-link" href={dashboardHref}>
             {t("account.backToDashboard")}
           </Link>
           <p className="eyebrow">{t("dashboard.account")}</p>
           <h1 id="account-title">{t("account.yourAccount")}</h1>
           <p className="lede">{currentUser.email}</p>
+        </section>
+
+        <section className="panel">
+          <h2>{t("account.language")}</h2>
           {localeUpdated ? (
             <p className="form-success">{t("account.languageUpdated")}</p>
           ) : null}
+          <form action={updateOwnLocaleAction} className="admin-form">
+            <input
+              name="redirectTo"
+              type="hidden"
+              value="/dashboard/account"
+            />
+            <label>
+              <span>{t("account.preferredLanguage")}</span>
+              <select defaultValue={currentUser.locale} name="locale">
+                {accountLocaleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="record-actions">
+              <button className="primary-button" type="submit">
+                {t("account.saveLanguage")}
+              </button>
+            </div>
+          </form>
         </section>
 
         <section className="panel">

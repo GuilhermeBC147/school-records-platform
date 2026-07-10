@@ -1,9 +1,26 @@
 import Link from "next/link";
-import { defaultUnauthenticatedLocale } from "@/lib/locale";
+import {
+  accountLocaleOptions,
+  normalizeAccountLocale,
+  type AccountLocale,
+} from "@/lib/locale";
 import { getTranslations } from "@/lib/translations";
 
-export default function Home() {
-  const t = getTranslations(defaultUnauthenticatedLocale);
+type HomeProps = {
+  searchParams: Promise<{
+    locale?: string;
+  }>;
+};
+
+function localeShortLabel(locale: AccountLocale) {
+  return locale === "PT_BR" ? "PT-BR" : "EN";
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  const locale = normalizeAccountLocale(params.locale);
+  const t = getTranslations(locale);
+  const loginHref = `/login?locale=${locale}`;
 
   return (
     <main className="public-page">
@@ -18,9 +35,27 @@ export default function Home() {
               <small>{t("landing.brandTagline")}</small>
             </span>
           </Link>
-          <Link className="primary-link" href="/login">
-            {t("landing.signIn")}
-          </Link>
+          <div className="public-topbar-actions">
+            <nav
+              aria-label={t("account.language")}
+              className="public-locale-toggle"
+            >
+              {accountLocaleOptions.map((option) => (
+                <Link
+                  aria-current={locale === option.value ? "page" : undefined}
+                  aria-label={option.label}
+                  className="locale-toggle-link"
+                  href={`/?locale=${option.value}`}
+                  key={option.value}
+                >
+                  {localeShortLabel(option.value)}
+                </Link>
+              ))}
+            </nav>
+            <Link className="primary-link" href={loginHref}>
+              {t("landing.signIn")}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -31,7 +66,7 @@ export default function Home() {
             <h1 id="landing-title">{t("landing.title")}</h1>
             <p className="lede">{t("landing.copy")}</p>
             <div className="action-row">
-              <Link className="primary-link" href="/login">
+              <Link className="primary-link" href={loginHref}>
                 {t("landing.signIn")}
               </Link>
               <Link className="secondary-link" href="#features">
