@@ -35,6 +35,29 @@ test("teacher class pages restrict class access to assigned teachers", async () 
   assert.match(recordForm, /teacherId: currentUser\.id/);
 });
 
+test("public landing and shared role shortcuts preserve the UI entry points", async () => {
+  const home = await readProjectFile("src/app/page.tsx");
+  const loginPage = await readProjectFile("src/app/login/page.tsx");
+  const appTopbar = await readProjectFile("src/app/components/app-topbar.tsx");
+  const translations = await readProjectFile("src/lib/translations.ts");
+  const styles = await readProjectFile("src/app/globals.css");
+
+  assert.doesNotMatch(home, /redirect\("\/login"\)/);
+  assert.match(home, /landing\.title/);
+  assert.match(home, /href="\/login"/);
+  assert.match(loginPage, /href="\/"/);
+  assert.match(loginPage, /auth\.backToLanding/);
+  assert.match(appTopbar, /shortcutsByRole/);
+  assert.match(appTopbar, /currentUser\.role/);
+  assert.match(appTopbar, /shortcut-link/);
+  assert.match(appTopbar, /name="redirectTo"/);
+  assert.match(styles, /\.shortcut-nav/);
+  assert.match(styles, /body\[data-theme="dark"\]/);
+  assert.match(translations, /landing\.title/);
+  assert.match(translations, /auth\.backToLanding/);
+  assert.match(translations, /navigation\.primary/);
+});
+
 test("class record submission protects duplicate and unauthorized writes", async () => {
   const action = await readProjectFile("src/app/actions/class-records.ts");
 

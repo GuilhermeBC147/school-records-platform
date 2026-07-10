@@ -55,6 +55,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </header>
 
       <section className="auth-panel" aria-labelledby="login-title">
+        <Link className="text-link auth-back-link" href="/">
+          {t("auth.backToLanding")}
+        </Link>
         <p className="eyebrow">{t("auth.Access")}</p>
         <h1 id="login-title">{t("auth.signInTitle")}</h1>
         <p className="lede">{t("auth.loginCopy")}</p>
