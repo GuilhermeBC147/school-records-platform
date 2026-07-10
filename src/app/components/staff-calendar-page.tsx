@@ -4,10 +4,15 @@ import { CalendarGrid } from "@/app/components/calendar-grid";
 import { DateInput } from "@/app/components/date-input";
 import { formatDuration, formatWeekdays } from "@/lib/class-schedule";
 import {
+  addCalendarDays,
+  dateKey,
+  getCalendarWeekDates,
+  getCalendarWeekStart,
   getCalendarWeekday,
   safeCalendarDate,
   type CalendarEvent,
 } from "@/lib/calendar";
+import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getTranslations } from "@/lib/translations";
@@ -50,8 +55,10 @@ export async function StaffCalendarPage({
   const query = await searchParams;
   const t = getTranslations(currentUser.locale);
   const calendarDate = safeCalendarDate(query.date);
+  const weekStart = getCalendarWeekStart(calendarDate.date);
+  const weekDates = getCalendarWeekDates(weekStart);
+  const weekEnd = addCalendarDays(weekStart, 7);
   const selectedTeacherId = query.teacherId?.trim() || undefined;
-  const selectedWeekday = getCalendarWeekday(calendarDate.date);
   const allTeachers = await prisma.user.findMany({
     orderBy: { name: "asc" },
     where: { isActive: true, role: "TEACHER" },
@@ -65,23 +72,24 @@ export async function StaffCalendarPage({
       orderBy: [{ startTime: "asc" }, { name: "asc" }],
       where: {
         isActive: true,
-        weekDays: { has: selectedWeekday },
         ...(selectedTeacherId ? { teacherId: selectedTeacherId } : {}),
       },
       select: {
+        book: true,
         classType: true,
         durationMinutes: true,
         id: true,
         name: true,
         startTime: true,
         teacherId: true,
+        weekDays: true,
         teacher: { select: { name: true } },
       },
     }),
     prisma.bonusClass.findMany({
       orderBy: [{ startTime: "asc" }, { teacher: { name: "asc" } }],
       where: {
-        scheduledDate: calendarDate.date,
+        scheduledDate: { gte: weekStart, lt: weekEnd },
         status: { not: "CANCELED" },
         ...(selectedTeacherId ? { teacherId: selectedTeacherId } : {}),
       },
@@ -100,22 +108,33 @@ export async function StaffCalendarPage({
     }),
   ]);
   const canEditClasses = currentUser.role === "ADMIN";
-  const classEvents: CalendarEvent[] = classes
-    .filter((schoolClass) => schoolClass.startTime)
-    .map((schoolClass) => ({
-      kind: "CLASS" as const,
-      className: schoolClass.name,
-      classType: schoolClass.classType,
-      date: calendarDate.date,
-      durationMinutes: schoolClass.durationMinutes,
-      href: canEditClasses
-        ? `/admin/classes/${schoolClass.id}`
-        : `/reception/classes?classId=${schoolClass.id}`,
-      id: schoolClass.id,
-      startTime: schoolClass.startTime,
-      teacherId: schoolClass.teacherId,
-      teacherName: schoolClass.teacher.name,
-    }));
+  const classEvents: CalendarEvent[] = [];
+
+  for (const date of weekDates) {
+    const weekday = getCalendarWeekday(date);
+
+    for (const schoolClass of classes) {
+      if (!schoolClass.startTime || !schoolClass.weekDays.includes(weekday)) {
+        continue;
+      }
+
+      classEvents.push({
+        kind: "CLASS",
+        className: schoolClass.name,
+        classType: schoolClass.classType,
+        book: schoolClass.book,
+        date,
+        durationMinutes: schoolClass.durationMinutes,
+        href: canEditClasses
+          ? `/admin/classes/${schoolClass.id}`
+          : `/reception/classes?classId=${schoolClass.id}`,
+        id: schoolClass.id,
+        startTime: schoolClass.startTime,
+        teacherId: schoolClass.teacherId,
+        teacherName: schoolClass.teacher.name,
+      });
+    }
+  }
   const bonusEvents: CalendarEvent[] = bonusClasses.map((bonusClass) => ({
     kind: "BONUS" as const,
     attendanceStatus: bonusClass.attendanceStatus,
@@ -138,6 +157,16 @@ export async function StaffCalendarPage({
       ? t("label.backToDashboard")
       : t("label.backToReception");
   const pageLabel = pageRole === "ADMIN" ? t("dashboard.adminDashboard") : t("dashboard.reception");
+  const calendarPath = pageRole === "ADMIN" ? "/admin/calendar" : "/reception/calendar";
+  const weekHref = (date: Date) => {
+    const params = new URLSearchParams({ date: dateKey(date) });
+
+    if (selectedTeacherId) {
+      params.set("teacherId", selectedTeacherId);
+    }
+
+    return `${calendarPath}?${params.toString()}`;
+  };
 
   return (
     <main className="app-shell">
@@ -158,7 +187,20 @@ export async function StaffCalendarPage({
           </div>
         </section>
 
-        <section className="panel" aria-label={t("label.calendarFilters")}>
+        <section className="panel calendar-controls" aria-label={t("label.calendarFilters")}>
+          <div className="calendar-week-nav">
+            <Link className="secondary-link" href={weekHref(addCalendarDays(weekStart, -7))}>
+              {t("calendar.previousWeek")}
+            </Link>
+            <strong>
+              {t("calendar.weekOf")} {formatShortDate(weekStart, currentUser.dateFormat)}
+              {" – "}
+              {formatShortDate(addCalendarDays(weekStart, 6), currentUser.dateFormat)}
+            </strong>
+            <Link className="secondary-link" href={weekHref(addCalendarDays(weekStart, 7))}>
+              {t("calendar.nextWeek")}
+            </Link>
+          </div>
           <form className="filter-form compact-filter-form">
             <label>
               <span>{t("label.date")}</span>
@@ -166,6 +208,7 @@ export async function StaffCalendarPage({
                 calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
                 defaultValue={calendarDate.label}
+                hideFormatHint
                 name="date"
                 required
               />
@@ -185,27 +228,28 @@ export async function StaffCalendarPage({
               <button className="primary-button" type="submit">
                 {t("label.view")}
               </button>
-              <Link className="text-link" href={pageRole === "ADMIN" ? "/admin/calendar" : "/reception/calendar"}>
+              <Link className="text-link" href={calendarPath}>
                 {t("dashboard.today")}
               </Link>
             </div>
           </form>
         </section>
 
-        <section className="panel data-panel" aria-labelledby="daily-calendar-title">
+        <section className="panel data-panel" aria-labelledby="weekly-calendar-title">
           <div className="section-heading-row">
             <div>
-              <p className="eyebrow">{formatWeekdays([selectedWeekday], currentUser.locale)}</p>
-              <h2 id="daily-calendar-title">{t("label.dailyTeacherCalendar")}</h2>
+              <p className="eyebrow">{pageLabel}</p>
+              <h2 id="weekly-calendar-title">{t("calendar.weeklyTitle")}</h2>
             </div>
             <span className="status-pill">{events.length}</span>
           </div>
           <CalendarGrid
+            collapseSameStart
             dateFormat={currentUser.dateFormat}
-            dates={[calendarDate.date]}
+            dates={weekDates}
             events={events}
             locale={currentUser.locale}
-            mode="day"
+            mode="week"
             teachers={teachers}
             t={t}
           />
@@ -234,7 +278,10 @@ export async function StaffCalendarPage({
                   key={schoolClass.id}
                 >
                   <strong>{schoolClass.name}</strong>
-                  <span>{schoolClass.teacher.name}</span>
+                  <span>
+                    {schoolClass.teacher.name} |{" "}
+                    {formatWeekdays(schoolClass.weekDays, currentUser.locale)}
+                  </span>
                   <small>{formatDuration(schoolClass.durationMinutes)}</small>
                 </Link>
               ))}

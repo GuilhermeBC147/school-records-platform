@@ -58,9 +58,9 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Reception accounts can schedule independent bonus classes with student, subject, teacher, date, start time, duration, and notes.
 - Scheduled bonus classes cannot overlap another non-canceled bonus class for the same teacher on the same date.
 - Reception accounts can use separate student and class lookup pages for parent-facing questions. Student lookup shows active class context, absences, and grades by class; class lookup shows teacher, schedule, roster, and recent submitted lessons.
-- Bonus class scheduling includes a day calendar with 30-minute time rows and one column per teacher.
+- Bonus class scheduling includes a date-filtered calendar list with 30-minute time information and edit or attendance actions.
 - Calendar pages project active `Class` records onto their configured weekdays and `BonusClass` records onto their scheduled dates; calendar events are not persisted separately.
-- Teachers have a weekly personal calendar. Admins and reception have a daily teacher-column calendar combining regular and bonus classes.
+- Teachers, admins, and reception use a Monday-to-Sunday calendar combining regular and bonus classes. Admin and reception event cards include the assigned teacher instead of using one column per teacher.
 - Calendar classes without a start time are listed separately because they cannot be placed on the time grid.
 - Bonus class attendance can be confirmed as present, absent, or excused by the assigned teacher, reception, or admin.
 - Completed scheduled bonus classes count toward the assigned teacher's monthly work summary.

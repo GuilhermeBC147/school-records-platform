@@ -54,6 +54,7 @@ export default async function TeacherCalendarPage({
         teacherId: currentUser.id,
       },
       select: {
+        book: true,
         classType: true,
         durationMinutes: true,
         id: true,
@@ -95,6 +96,7 @@ export default async function TeacherCalendarPage({
         kind: "CLASS",
         className: schoolClass.name,
         classType: schoolClass.classType,
+        book: schoolClass.book,
         date,
         durationMinutes: schoolClass.durationMinutes,
         href: `/dashboard/classes/${schoolClass.id}`,

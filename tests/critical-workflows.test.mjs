@@ -877,6 +877,9 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   const staffCalendarPage = await readProjectFile(
     "src/app/components/staff-calendar-page.tsx",
   );
+  const calendarGrid = await readProjectFile(
+    "src/app/components/calendar-grid.tsx",
+  );
   const calendarLib = await readProjectFile("src/lib/calendar.ts");
   const teacherCalendarPage = await readProjectFile(
     "src/app/dashboard/calendar/page.tsx",
@@ -955,13 +958,24 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(receptionPage, /formatBonusClassErrorMessage/);
   assert.match(receptionCalendarPage, /StaffCalendarPage/);
   assert.match(adminCalendarPage, /StaffCalendarPage/);
-  assert.match(staffCalendarPage, /label\.dailyTeacherCalendar/);
+  assert.match(staffCalendarPage, /calendar\.weeklyTitle/);
   assert.match(staffCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(staffCalendarPage, /CalendarGrid/);
-  assert.match(staffCalendarPage, /weekDays: \{ has: selectedWeekday \}/);
+  assert.match(staffCalendarPage, /collapseSameStart/);
+  assert.match(staffCalendarPage, /getCalendarWeekDates/);
+  assert.match(staffCalendarPage, /schoolClass\.weekDays\.includes\(weekday\)/);
+  assert.match(staffCalendarPage, /mode="week"/);
+  assert.match(staffCalendarPage, /hideFormatHint/);
   assert.match(staffCalendarPage, /\/reception\/classes\?classId=/);
   assert.match(staffCalendarPage, /\/admin\/classes\//);
   assert.match(staffCalendarPage, /status: \{ not: "CANCELED" \}/);
+  assert.match(calendarGrid, /schedule-event-meta">\{event\.teacherName\}/);
+  assert.match(calendarGrid, /groupEventsByStartTime/);
+  assert.match(calendarGrid, /schedule-event-group/);
+  assert.match(calendarGrid, /event\.book/);
+  assert.match(calendarGrid, /durationMinutes \/ 30/);
+  assert.match(calendarGrid, /laneEndMinutes/);
+  assert.match(calendarGrid, /schedule-event-positioned/);
   assert.match(teacherCalendarPage, /CalendarGrid/);
   assert.match(teacherCalendarPage, /getCalendarWeekDates/);
   assert.match(teacherCalendarPage, /\/dashboard\/classes\//);

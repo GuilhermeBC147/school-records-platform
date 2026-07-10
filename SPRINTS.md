@@ -11,7 +11,7 @@ Keep the repository documentation synchronized with the implemented platform bef
 - Core class records, accounts, classes, students, grades, risk review, teacher work summaries, substitutions, reception workflows, localization, and imports are present in the current source.
 - Sprint 17 localization and Sprint 18 student/class imports are implemented and covered by the current critical-workflow checks.
 - Account theme preferences were added after the Sprint 18 plan and are implemented.
-- Role-scoped calendar views are implemented: teachers have a weekly personal calendar, while admins and reception can view combined regular and bonus classes in a daily teacher grid.
+- Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular and bonus classes across a Monday-to-Sunday week, with teachers shown on event cards.
 - Sprint 19 production readiness is not complete.
 
 ## Completed workflow decisions
@@ -455,7 +455,7 @@ Tasks:
 - Keep teacher-created bonus classes from the dashboard Add event flow aligned with reception-created bonus classes, including subject, date, start time, duration, and notes.
 - Add a reception student lookup for parent-facing questions, including last attended lesson, missed lessons, missed-class count, incomplete-homework count, and active class information.
 - Add a reception class lookup so reception can quickly confirm class teacher, schedule, roster, and recent lessons.
-- Show bonus classes in a calendar-style day grid with 30-minute rows and one column per teacher.
+- Show regular and bonus classes in a Monday-to-Sunday calendar-style grid with 30-minute rows and teacher details on staff event cards.
 - Let teachers, reception, or admins confirm bonus class attendance.
 - Split reception tools into focused dashboard, scheduling, calendar, and lookup pages.
 - Count completed bonus classes toward the assigned teacher's monthly paid work.

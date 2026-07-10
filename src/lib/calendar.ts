@@ -23,6 +23,7 @@ export type CalendarClassEvent = {
   teacherId: string;
   teacherName: string;
   className: string;
+  book: string | null;
   classType: string;
   startTime: string | null;
   durationMinutes: number;

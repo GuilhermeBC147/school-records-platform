@@ -71,13 +71,24 @@ Implement conflict detection and warning UX, add focused tests, and do not add a
 ## 2026-07-10 - Project existing schedules into role-specific calendars
 
 Decision:
-Use the existing `Class` recurring schedule and `BonusClass` dated session records to render calendar views. Teachers receive a weekly personal view; admins and reception use a daily teacher-column view. Calendar events link to existing protected pages for editing, lookup, or attendance confirmation.
+Use the existing `Class` recurring schedule and `BonusClass` dated session records to render calendar views. Teachers, admins, and reception use a Monday-to-Sunday week view. Admin and reception cards include the assigned teacher instead of using one column per teacher. Calendar events link to existing protected pages for editing, lookup, or attendance confirmation.
 
 Reason:
 The current data model already contains the information needed for the first calendar increment. A projection keeps the change reversible and avoids introducing a second scheduling write path or schema migration.
 
 Consequences:
-The first calendar increment does not model holidays, date ranges, recurring exceptions, or drag-and-drop editing. Classes without start times are shown outside the time grid, and the staff grid preserves the existing 07:00–22:00 range.
+The first calendar increment does not model holidays, date ranges, recurring exceptions, or drag-and-drop editing. Classes without start times are shown outside the time grid, and the week view preserves the existing 07:00–22:00 range.
+
+## 2026-07-10 - Make calendar cards duration-aware and scannable
+
+Decision:
+Render scheduled events as positioned cards whose height matches their duration. Place partially overlapping events in separate lanes, and group admin/reception events with the same day and exact start time behind an expandable card. Use an opaque card surface and a raised stacking layer so event text remains readable above the timeline rules. Keep the board within its panel at normal widths and contain narrow-screen scrolling inside the calendar viewport.
+
+Reason:
+Teachers, admins, and reception need to understand class length and concurrent activity from the weekly view without text collisions or cards extending beyond the surrounding page frame.
+
+Consequences:
+Grouped cards use the longest duration of their grouped events, while events with different start times remain separate. The layout remains read-only for scheduling purposes; existing event links continue to open the relevant protected workflow.
 
 ## 2026-07-10 - Use Hostinger VPS for production
 
