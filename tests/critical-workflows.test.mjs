@@ -514,12 +514,11 @@ test("admin student management supports creating and editing students", async ()
   assert.match(recordForm, /teacherAccounts/);
   assert.match(recordForm, /name="submittedById"/);
   assert.doesNotMatch(recordForm, /Conversation practice/);
-  assert.match(dashboardPage, /dashboard\.manageStudents/);
   assert.doesNotMatch(dashboardPage, /\/admin\/records/);
   assert.doesNotMatch(dashboardPage, /dashboard\.submittedRecords/);
   assert.match(dashboardPage, /dashboard-metric-grid/);
-  assert.match(dashboardPage, /dashboard-action-grid/);
-  assert.match(dashboardPage, /dashboard\.reviewSubstitutions/);
+  assert.doesNotMatch(dashboardPage, /dashboard-action-grid/);
+  assert.doesNotMatch(dashboardPage, /dashboard-action-card/);
 });
 
 test("admin CSV export includes record filters and student rows", async () => {
@@ -610,7 +609,6 @@ test("logged-in account page supports changing own password", async () => {
   assert.match(accountPage, /newPassword/);
   assert.match(accountPage, /confirmPassword/);
   assert.match(dashboardPage, /currentUser\.role === "ADMIN"/);
-  assert.match(dashboardPage, /\/dashboard\/account/);
 });
 
 test("admin risk review flags attendance and homework signals", async () => {
@@ -656,7 +654,6 @@ test("admin risk review flags attendance and homework signals", async () => {
   assert.doesNotMatch(riskPage, /test total below 7/);
   assert.doesNotMatch(riskPage, /oral grade C or below/);
   assert.doesNotMatch(riskPage, /missed classes/);
-  assert.match(dashboardPage, /\/admin\/risk/);
   assert.match(dashboardPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.doesNotMatch(dashboardPage, /Sign out/);
   assert.match(translations, /riskSignal\.incompleteHomework/);
@@ -806,14 +803,8 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.doesNotMatch(adminWorkPage, /type="time"/);
   assert.doesNotMatch(adminWorkPage, /type="number"/);
   assert.match(adminWorkPage, /label\.allTeachers/);
-  assert.match(dashboardPage, /\/dashboard\/work/);
   assert.match(dashboardPage, /AppTopbar currentUser=\{currentUser\}/);
-  assert.match(dashboardPage, /\/dashboard\/work\/new/);
-  assert.match(dashboardPage, /dashboard\.addActivity/);
   assert.doesNotMatch(dashboardPage, /Add event/);
-  assert.match(dashboardPage, /\/admin\/work-summary/);
-  assert.match(dashboardPage, /\/admin\/work-summary\/new-activity/);
-  assert.match(dashboardPage, /\/admin\/work-summary\/new-meeting/);
   assert.match(dataModelDoc, /Teacher Work Summaries/);
   assert.match(dataModelDoc, /class's assigned teacher/);
 });
@@ -880,8 +871,6 @@ test("substitute teachers can submit lessons pending admin approval", async () =
   assert.match(adminSubstitutionsPage, /adminReview\.noSubstituteLessons/);
   assert.doesNotMatch(adminSubstitutionsPage, /Undo approval/);
   assert.doesNotMatch(adminSubstitutionsPage, /<p className="eyebrow">\{lesson\.substitutionStatus\}<\/p>/);
-  assert.match(dashboardPage, /\/dashboard\/substitutions\/new/);
-  assert.match(dashboardPage, /\/admin\/substitutions/);
   assert.match(workLib, /substitutionStatus: "APPROVED"/);
   assert.match(workLib, /pendingSubstituteLessons/);
   assert.match(dataModelDoc, /Substitute Lessons/);
@@ -971,11 +960,9 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusLib, /formatBonusClassResultMessage/);
   assert.match(bonusLib, /formatBonusClassErrorMessage/);
   assert.match(bonusLib, /startMinutes < existingEnd/);
-  assert.match(receptionDashboardPage, /\/reception\/calendar/);
-  assert.match(receptionDashboardPage, /\/reception\/students/);
-  assert.match(receptionDashboardPage, /\/reception\/classes/);
   assert.match(receptionDashboardPage, /dashboard-metric-grid/);
-  assert.match(receptionDashboardPage, /dashboard-action-grid/);
+  assert.doesNotMatch(receptionDashboardPage, /dashboard-action-grid/);
+  assert.doesNotMatch(receptionDashboardPage, /dashboard-action-card/);
   assert.match(receptionDashboardPage, /upcomingBonusClasses/);
   assert.match(receptionDashboardPage, /getTranslations\(currentUser\.locale\)/);
   assert.match(receptionDashboardPage, /AppTopbar currentUser=\{currentUser\}/);
@@ -1096,10 +1083,6 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(dashboardPage, /dashboard\.adminDashboard/);
   assert.match(dashboardPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(dashboardPage, /getTranslations\(currentUser\.locale\)/);
-  assert.match(dashboardPage, /\/reception/);
-  assert.match(dashboardPage, /\/dashboard\/bonus-classes/);
-  assert.match(dashboardPage, /\/dashboard\/calendar/);
-  assert.match(dashboardPage, /\/admin\/calendar/);
   assert.match(workLib, /bonusClasses/);
   assert.match(workLib, /status: "COMPLETED"/);
   assert.match(dataModelDoc, /Reception accounts can schedule independent bonus classes/);

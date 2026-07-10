@@ -2171,48 +2171,6 @@ input[type="time"],
   margin-top: 8px;
 }
 
-.dashboard-action-grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.dashboard-action-card {
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--accent);
-  border-radius: 14px;
-  background: var(--panel);
-  display: grid;
-  gap: 8px;
-  min-height: 150px;
-  padding: 18px;
-  text-decoration: none;
-}
-
-.dashboard-action-card:hover {
-  border-color: var(--brand);
-  box-shadow: var(--shadow);
-  text-decoration: none;
-}
-
-.dashboard-action-card span {
-  color: var(--brand);
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.dashboard-action-card strong {
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.dashboard-action-card small {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.45;
-}
-
 .dashboard-feed {
   display: grid;
   gap: 14px;
@@ -3059,7 +3017,6 @@ th {
   .workspace,
   .workflow,
   .metric-grid,
-  .dashboard-action-grid,
   .data-grid,
   .class-grid,
   .record-settings,

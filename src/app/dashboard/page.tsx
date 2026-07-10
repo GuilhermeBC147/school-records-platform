@@ -277,65 +277,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               </article>
             </section>
 
-            <section className="dashboard-action-grid" aria-label={t("dashboard.adminWorkflows")}>
-              <Link className="dashboard-action-card" href="/admin/calendar">
-                <span>{t("dashboard.schedule")}</span>
-                <strong>{t("dashboard.calendar")}</strong>
-                <small>{t("calendar.staffCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/admin/manage-accounts">
-                <span>{t("dashboard.staff")}</span>
-                <strong>{t("dashboard.manageAccounts")}</strong>
-                <small>{t("dashboard.manageAccountsCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/admin/classes">
-                <span>{t("dashboard.classes")}</span>
-                <strong>{t("dashboard.manageClasses")}</strong>
-                <small>{t("dashboard.manageClassesCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/admin/students">
-                <span>{t("dashboard.students")}</span>
-                <strong>{t("dashboard.manageStudents")}</strong>
-                <small>{t("dashboard.manageStudentsCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/admin/risk">
-                <span>{t("dashboard.review")}</span>
-                <strong>{t("dashboard.studentRisk")}</strong>
-                <small>{t("dashboard.studentRiskCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/admin/work-summary">
-                <span>{t("dashboard.payroll")}</span>
-                <strong>{t("dashboard.workSummaries")}</strong>
-                <small>{t("dashboard.workSummariesCopy")}</small>
-              </Link>
-              <Link
-                className="dashboard-action-card"
-                href="/admin/work-summary/new-activity"
-              >
-                <span>{t("dashboard.payroll")}</span>
-                <strong>{t("dashboard.addActivity")}</strong>
-                <small>{t("dashboard.addActivityCopy")}</small>
-              </Link>
-              <Link
-                className="dashboard-action-card"
-                href="/admin/work-summary/new-meeting"
-              >
-                <span>{t("dashboard.payroll")}</span>
-                <strong>{t("dashboard.createMeeting")}</strong>
-                <small>{t("dashboard.createMeetingCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/admin/substitutions">
-                <span>{t("dashboard.approvals")}</span>
-                <strong>{t("dashboard.reviewSubstitutions")}</strong>
-                <small>{t("dashboard.reviewSubstitutionsCopy")}</small>
-              </Link>
-              <Link className="dashboard-action-card" href="/reception">
-                <span>{t("dashboard.frontDesk")}</span>
-                <strong>{t("dashboard.receptionTools")}</strong>
-                <small>{t("dashboard.receptionToolsCopy")}</small>
-              </Link>
-            </section>
-
             <section className="panel dashboard-feed" aria-labelledby="admin-feed-title">
               <div className="section-heading-row">
                 <div>
@@ -478,47 +419,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   </article>
                 </section>
 
-                <section
-                  className="dashboard-action-grid teacher-action-grid"
-                  aria-label={t("dashboard.teacherWorkflows")}
-                >
-                  <Link className="dashboard-action-card" href="/dashboard/work">
-                    <span>{t("dashboard.payroll")}</span>
-                    <strong>{t("dashboard.monthlySummary")}</strong>
-                    <small>{t("dashboard.monthlySummaryCopy")}</small>
-                  </Link>
-                  <Link className="dashboard-action-card" href="/dashboard/calendar">
-                    <span>{t("dashboard.schedule")}</span>
-                    <strong>{t("dashboard.calendar")}</strong>
-                    <small>{t("calendar.weeklyCopy")}</small>
-                  </Link>
-                  <Link className="dashboard-action-card" href="/dashboard/work/new">
-                    <span>{t("dashboard.activity")}</span>
-                    <strong>{t("dashboard.addActivity")}</strong>
-                    <small>{t("dashboard.addActivityCopy")}</small>
-                  </Link>
-                  <Link
-                    className="dashboard-action-card"
-                    href="/dashboard/bonus-classes"
-                  >
-                    <span>{t("dashboard.attendance")}</span>
-                    <strong>{t("dashboard.bonusClasses")}</strong>
-                    <small>{t("dashboard.confirmBonusAttendanceCopy")}</small>
-                  </Link>
-                  <Link
-                    className="dashboard-action-card"
-                    href="/dashboard/substitutions/new"
-                  >
-                    <span>{t("dashboard.substitution")}</span>
-                    <strong>{t("dashboard.substituteLesson")}</strong>
-                    <small>{t("dashboard.substituteLessonCopy")}</small>
-                  </Link>
-                  <Link className="dashboard-action-card" href="/dashboard/account">
-                    <span>{t("dashboard.account")}</span>
-                    <strong>{t("dashboard.accountSettings")}</strong>
-                    <small>{t("dashboard.accountSettingsCopy")}</small>
-                  </Link>
-                </section>
               </>
             ) : null}
           </>

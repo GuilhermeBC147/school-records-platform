@@ -25,8 +25,8 @@ core workflow row for dashboard, calendar, classes, students, and records,
 plus a second horizontally scrollable row of collapsible groups for management,
 work, operations, and account tools. The group containing the current route
 opens automatically and scrolls into view, while each group keeps its existing
-direct links. The dashboard cards continue to provide contextual actions and
-status information.
+direct links. Dashboard metrics and activity feeds provide context without
+duplicating the topbar navigation.
 
 Dashboard text and date/time labels use the signed-in account's locale and date
 format. Account theme preferences apply across the application.

@@ -114,29 +114,6 @@ export default async function ReceptionDashboardPage() {
           </article>
         </section>
 
-        <section className="dashboard-action-grid" aria-label={t("dashboard.receptionWorkflows")}>
-          <Link className="dashboard-action-card" href="/reception/bonus-classes">
-            <span>{t("dashboard.schedule")}</span>
-            <strong>{t("dashboard.bonusClasses")}</strong>
-            <small>{t("dashboard.scheduleBonusClassesCopy")}</small>
-          </Link>
-          <Link className="dashboard-action-card" href="/reception/calendar">
-            <span>{t("dashboard.calendar")}</span>
-            <strong>{t("dashboard.teacherAvailability")}</strong>
-            <small>{t("dashboard.teacherAvailabilityCopy")}</small>
-          </Link>
-          <Link className="dashboard-action-card" href="/reception/students">
-            <span>{t("dashboard.lookup")}</span>
-            <strong>{t("dashboard.students")}</strong>
-            <small>{t("dashboard.studentsCopy")}</small>
-          </Link>
-          <Link className="dashboard-action-card" href="/reception/classes">
-            <span>{t("dashboard.lookup")}</span>
-            <strong>{t("dashboard.classes")}</strong>
-            <small>{t("dashboard.manageClassesCopy")}</small>
-          </Link>
-        </section>
-
         <section className="panel dashboard-feed" aria-labelledby="reception-feed-title">
           <div className="section-heading-row">
             <div>
