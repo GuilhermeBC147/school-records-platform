@@ -169,7 +169,7 @@ button {
 
 .admin-shortcut-stack {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -199,27 +199,81 @@ button {
   border-radius: 999px;
 }
 
+.admin-group-nav {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  padding-top: 12px;
+  scrollbar-color: var(--brand-line) transparent;
+  scrollbar-width: thin;
+}
+
+.admin-group-nav::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-group-nav::-webkit-scrollbar-thumb {
+  background: var(--brand-line);
+  border-radius: 999px;
+}
+
 .shortcut-group {
   align-items: center;
   display: flex;
   flex: 0 0 auto;
   gap: 8px;
+  position: relative;
 }
 
-.shortcut-group + .shortcut-group {
-  border-left: 1px solid var(--line);
-  margin-left: 4px;
-  padding-left: 10px;
+.shortcut-group[open] {
+  z-index: 5;
 }
 
-.shortcut-group-label {
+.shortcut-group-trigger {
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
   color: var(--muted);
-  flex: 0 0 auto;
-  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  gap: 8px;
+  justify-content: center;
+  list-style: none;
+  min-height: 40px;
+  padding: 8px 12px;
   white-space: nowrap;
+}
+
+.shortcut-group-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.shortcut-group-trigger::marker {
+  content: "";
+}
+
+.shortcut-group-trigger:hover,
+.shortcut-group[open] .shortcut-group-trigger,
+.shortcut-group.has-active .shortcut-group-trigger {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand);
+}
+
+.shortcut-group-chevron {
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.shortcut-group[open] .shortcut-group-chevron {
+  transform: rotate(180deg);
 }
 
 .shortcut-group-links {
@@ -227,6 +281,11 @@ button {
   display: flex;
   flex: 0 0 auto;
   gap: 6px;
+}
+
+.shortcut-group[open] .shortcut-group-links {
+  border-left: 1px solid var(--line);
+  padding-left: 8px;
 }
 
 .shortcut-nav-shell.has-left-overflow::before,
@@ -2897,16 +2956,41 @@ th {
     width: 100%;
   }
 
-  .shortcut-nav {
+  .admin-shortcut-stack {
+    gap: 6px;
+  }
+
+  .admin-group-nav {
+    align-items: flex-start;
     padding-bottom: 4px;
   }
 
-  .admin-shortcut-stack {
-    gap: 4px;
+  .shortcut-group-trigger {
+    min-height: 42px;
+    padding: 8px 10px;
   }
 
-  .shortcut-group-label {
-    font-size: 10px;
+  .shortcut-group[open] {
+    align-items: stretch;
+    display: grid;
+    gap: 6px;
+  }
+
+  .shortcut-group[open] .shortcut-group-links {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 4px;
+    min-width: 190px;
+    padding-left: 0;
+    padding-top: 6px;
+  }
+
+  .shortcut-group[open] .shortcut-group-links .shortcut-link {
+    justify-content: flex-start;
+    min-width: 190px;
+    text-align: left;
+    white-space: normal;
   }
 
   .public-topbar-inner {

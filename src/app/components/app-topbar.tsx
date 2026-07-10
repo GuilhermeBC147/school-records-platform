@@ -97,15 +97,20 @@ function isShortcutActive(pathname: string, href: string) {
 
 type ShortcutNavProps = {
   ariaLabel: string;
-  groups?: readonly ShortcutGroup[];
   locale: AccountLocale;
   pathname: string;
   shortcuts?: readonly Shortcut[];
 };
 
+type ShortcutGroupNavProps = {
+  ariaLabel: string;
+  groups: readonly ShortcutGroup[];
+  locale: AccountLocale;
+  pathname: string;
+};
+
 function ShortcutNav({
   ariaLabel,
-  groups,
   locale,
   pathname,
   shortcuts,
@@ -162,7 +167,7 @@ function ShortcutNav({
   ]
     .filter(Boolean)
     .join(" ");
-  const visibleShortcuts = groups?.flatMap((group) => group.shortcuts) ?? shortcuts ?? [];
+  const visibleShortcuts = shortcuts ?? [];
   const activeShortcutHref = visibleShortcuts
     .filter((shortcut) => isShortcutActive(pathname, shortcut.href))
     .sort((left, right) => right.href.length - left.href.length)[0]?.href;
@@ -185,16 +190,152 @@ function ShortcutNav({
   return (
     <div className={shortcutNavClassName}>
       <nav aria-label={ariaLabel} className="shortcut-nav" ref={shortcutNavRef}>
-        {groups
-          ? groups.map((group) => (
-              <div className="shortcut-group" key={group.labelKey}>
-                <span className="shortcut-group-label">{t(group.labelKey)}</span>
-                <div className="shortcut-group-links">
-                  {group.shortcuts.map(renderShortcut)}
-                </div>
+        {shortcuts?.map(renderShortcut)}
+      </nav>
+      {canScrollLeft ? (
+        <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-left">
+          {"\u2039"}
+        </span>
+      ) : null}
+      {canScrollRight ? (
+        <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-right">
+          {"\u203A"}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function ShortcutGroupNav({
+  ariaLabel,
+  groups,
+  locale,
+  pathname,
+}: ShortcutGroupNavProps) {
+  const t = getTranslations(locale);
+  const groupNavRef = useRef<HTMLElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const visibleShortcuts = groups.flatMap((group) => group.shortcuts);
+  const activeShortcutHref = visibleShortcuts
+    .filter((shortcut) => isShortcutActive(pathname, shortcut.href))
+    .sort((left, right) => right.href.length - left.href.length)[0]?.href;
+  const activeGroupKey = groups.find((group) =>
+    group.shortcuts.some((shortcut) => shortcut.href === activeShortcutHref),
+  )?.labelKey;
+  const [openGroupKey, setOpenGroupKey] = useState<TranslationKey | null>(
+    activeGroupKey ?? null,
+  );
+
+  useEffect(() => {
+    setOpenGroupKey(activeGroupKey ?? null);
+  }, [activeGroupKey]);
+
+  useEffect(() => {
+    const nav = groupNavRef.current;
+
+    if (!nav) {
+      return;
+    }
+
+    const updateScrollState = () => {
+      const maxScrollLeft = nav.scrollWidth - nav.clientWidth;
+
+      setCanScrollLeft(nav.scrollLeft > 1);
+      setCanScrollRight(maxScrollLeft - nav.scrollLeft > 1);
+    };
+
+    updateScrollState();
+    nav.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateScrollState);
+
+    resizeObserver?.observe(nav);
+
+    return () => {
+      nav.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+      resizeObserver?.disconnect();
+    };
+  }, [locale, openGroupKey]);
+
+  useEffect(() => {
+    const activeShortcut = groupNavRef.current?.querySelector<HTMLElement>(
+      '[aria-current="page"]',
+    );
+
+    activeShortcut?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [locale, openGroupKey, pathname]);
+
+  const renderShortcut = (shortcut: Shortcut) => {
+    const active = shortcut.href === activeShortcutHref;
+
+    return (
+      <Link
+        aria-current={active ? "page" : undefined}
+        className={`shortcut-link${active ? " is-active" : ""}`}
+        href={shortcut.href}
+        key={shortcut.href}
+      >
+        {t(shortcut.labelKey)}
+      </Link>
+    );
+  };
+
+  const toggleGroup = (groupKey: TranslationKey) => {
+    setOpenGroupKey((currentGroupKey) =>
+      currentGroupKey === groupKey ? null : groupKey,
+    );
+  };
+
+  const shortcutNavClassName = [
+    "shortcut-nav-shell",
+    canScrollLeft ? "has-left-overflow" : "",
+    canScrollRight ? "has-right-overflow" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div className={shortcutNavClassName}>
+      <nav aria-label={ariaLabel} className="admin-group-nav" ref={groupNavRef}>
+        {groups.map((group) => {
+          const active = group.labelKey === activeGroupKey;
+
+          return (
+            <details
+              className={`shortcut-group${active ? " has-active" : ""}`}
+              key={group.labelKey}
+              open={openGroupKey === group.labelKey}
+            >
+              <summary
+                className="shortcut-group-trigger"
+                onClick={(event) => {
+                  event.preventDefault();
+                  toggleGroup(group.labelKey);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleGroup(group.labelKey);
+                  }
+                }}
+              >
+                <span>{t(group.labelKey)}</span>
+                <span aria-hidden="true" className="shortcut-group-chevron">
+                  {"\u2304"}
+                </span>
+              </summary>
+              <div className="shortcut-group-links">
+                {group.shortcuts.map(renderShortcut)}
               </div>
-            ))
-          : shortcuts?.map(renderShortcut)}
+            </details>
+          );
+        })}
       </nav>
       {canScrollLeft ? (
         <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-left">
@@ -248,7 +389,7 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
               pathname={pathname}
               shortcuts={adminPrimaryShortcuts}
             />
-            <ShortcutNav
+            <ShortcutGroupNav
               ariaLabel={t("dashboard.adminTools")}
               groups={adminShortcutGroups}
               locale={currentUser.locale}

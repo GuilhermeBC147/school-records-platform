@@ -136,3 +136,27 @@ None.
 - Edge cases found: each row needs independent overflow state; nested active routes remain most-specific; bilingual labels must stay no-wrap.
 - Verification: `npm.cmd test`, `npm.cmd run typecheck`, `npm.cmd run build`, `git diff --check`, and desktop/mobile browser smoke checks passed; the browser console was clean.
 - Next session should read first: this section, `src/app/components/app-topbar.tsx`, and the topbar rules in `src/app/globals.css`.
+
+## Admin collapsible navigation refinement
+
+### Deviations
+
+- The grouped admin row changed from inline labeled links to native `<details>/<summary>` collapsible groups after mobile review found the labels and links too visually similar; the links remain inline in the second topbar row instead of overlaying the page.
+
+### Discovered edge cases
+
+- The most-specific active route must open its containing group so nested work-summary routes remain discoverable after client navigation.
+- Sibling groups close when another group opens to keep the second row compact; the primary and grouped admin rows keep independent horizontal overflow state.
+- The active group opens and scrolls into view after route changes, including nested work-summary routes.
+
+### Questions for review
+
+None.
+
+### End-of-session summary
+
+- Deviations: 1 user-requested interaction refinement from the previous grouped-navigation implementation.
+- Most likely to revisit: whether group spacing or the active-group scroll position needs further tuning after extended mobile use.
+- Edge cases found: active nested routes open the correct group; native summary controls preserve keyboard access; teacher and reception navigation remain unchanged.
+- Verification: `npm.cmd test`, `npm.cmd run typecheck`, `npm.cmd run build`, `git diff --check`, and in-app browser checks at mobile and desktop widths passed; mouse, Enter, and Space group toggles worked and the browser console was clean.
+- Next session should read first: this section, `src/app/components/app-topbar.tsx`, and the topbar rules in `src/app/globals.css`.

@@ -22,10 +22,11 @@ The dashboard redirects users into role-specific workflows:
 All signed-in dashboards also expose role-aware shortcut navigation in the
 shared topbar. Teachers and reception keep one direct-link row. Admins get a
 core workflow row for dashboard, calendar, classes, students, and records,
-plus a second row grouping management, work, operations, and account tools.
-Each admin row stays horizontally scrollable with a visible overflow
-affordance, while the dashboard cards continue to provide contextual actions
-and status information.
+plus a second horizontally scrollable row of collapsible groups for management,
+work, operations, and account tools. The group containing the current route
+opens automatically and scrolls into view, while each group keeps its existing
+direct links. The dashboard cards continue to provide contextual actions and
+status information.
 
 Dashboard text and date/time labels use the signed-in account's locale and date
 format. Account theme preferences apply across the application.

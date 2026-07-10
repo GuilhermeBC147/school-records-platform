@@ -11,7 +11,7 @@ Keep the repository documentation synchronized with the implemented platform bef
 - Core class records, accounts, classes, students, grades, risk review, teacher work summaries, substitutions, reception workflows, localization, and imports are present in the current source.
 - Sprint 17 localization and Sprint 18 student/class imports are implemented and covered by the current critical-workflow checks.
 - Account theme preferences were added after the Sprint 18 plan and are implemented.
-- Role navigation has been streamlined: the shared top bar now exposes each role's primary routes with a visible horizontal-overflow affordance; admins use a core row plus grouped management, work, operations, and account tools, while signed-in language selection lives in account settings and landing/login language controls are compact and URL-based.
+- Role navigation has been streamlined: the shared top bar now exposes each role's primary routes with a visible horizontal-overflow affordance; admins use a core row plus collapsible groups for management, work, operations, and account tools, while signed-in language selection lives in account settings and landing/login language controls are compact and URL-based.
 - Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular classes, bonus classes, and admin-created meetings across a Monday-to-Sunday week, with teachers shown on staff event cards. The admin view shows one card per meeting, and all calendar views keep the weekday header visible while scrolling.
 - Sprint 19 production readiness is not complete.
 

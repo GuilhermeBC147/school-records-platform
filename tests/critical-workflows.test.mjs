@@ -55,6 +55,13 @@ test("public landing and shared role shortcuts preserve the UI entry points", as
   assert.match(appTopbar, /shortcut-scroll-hint/);
   assert.match(appTopbar, /adminPrimaryShortcuts/);
   assert.match(appTopbar, /adminShortcutGroups/);
+  assert.match(appTopbar, /ShortcutGroupNav/);
+  assert.match(appTopbar, /<details/);
+  assert.match(appTopbar, /<summary\s+className="shortcut-group-trigger"/);
+  assert.match(appTopbar, /open={openGroupKey === group\.labelKey}/);
+  assert.match(appTopbar, /event\.preventDefault\(\)/);
+  assert.match(appTopbar, /event\.key === "Enter"/);
+  assert.match(appTopbar, /event\.key === " "/);
   assert.match(appTopbar, /dashboard\.navManagement/);
   assert.match(appTopbar, /dashboard\.navWork/);
   assert.match(appTopbar, /dashboard\.navOperations/);
@@ -65,7 +72,9 @@ test("public landing and shared role shortcuts preserve the UI entry points", as
   assert.match(appTopbar, /\/dashboard\/account/);
   assert.match(styles, /\.shortcut-nav/);
   assert.match(styles, /\.admin-shortcut-stack/);
-  assert.match(styles, /\.shortcut-group-label/);
+  assert.match(styles, /\.admin-group-nav/);
+  assert.match(styles, /\.shortcut-group-trigger/);
+  assert.match(styles, /\.shortcut-group-links/);
   assert.match(styles, /overflow-x: auto/);
   assert.match(styles, /body\[data-theme="dark"\]/);
   assert.match(translations, /landing\.title/);
