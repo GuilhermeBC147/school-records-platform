@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skills": {
+    "blindspot-pass": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/blindspot-pass/SKILL.md",
+      "computedHash": "405cffc33a58dbe53ff0552a7b6872575cbd01d4c03afb98cb3ee2e1f160ee08"
+    },
+    "brainstorm-prototypes": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/brainstorm-prototypes/SKILL.md",
+      "computedHash": "7a93a06ff68bc2af94f8559f5cfdf2e9ba01ec09501a10264ff353cfc6f2fdce"
+    },
+    "change-quiz": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/change-quiz/SKILL.md",
+      "computedHash": "e2d3375a290017261b38ebe6961d4e9d456af132c9bdc1ed121968ed2b210837"
+    },
+    "implementation-notes": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/implementation-notes/SKILL.md",
+      "computedHash": "af428cf35bde8952e226e3d250c41632079fc4861a750a64d09ea779e67d566f"
+    },
+    "implementation-plan": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/implementation-plan/SKILL.md",
+      "computedHash": "b06205779ee8a55287fd83ba5f97c9e1f8f9475d9f197b6f2443d193bd902b43"
+    },
+    "interview-me": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/interview-me/SKILL.md",
+      "computedHash": "b7aa0197037aebafa9a3c234a3ceba648f99f9a76b49a03da11ac9cb8fe2ec06"
+    },
+    "pitch-packager": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/pitch-packager/SKILL.md",
+      "computedHash": "633329b92ab76b98eb99a080e5039bf76b5decc9e2712e2969d438581c91072d"
+    },
+    "reference-hunt": {
+      "source": "Neeeophytee/finding-unknowns-skills",
+      "sourceType": "github",
+      "skillPath": "skills/reference-hunt/SKILL.md",
+      "computedHash": "6b14038e3b63942b3b514527db8bddb9b71964fe8ea38fc2a417ae6e1b822908"
+    }
+  }
+}

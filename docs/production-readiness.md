@@ -9,6 +9,7 @@ Use this checklist before handing the class records platform to the school for d
 - Set `AUTH_SECRET` to a long random value that is different from local development.
 - Keep `.env`, `.env.local`, and production secrets out of Git.
 - Run `npm.cmd run build` before deployment.
+- Run `npm.cmd test`, `npm.cmd run typecheck`, and `npm.cmd run prisma:validate` before deployment.
 - Run database migrations with `npm.cmd exec prisma migrate deploy`.
 
 ## Hosted PostgreSQL
@@ -69,6 +70,19 @@ After each deployment:
 10. Edit the submitted record and confirm the update is visible to the admin.
 11. Open a class grade table and confirm saved grades still load.
 12. Open `/admin/risk` and confirm the report loads for admins only.
+
+Also smoke-test the current role-specific scope:
+
+- Teacher: assigned-class access, draft/submitted record, grades, work summary, and substitute lesson flow.
+- Reception: bonus-class scheduling, calendar, student lookup, class lookup, and attendance confirmation.
+- Admin: account management, student/class imports, substitution approval, work summaries, grades, risk review, and CSV export.
+- Account preferences: English/Brazilian Portuguese, date format, and light/dark theme persistence.
+
+## Known launch blockers
+
+- Production password-reset email delivery is not configured.
+- Backup retention, restore testing, and ownership must be confirmed with the school.
+- Bonus classes currently prevent overlap with other bonus classes; regular-class schedule overlap remains an open decision and implementation item.
 
 ## Recovery Notes
 

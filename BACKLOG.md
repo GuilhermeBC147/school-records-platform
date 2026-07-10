@@ -2,54 +2,38 @@
 
 ## Now
 
-- Finish teacher self-service and admin risk review on the current sprint branch.
-- Keep risk-review thresholds easy to adjust.
-- Confirm admin risk report links back to relevant class/student records.
+- Complete production-readiness checks across admin, teacher, and reception workflows.
+- Confirm the production password-reset email path.
+- Confirm PostgreSQL backup ownership, retention, and restore testing.
+- Decide whether bonus classes must conflict with regular class schedules.
 
 ## Next
 
-- Add monthly teacher work summaries for payroll support.
-- Count regular submitted lessons by the teacher who actually taught them.
-- Add teacher-created paid activity records for events, game nights, Halloween, meetings, and other work.
-- Add admin review/correction for monthly teacher work totals.
+- Add browser and production-database checks for critical workflows.
+- Run a full quality-control pass for imports, localization, grading, risk review, scheduling, substitutions, exports, and work summaries.
+- Document any remaining launch blockers and follow-up work.
 
 ## Later
 
-- Add reception accounts with limited access.
-- Add independent bonus class scheduling.
-- Prevent double-booking a teacher for bonus classes.
-- Prevent bonus classes from overlapping regular class schedules when schedule data is available.
-- Count completed bonus classes in monthly teacher work summaries.
-- Add substitute teacher support for regular class lessons.
-- Separate lesson submitter/audit history from the teacher counted for payroll.
-- Add admin approval workflow for submitted records.
-- Add record edit history.
-- Add class/student archive workflow.
-- Add bilingual UI labels if needed.
-- Add broader workflow tests around admin setup.
+- Record edit history and broader audit history.
+- Class and student archive workflows.
+- Additional reporting or export formats beyond the current class-record CSV.
+- Additional roles or school-system integrations if the school requests them.
 
 ## Open Questions
 
-- What threshold counts as "a lot" of incomplete homework assignments?
-- What threshold counts as "a lot" of missed classes?
-- Should absences marked `EXCUSED` count as missed classes in the admin risk report?
-- Should late arrivals count in the risk report, or only absences?
-- Should grade entry be editable after the teacher saves it, or locked after an admin review?
-- Should admins be able to edit grades, or only view/export them?
-- Should grade reports be exportable to CSV in the first grading sprint?
-- Should an admin approve records before they become final?
-- Who is allowed to assign a substitute teacher: admins only, the primary teacher, or reception too?
-- Should substitute teachers be able to see the full class page, or only the lesson record they are covering?
-- Should extra activities require admin approval before they count for payroll?
-- What paid activity categories should be fixed options instead of free text?
-- What default duration should a bonus class have?
-- Can a bonus class include more than one student?
-- Should reception be able to edit or cancel bonus classes after the teacher confirms them?
-- Should payroll summaries count by lessons, hours, or both?
-- Does the school need Portuguese, English, or bilingual UI labels?
-- Should password reset emails be sent through the hosting provider, SMTP, or a transactional email service?
-- Should class books be free text or selected from an admin-managed book list?
-- Should semesters be fixed to 1 and 2, or support custom terms?
+- Which school-owned email provider should deliver password-reset links?
+- Should bonus classes be blocked when they overlap a teacher's regular class schedule?
+- What backup retention and restore-test schedule does the school require?
+- Should the school require additional exports for grades, imports, bonus classes, or payroll review?
+
+## Decisions already reflected in code
+
+- Risk thresholds are 4 incomplete homework records, 4 missed classes, 2 consecutive missed classes, test total below 7, and oral grade C or below.
+- Only `ABSENT` attendance counts as a missed class by default; `LATE` and `EXCUSED` remain visible but do not trigger that signal.
+- Substitute lessons use teacher submission, taught-by attribution, and admin approval state.
+- Work summaries count lessons and hours, including approved substitutions, completed bonus classes, and work logs.
+- The interface supports English and Brazilian Portuguese; the default locale is Brazilian Portuguese.
 
 ## Learning Goals
 

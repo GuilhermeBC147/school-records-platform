@@ -10,7 +10,8 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 
 ## Main Tables
 
-- `User`: login account for admins and teachers.
+- `User`: login account for admins, teachers, and reception staff, including date-format, locale, theme, and active-status preferences.
+- `PasswordResetToken`: hashed, expiring password-reset token linked to a user.
 - `Class`: a school class assigned to one teacher, with type, book, semester, year, schedule, and active status.
 - `Student`: a learner who can be enrolled in one or more classes.
 - `Enrollment`: the connection between a student and a class.
@@ -19,7 +20,9 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - `HomeworkRecord`: one student's homework status for one lesson.
 - `PartialEvaluationGrade`: one student's partial evaluation grade for the 7th or 23rd class.
 - `TestGrade`: one student's Mid-term or Final test grade.
+- `StudentRiskResolution`: an admin's resolution marker for a student/class risk row.
 - `TeacherWorkLog`: one paid non-class activity counted for a teacher's monthly work summary.
+- `TeacherWorkLogStudent`: a student attached to a teacher work-log entry.
 - `BonusClass`: one independently scheduled bonus class assigned to a teacher.
 - `ImportBatch`: one admin CSV import preview or confirmed import, with audit-friendly summary counts.
 - `ImportRow`: one uploaded CSV row with normalized data, validation errors, duplicate warnings, and the created record id when imported.
@@ -33,7 +36,7 @@ Teacher work summaries combine submitted lessons with manually entered paid acti
 - Admins can keep inactive classes for historical record review.
 - A student can be enrolled in multiple classes.
 - A student can optionally have one unique enrollment identifier for import duplicate detection.
-- A class can have only one lesson record for the same date.
+- A named lesson is unique per class, lesson date, and lesson name. The class-record form requires a lesson name, so a class can have multiple named lessons on the same date.
 - A student can have only one attendance record per lesson.
 - A student can have only one homework record per lesson.
 - A student can have only one partial evaluation grade per class and partial period.
@@ -84,7 +87,7 @@ Substitute records start as `PENDING_APPROVAL`. Admins can approve or reject the
 
 ## Risk Review
 
-The admin risk review report is computed from submitted class records. Admins can mark a student/class risk row as resolved; that stores the latest resolved lesson date so future reports only count submitted records after that point.
+The admin risk review report combines submitted lesson attendance/homework signals with saved test-grade signals. Admins can mark a student/class risk row as resolved; that stores the latest resolved lesson date so future lesson signals only count submitted records after that point.
 
 Default thresholds are kept in `src/app/admin/risk/page.tsx` so they can be adjusted in one place:
 
@@ -96,8 +99,8 @@ Default thresholds are kept in `src/app/admin/risk/page.tsx` so they can be adju
 
 Only `ABSENT` attendance records count as missed classes by default. `EXCUSED` and `LATE` records stay visible in class records but do not count toward the risk report thresholds.
 
-## Future Questions
+## Open Questions
 
-- Should substitute teachers be supported with a separate assignment table?
-- Should admin approval be required before a lesson becomes final?
-- What export format would be most useful for school records?
+- Which school-owned email provider should deliver password-reset links?
+- Should bonus classes also be blocked when they overlap regular class schedules?
+- What backup retention, restore testing, and additional exports does the school require?

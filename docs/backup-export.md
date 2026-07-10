@@ -19,6 +19,11 @@ The CSV includes one row per student record with:
 - homework status
 - submitter, submission time, and notes
 
+This CSV is a reporting export for submitted attendance and homework records.
+It is not a complete backup of grades, risk resolutions, substitutions, bonus
+classes, teacher work logs, import batches, account settings, or enrollment
+history.
+
 ## Grades and Risk Review Backups
 
 Class-record CSV exports are reporting copies for attendance and homework. They are not a full database backup.
@@ -29,6 +34,7 @@ Grades and risk-review inputs depend on database tables that are not represented
 - mid-term and final test grades
 - class rosters and enrollment history
 - submitted attendance and homework history used by `/admin/risk`
+- risk-resolution, substitution, bonus-class, work-log, and import records
 
 Use hosted PostgreSQL backups as the source of truth for recovering grades and risk-review data. Before any production migration, confirm a recent database backup exists and that it includes the whole database, not only exported CSV files.
 

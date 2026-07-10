@@ -4,30 +4,33 @@ Last updated: 2026-07-10
 
 ## Current focus
 
-Set up a better Codex workflow for the ongoing school records platform.
+Keep the repository documentation synchronized with the implemented platform before starting more product work.
 
-## Completed recently
+## Current implementation status
 
-- Decided to use repository documentation as long-term memory.
-- Decided to use AGENTS.md for Codex instructions.
-- Decided to use codebase-memory-mcp for codebase navigation.
-- Decided to use finding-unknowns-skills for planning bigger tasks.
-- Decided to bench Context Mode and Ultracode for now.
+- Core class records, accounts, classes, students, grades, risk review, teacher work summaries, substitutions, reception workflows, localization, and imports are present in the current source.
+- Sprint 17 localization and Sprint 18 student/class imports are implemented and covered by the current critical-workflow checks.
+- Account theme preferences were added after the Sprint 18 plan and are implemented.
+- Sprint 19 production readiness is not complete.
 
-## In progress
+## Completed workflow decisions
 
-- Adding or refreshing project documentation.
-- Installing Codex support tools.
-- Creating a repeatable workflow for new sessions, small changes, features, refactors, and handoffs.
-
-## Next recommended task
-
-Ask Codex to audit the current repository and update docs/ARCHITECTURE.md so it accurately reflects the current codebase.
+- Use repository documentation as long-term memory.
+- Use AGENTS.md for Codex instructions.
+- Use codebase-memory-mcp for codebase navigation.
+- Use the repository's finding-unknowns-skills package through the `blindspot-pass` skill for larger planning work.
+- Keep Context Mode and Ultracode benched for now.
 
 ## Known issues / questions
 
-- Confirm which features are already fully implemented.
-- Confirm which tests currently exist and which commands should be used regularly.
+- Production password-reset email delivery is still required before school use.
+- The current bonus-class overlap check covers other bonus classes, not regular class schedules.
+- Database backup ownership, retention, and restore testing still need production confirmation.
+- The current test suite is a static source-level critical-workflow suite, not browser or production database coverage.
+
+## Next recommended task
+
+Complete the production-readiness checklist and decide whether bonus classes must also be blocked against regular class schedules.
 
 ---
 # Sprint Plan

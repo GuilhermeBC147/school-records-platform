@@ -18,7 +18,10 @@ First run:
 cd "E:\Projects\school-records-platform"
 npm.cmd install
 Copy-Item .env.example .env.local
+# Edit .env.local and set a local AUTH_SECRET value.
 docker compose up -d
+npm.cmd exec prisma migrate deploy
+npm.cmd run db:seed
 npm.cmd run prisma:validate
 npm.cmd run dev
 ```
@@ -58,6 +61,7 @@ npm.cmd run build
 npm.cmd run test
 npm.cmd run typecheck
 npm.cmd run prisma:validate
+npm.cmd exec prisma migrate deploy
 npm.cmd run db:seed
 docker compose up -d
 docker compose down
@@ -104,7 +108,12 @@ The project is being built sprint by sprint as a learning-focused product. See:
 - [PROJECT_BRIEF.md](PROJECT_BRIEF.md)
 - [SPRINTS.md](SPRINTS.md)
 - [BACKLOG.md](BACKLOG.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/CODEX_WORKFLOW.md](docs/CODEX_WORKFLOW.md)
+- [docs/DECISIONS.md](docs/DECISIONS.md)
+- [docs/data-model.md](docs/data-model.md)
 - [docs/account-management.md](docs/account-management.md)
 - [docs/backup-export.md](docs/backup-export.md)
 - [docs/class-management.md](docs/class-management.md)
+- [docs/imports.md](docs/imports.md)
 - [docs/production-readiness.md](docs/production-readiness.md)

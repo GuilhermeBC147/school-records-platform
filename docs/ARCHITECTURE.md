@@ -1,44 +1,117 @@
 # Architecture
 
-## Purpose
+Current snapshot: 2026-07-10. The current code and Prisma schema are the source of truth when this document differs from older plans.
 
-This file explains the current structure of the School Records Platform so future Codex sessions can understand the project quickly.
+## Runtime
 
-## Overview
+- Next.js App Router with TypeScript and React.
+- PostgreSQL accessed through Prisma.
+- Docker Compose provides the local PostgreSQL database.
+- There is no separate backend service. Pages, server actions, and route handlers live in `src/app/`.
 
-School Records Platform is a web application for managing school/class records, including students, classes, attendance, homework, grades, and teacher workflows.
+## Repository structure
 
-## Main technologies
+- `src/app/` - App Router pages, layouts, role-specific workflows, and CSV/template route handlers.
+- `src/app/actions/` - server actions for authentication, accounts, class records, classes, grades, imports, risk review, students, substitutions, bonus classes, and teacher work.
+- `src/lib/` - shared session, password, Prisma, formatting, scheduling, translation, import, grade, bonus-class, and work-summary logic.
+- `prisma/schema.prisma` - current database models and enums.
+- `prisma/migrations/` - database migration history.
+- `prisma/seed.sql` - repeatable local development data.
+- `tests/critical-workflows.test.mjs` - static source-level checks for critical workflows.
+- `docs/` - product, architecture, workflow, and operational notes.
 
-- Next.js
-- TypeScript
-- Prisma
-- PostgreSQL
-- npm
+The generated Prisma client is written to `src/generated/prisma` by `prisma generate` and should not be edited by hand.
 
-## Main folders
+## Roles and authentication
 
-- `src/` - Application source code.
-- `prisma/` - Prisma schema, migrations, and seed-related files.
-- `tests/` - Automated tests, if present.
-- `docs/` - Project documentation and workflow notes.
+The current roles are `ADMIN`, `TEACHER`, and `RECEPTION`.
 
-## Important rules
+- Login uses email/password credentials.
+- Passwords are hashed with the shared password helper.
+- Sessions use a signed, HTTP-only seven-day cookie and require `AUTH_SECRET`.
+- Inactive users cannot log in.
+- Admin actions require an admin session.
+- Teachers are restricted to their own active classes, with a controlled substitute-lesson path.
+- Reception has separate scheduling and lookup workflows and does not receive general admin access.
 
-- Database schema changes should be intentional and reviewed carefully.
-- Business logic should not be changed during pure UI tasks.
-- Completed flows should not be rewritten without a specific refactor/redesign task.
-- Documentation should describe the current state of the project, not old plans.
+## Route map
 
-## To be updated by Codex
+Public routes:
 
-This file should later be updated after Codex audits the current repository.
+- `/`, `/login`, `/forgot-password`, `/reset-password`
 
-Codex should add:
+Teacher and admin dashboard routes:
 
-- Actual route/page structure.
-- Main database models.
-- Authentication/authorization flow, if implemented.
-- Main feature flows.
-- Test commands.
-- Development commands.
+- `/dashboard`
+- `/dashboard/account`
+- `/dashboard/classes/[classId]`
+- `/dashboard/classes/[classId]/record`
+- `/dashboard/work`, `/dashboard/work/new`
+- `/dashboard/bonus-classes`
+- `/dashboard/substitutions/new`
+
+Admin routes:
+
+- `/admin/manage-accounts`
+- `/admin/classes` and `/admin/classes/[classId]`
+- `/admin/students` and student profile/view routes
+- `/admin/records` and record export/detail routes
+- `/admin/risk`
+- `/admin/substitutions`
+- `/admin/work-summary`
+- `/admin/data`
+- `/admin/students/import` and `/admin/classes/import`, including templates and error reports
+
+Reception routes:
+
+- `/reception`
+- `/reception/bonus-classes` and `/reception/bonus-classes/[bonusClassId]`
+- `/reception/calendar`
+- `/reception/students`
+- `/reception/classes`
+
+Legacy `/admin/teachers` routes redirect to account management. `/reception/students-and-classes` redirects to the reception student lookup.
+
+## Data model
+
+The schema currently contains `User`, `PasswordResetToken`, `Class`, `Student`, `Enrollment`, `Lesson`, `AttendanceRecord`, `HomeworkRecord`, `PartialEvaluationGrade`, `TestGrade`, `StudentRiskResolution`, `TeacherWorkLog`, `TeacherWorkLogStudent`, `BonusClass`, `ImportBatch`, and `ImportRow`.
+
+Important invariants:
+
+- Teachers see active classes assigned to them; admins retain historical visibility of inactive data.
+- A lesson is identified by class, lesson date, and lesson name. The class-record form requires a lesson name, so a class can have multiple named lessons on one date.
+- Attendance and homework are unique per lesson and student.
+- Partial and test grades are unique per class, student, and period.
+- Substitute lessons retain the submitting teacher, the teacher who taught, and admin approval state.
+- Monthly work summaries combine submitted lessons, completed bonus classes, and teacher work logs.
+- Imports are previewed, validated, and recorded through import batches and rows.
+
+## Main workflows
+
+- Teachers and admins create class records with attendance, homework, notes, drafts, and submissions.
+- Teachers enter partial and test grades for their assigned classes.
+- Admins review records, exports, grades, risk signals, substitutions, imports, and work summaries.
+- Reception schedules bonus classes, uses student/class lookup, and confirms bonus attendance.
+- Users can select English or Brazilian Portuguese, a date format, and a light/dark theme.
+
+## Development and verification
+
+```powershell
+npm.cmd install
+Copy-Item .env.example .env.local
+docker compose up -d
+npm.cmd exec prisma migrate deploy
+npm.cmd run db:seed
+npm.cmd run dev
+```
+
+Useful checks:
+
+```powershell
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run prisma:validate
+npm.cmd run build
+```
+
+`npm.cmd test` currently runs static critical-workflow assertions rather than browser or database integration tests. See `README.md`, `docs/data-model.md`, and `docs/production-readiness.md` for operational details.
