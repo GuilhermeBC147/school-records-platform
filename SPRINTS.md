@@ -1,3 +1,35 @@
+# Current Handoff
+
+Last updated: 2026-07-10
+
+## Current focus
+
+Set up a better Codex workflow for the ongoing school records platform.
+
+## Completed recently
+
+- Decided to use repository documentation as long-term memory.
+- Decided to use AGENTS.md for Codex instructions.
+- Decided to use codebase-memory-mcp for codebase navigation.
+- Decided to use finding-unknowns-skills for planning bigger tasks.
+- Decided to bench Context Mode and Ultracode for now.
+
+## In progress
+
+- Adding or refreshing project documentation.
+- Installing Codex support tools.
+- Creating a repeatable workflow for new sessions, small changes, features, refactors, and handoffs.
+
+## Next recommended task
+
+Ask Codex to audit the current repository and update docs/ARCHITECTURE.md so it accurately reflects the current codebase.
+
+## Known issues / questions
+
+- Confirm which features are already fully implemented.
+- Confirm which tests currently exist and which commands should be used regularly.
+
+---
 # Sprint Plan
 
 ## Working Rhythm
