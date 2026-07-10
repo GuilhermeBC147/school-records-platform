@@ -19,12 +19,13 @@ The dashboard redirects users into role-specific workflows:
   bonus-class calendar with admin-created meetings, student lookup, and class
   lookup.
 
-All signed-in dashboards also expose a role-aware shortcut row in the shared
-topbar. It provides direct links to the primary workflows, including
-role-specific activity, meeting, approval, reception, and account actions,
-while the dashboard cards continue to provide contextual actions and status
-information. The row stays on one horizontal line and shows an overflow
-affordance when additional shortcuts are available to the side.
+All signed-in dashboards also expose role-aware shortcut navigation in the
+shared topbar. Teachers and reception keep one direct-link row. Admins get a
+core workflow row for dashboard, calendar, classes, students, and records,
+plus a second row grouping management, work, operations, and account tools.
+Each admin row stays horizontally scrollable with a visible overflow
+affordance, while the dashboard cards continue to provide contextual actions
+and status information.
 
 Dashboard text and date/time labels use the signed-in account's locale and date
 format. Account theme preferences apply across the application.

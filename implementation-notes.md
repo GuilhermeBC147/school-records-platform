@@ -112,3 +112,27 @@ None yet.
 - Edge cases found: nested routes use the most-specific active shortcut; mobile overflow exposes hidden links; public locale selection is URL-based.
 - Verification: `npm.cmd test`, `npm.cmd run typecheck`, `npm.cmd run build`, and in-app browser smoke checks passed.
 - Next session should read first: this section, `src/app/components/app-topbar.tsx`, and `src/app/globals.css`.
+
+## Admin grouped navigation refinement
+
+### Deviations
+
+None.
+
+### Discovered edge cases
+
+- The admin layout needs separate scroll refs and overflow state for the core and grouped rows so each row keeps its own hint and active-item scrolling.
+- The existing scroll-hint chevrons appeared encoding-corrupted in shell output; the refactor renders them with Unicode escapes so the source intent is unambiguous without changing the glyphs.
+- Portuguese group labels are kept in the existing translation map and use escaped characters where needed to avoid source-encoding drift.
+
+### Questions for review
+
+None.
+
+### End-of-session summary
+
+- Deviations: 0 from the approved admin grouping plan.
+- Most likely to revisit: the second admin row may need spacing or label-size tuning after extended mobile use.
+- Edge cases found: each row needs independent overflow state; nested active routes remain most-specific; bilingual labels must stay no-wrap.
+- Verification: `npm.cmd test`, `npm.cmd run typecheck`, `npm.cmd run build`, `git diff --check`, and desktop/mobile browser smoke checks passed; the browser console was clean.
+- Next session should read first: this section, `src/app/components/app-topbar.tsx`, and the topbar rules in `src/app/globals.css`.

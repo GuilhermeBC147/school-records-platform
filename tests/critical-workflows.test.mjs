@@ -53,17 +53,28 @@ test("public landing and shared role shortcuts preserve the UI entry points", as
   assert.match(appTopbar, /shortcut-link/);
   assert.match(appTopbar, /shortcut-nav-shell/);
   assert.match(appTopbar, /shortcut-scroll-hint/);
+  assert.match(appTopbar, /adminPrimaryShortcuts/);
+  assert.match(appTopbar, /adminShortcutGroups/);
+  assert.match(appTopbar, /dashboard\.navManagement/);
+  assert.match(appTopbar, /dashboard\.navWork/);
+  assert.match(appTopbar, /dashboard\.navOperations/);
   assert.match(appTopbar, /\/admin\/work-summary\/new-meeting/);
   assert.match(appTopbar, /\/admin\/substitutions/);
   assert.match(appTopbar, /\/reception/);
   assert.match(appTopbar, /\/dashboard\/work\/new/);
   assert.match(appTopbar, /\/dashboard\/account/);
   assert.match(styles, /\.shortcut-nav/);
+  assert.match(styles, /\.admin-shortcut-stack/);
+  assert.match(styles, /\.shortcut-group-label/);
   assert.match(styles, /overflow-x: auto/);
   assert.match(styles, /body\[data-theme="dark"\]/);
   assert.match(translations, /landing\.title/);
   assert.match(translations, /auth\.backToLanding/);
   assert.match(translations, /navigation\.primary/);
+  assert.match(translations, /dashboard\.adminTools/);
+  assert.match(translations, /dashboard\.navManagement/);
+  assert.match(translations, /dashboard\.navOperations/);
+  assert.match(translations, /dashboard\.navWork/);
 });
 
 test("class record submission protects duplicate and unauthorized writes", async () => {

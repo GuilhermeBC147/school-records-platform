@@ -398,6 +398,7 @@ export const translationResources = {
     "dashboard.adminLede":
       "Manage school records, staff accounts, reception tools, risk review, and teacher work summaries from one place.",
     "dashboard.adminOverview": "Admin overview",
+    "dashboard.adminTools": "Admin tools",
     "dashboard.adminWorkflows": "Admin workflows",
     "dashboard.allClasses": "All classes",
     "dashboard.allDays": "All days",
@@ -433,6 +434,9 @@ export const translationResources = {
     "dashboard.manageStudentsCopy":
       "Update student status and keep records tidy.",
     "dashboard.monthlySummary": "Monthly summary",
+    "dashboard.navManagement": "Management",
+    "dashboard.navOperations": "Operations",
+    "dashboard.navWork": "Work",
     "dashboard.monthlySummaryCopy":
       "Review counted lessons, bonus classes, and paid activities.",
     "dashboard.nextBonusClasses": "Next bonus classes",
@@ -1154,6 +1158,7 @@ export const translationResources = {
     "dashboard.adminLede":
       "Gerencie registros escolares, contas da equipe, recepção, revisão de risco e resumos de trabalho docente em um só lugar.",
     "dashboard.adminOverview": "Visão geral administrativa",
+    "dashboard.adminTools": "Ferramentas administrativas",
     "dashboard.adminWorkflows": "Fluxos administrativos",
     "dashboard.allClasses": "Todas as turmas",
     "dashboard.allDays": "Todos os dias",
@@ -1189,6 +1194,9 @@ export const translationResources = {
     "dashboard.manageStudentsCopy":
       "Atualize o status dos alunos e mantenha os registros organizados.",
     "dashboard.monthlySummary": "Resumo mensal",
+    "dashboard.navManagement": "Gest\u00e3o",
+    "dashboard.navOperations": "Opera\u00e7\u00f5es",
+    "dashboard.navWork": "Trabalho",
     "dashboard.monthlySummaryCopy":
       "Revise aulas contadas, aulas bônus e atividades pagas.",
     "dashboard.nextBonusClasses": "Próximas aulas bônus",

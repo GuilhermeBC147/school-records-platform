@@ -15,22 +15,50 @@ type Shortcut = {
   labelKey: TranslationKey;
 };
 
-const shortcutsByRole: Record<AppRole, readonly Shortcut[]> = {
-  ADMIN: [
-    { href: "/dashboard", labelKey: "dashboard.home" },
-    { href: "/admin/calendar", labelKey: "dashboard.calendar" },
-    { href: "/admin/manage-accounts", labelKey: "dashboard.manageAccounts" },
-    { href: "/admin/classes", labelKey: "dashboard.manageClasses" },
-    { href: "/admin/students", labelKey: "dashboard.manageStudents" },
-    { href: "/admin/records", labelKey: "dashboard.records" },
-    { href: "/admin/risk", labelKey: "dashboard.studentRisk" },
-    { href: "/admin/work-summary", labelKey: "dashboard.workSummaries" },
-    { href: "/admin/work-summary/new-activity", labelKey: "dashboard.addActivity" },
-    { href: "/admin/work-summary/new-meeting", labelKey: "dashboard.createMeeting" },
-    { href: "/admin/substitutions", labelKey: "dashboard.reviewSubstitutions" },
-    { href: "/reception", labelKey: "dashboard.receptionTools" },
-    { href: "/dashboard/account", labelKey: "dashboard.accountSettings" },
-  ],
+type ShortcutGroup = {
+  labelKey: TranslationKey;
+  shortcuts: readonly Shortcut[];
+};
+
+const adminPrimaryShortcuts: readonly Shortcut[] = [
+  { href: "/dashboard", labelKey: "dashboard.home" },
+  { href: "/admin/calendar", labelKey: "dashboard.calendar" },
+  { href: "/admin/classes", labelKey: "dashboard.manageClasses" },
+  { href: "/admin/students", labelKey: "dashboard.manageStudents" },
+  { href: "/admin/records", labelKey: "dashboard.records" },
+];
+
+const adminShortcutGroups: readonly ShortcutGroup[] = [
+  {
+    labelKey: "dashboard.navManagement",
+    shortcuts: [
+      { href: "/admin/manage-accounts", labelKey: "dashboard.manageAccounts" },
+      { href: "/admin/risk", labelKey: "dashboard.studentRisk" },
+    ],
+  },
+  {
+    labelKey: "dashboard.navWork",
+    shortcuts: [
+      { href: "/admin/work-summary", labelKey: "dashboard.workSummaries" },
+      { href: "/admin/work-summary/new-activity", labelKey: "dashboard.addActivity" },
+      { href: "/admin/work-summary/new-meeting", labelKey: "dashboard.createMeeting" },
+    ],
+  },
+  {
+    labelKey: "dashboard.navOperations",
+    shortcuts: [
+      { href: "/admin/substitutions", labelKey: "dashboard.reviewSubstitutions" },
+      { href: "/reception", labelKey: "dashboard.receptionTools" },
+    ],
+  },
+  {
+    labelKey: "dashboard.account",
+    shortcuts: [{ href: "/dashboard/account", labelKey: "dashboard.accountSettings" }],
+  },
+];
+
+const shortcutsByRole = {
+  ADMIN: adminPrimaryShortcuts,
   TEACHER: [
     { href: "/dashboard", labelKey: "dashboard.home" },
     { href: "/dashboard/calendar", labelKey: "dashboard.calendar" },
@@ -48,7 +76,7 @@ const shortcutsByRole: Record<AppRole, readonly Shortcut[]> = {
     { href: "/reception/classes", labelKey: "dashboard.classes" },
     { href: "/dashboard/account", labelKey: "dashboard.accountSettings" },
   ],
-};
+} satisfies Record<AppRole, readonly Shortcut[]>;
 
 type AppTopbarProps = {
   currentUser: {
@@ -67,17 +95,25 @@ function isShortcutActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppTopbar({ currentUser }: AppTopbarProps) {
-  const pathname = usePathname();
-  const t = getTranslations(currentUser.locale);
-  const homeHref = currentUser.role === "RECEPTION" ? "/reception" : "/dashboard";
+type ShortcutNavProps = {
+  ariaLabel: string;
+  groups?: readonly ShortcutGroup[];
+  locale: AccountLocale;
+  pathname: string;
+  shortcuts?: readonly Shortcut[];
+};
+
+function ShortcutNav({
+  ariaLabel,
+  groups,
+  locale,
+  pathname,
+  shortcuts,
+}: ShortcutNavProps) {
+  const t = getTranslations(locale);
   const shortcutNavRef = useRef<HTMLElement | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-
-  useEffect(() => {
-    document.body.dataset.theme = formatThemeAttribute(currentUser.theme);
-  }, [currentUser.theme]);
 
   useEffect(() => {
     const nav = shortcutNavRef.current;
@@ -109,7 +145,7 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
       window.removeEventListener("resize", updateScrollState);
       resizeObserver?.disconnect();
     };
-  }, [currentUser.role]);
+  }, [locale]);
 
   useEffect(() => {
     const activeShortcut = shortcutNavRef.current?.querySelector<HTMLElement>(
@@ -117,7 +153,7 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
     );
 
     activeShortcut?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [pathname]);
+  }, [locale, pathname]);
 
   const shortcutNavClassName = [
     "shortcut-nav-shell",
@@ -126,10 +162,62 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
   ]
     .filter(Boolean)
     .join(" ");
-  const shortcuts = shortcutsByRole[currentUser.role];
-  const activeShortcutHref = shortcuts
+  const visibleShortcuts = groups?.flatMap((group) => group.shortcuts) ?? shortcuts ?? [];
+  const activeShortcutHref = visibleShortcuts
     .filter((shortcut) => isShortcutActive(pathname, shortcut.href))
     .sort((left, right) => right.href.length - left.href.length)[0]?.href;
+
+  const renderShortcut = (shortcut: Shortcut) => {
+    const active = shortcut.href === activeShortcutHref;
+
+    return (
+      <Link
+        aria-current={active ? "page" : undefined}
+        className={`shortcut-link${active ? " is-active" : ""}`}
+        href={shortcut.href}
+        key={shortcut.href}
+      >
+        {t(shortcut.labelKey)}
+      </Link>
+    );
+  };
+
+  return (
+    <div className={shortcutNavClassName}>
+      <nav aria-label={ariaLabel} className="shortcut-nav" ref={shortcutNavRef}>
+        {groups
+          ? groups.map((group) => (
+              <div className="shortcut-group" key={group.labelKey}>
+                <span className="shortcut-group-label">{t(group.labelKey)}</span>
+                <div className="shortcut-group-links">
+                  {group.shortcuts.map(renderShortcut)}
+                </div>
+              </div>
+            ))
+          : shortcuts?.map(renderShortcut)}
+      </nav>
+      {canScrollLeft ? (
+        <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-left">
+          {"\u2039"}
+        </span>
+      ) : null}
+      {canScrollRight ? (
+        <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-right">
+          {"\u203A"}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+export function AppTopbar({ currentUser }: AppTopbarProps) {
+  const pathname = usePathname();
+  const t = getTranslations(currentUser.locale);
+  const homeHref = currentUser.role === "RECEPTION" ? "/reception" : "/dashboard";
+
+  useEffect(() => {
+    document.body.dataset.theme = formatThemeAttribute(currentUser.theme);
+  }, [currentUser.theme]);
 
   return (
     <header className="topbar">
@@ -152,38 +240,29 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
             </form>
           </div>
         </div>
-        <div className={shortcutNavClassName}>
-          <nav
-            aria-label={t("navigation.primary")}
-            className="shortcut-nav"
-            ref={shortcutNavRef}
-          >
-            {shortcuts.map((shortcut) => {
-              const active = shortcut.href === activeShortcutHref;
-
-              return (
-                <Link
-                  aria-current={active ? "page" : undefined}
-                  className={`shortcut-link${active ? " is-active" : ""}`}
-                  href={shortcut.href}
-                  key={shortcut.href}
-                >
-                  {t(shortcut.labelKey)}
-                </Link>
-              );
-            })}
-          </nav>
-          {canScrollLeft ? (
-            <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-left">
-              ‹
-            </span>
-          ) : null}
-          {canScrollRight ? (
-            <span aria-hidden="true" className="shortcut-scroll-hint shortcut-scroll-hint-right">
-              ›
-            </span>
-          ) : null}
-        </div>
+        {currentUser.role === "ADMIN" ? (
+          <div className="admin-shortcut-stack">
+            <ShortcutNav
+              ariaLabel={t("navigation.primary")}
+              locale={currentUser.locale}
+              pathname={pathname}
+              shortcuts={adminPrimaryShortcuts}
+            />
+            <ShortcutNav
+              ariaLabel={t("dashboard.adminTools")}
+              groups={adminShortcutGroups}
+              locale={currentUser.locale}
+              pathname={pathname}
+            />
+          </div>
+        ) : (
+          <ShortcutNav
+            ariaLabel={t("navigation.primary")}
+            locale={currentUser.locale}
+            pathname={pathname}
+            shortcuts={shortcutsByRole[currentUser.role]}
+          />
+        )}
       </div>
     </header>
   );
