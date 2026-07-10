@@ -101,7 +101,6 @@ button {
 }
 
 .topbar {
-  border-top: 4px solid var(--accent);
   border-bottom: 1px solid var(--line);
   background: var(--panel);
 }
@@ -165,6 +164,14 @@ button {
 
 .topbar-actions {
   justify-content: flex-end;
+}
+
+.topbar-locale-form {
+  display: flex;
+}
+
+.topbar-locale-toggle {
+  flex: 0 0 auto;
 }
 
 .admin-shortcut-stack {
@@ -512,10 +519,16 @@ body[data-theme="dark"] .public-topbar {
 }
 
 .locale-toggle-link {
+  align-items: center;
+  background: transparent;
+  border: 0;
   border-radius: 999px;
   color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
   font-size: 11px;
   font-weight: 800;
+  justify-content: center;
   min-height: 30px;
   padding: 6px 8px;
   text-decoration: none;
@@ -2929,8 +2942,9 @@ th {
   }
 
   .topbar-actions {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-end;
     width: 100%;
   }
 

@@ -1,11 +1,12 @@
 "use client";
 
+import { updateOwnLocaleAction } from "@/app/actions/accounts";
 import { logoutAction } from "@/app/actions/auth";
 import Link from "next/link";
-import { type AccountLocale } from "@/lib/locale";
+import { accountLocaleOptions, type AccountLocale } from "@/lib/locale";
 import { formatThemeAttribute, type AccountTheme } from "@/lib/theme";
 import { getTranslations, type TranslationKey } from "@/lib/translations";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type AppRole = "ADMIN" | "TEACHER" | "RECEPTION";
@@ -93,6 +94,43 @@ function isShortcutActive(pathname: string, href: string) {
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+type LocaleToggleProps = {
+  label: string;
+  locale: AccountLocale;
+  redirectTo: string;
+};
+
+function LocaleToggle({ label, locale, redirectTo }: LocaleToggleProps) {
+  return (
+    <form action={updateOwnLocaleAction} className="topbar-locale-form">
+      <input name="redirectTo" type="hidden" value={redirectTo} />
+      <nav
+        aria-label={label}
+        className="public-locale-toggle topbar-locale-toggle"
+      >
+        {accountLocaleOptions.map((option) => {
+          const active = locale === option.value;
+
+          return (
+            <button
+              aria-current={active ? "page" : undefined}
+              aria-label={option.label}
+              aria-pressed={active}
+              className="locale-toggle-link"
+              name="locale"
+              type="submit"
+              value={option.value}
+              key={option.value}
+            >
+              {option.value === "PT_BR" ? "PT-BR" : "EN"}
+            </button>
+          );
+        })}
+      </nav>
+    </form>
+  );
 }
 
 type ShortcutNavProps = {
@@ -350,8 +388,11 @@ function ShortcutGroupNav({
 
 export function AppTopbar({ currentUser }: AppTopbarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = getTranslations(currentUser.locale);
   const homeHref = currentUser.role === "RECEPTION" ? "/reception" : "/dashboard";
+  const queryString = searchParams.toString();
+  const redirectTo = queryString ? `${pathname}?${queryString}` : pathname;
 
   useEffect(() => {
     document.body.dataset.theme = formatThemeAttribute(currentUser.theme);
@@ -371,6 +412,11 @@ export function AppTopbar({ currentUser }: AppTopbarProps) {
             </span>
           </Link>
           <div className="topbar-actions">
+            <LocaleToggle
+              label={t("account.language")}
+              locale={currentUser.locale}
+              redirectTo={redirectTo}
+            />
             <form action={logoutAction}>
               <button className="secondary-button" type="submit">
                 {t("label.signOut")}

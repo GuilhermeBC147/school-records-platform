@@ -29,7 +29,8 @@ direct links. Dashboard metrics and activity feeds provide context without
 duplicating the topbar navigation.
 
 Dashboard text and date/time labels use the signed-in account's locale and date
-format. Account theme preferences apply across the application.
+format. Signed-in users can switch language from the compact topbar toggle or
+account settings. Account theme preferences apply across the application.
 
 Calendar views project existing records rather than creating a new event table.
 Active classes repeat on their configured weekdays, while non-canceled bonus

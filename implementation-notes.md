@@ -160,3 +160,26 @@ None.
 - Edge cases found: active nested routes open the correct group; native summary controls preserve keyboard access; teacher and reception navigation remain unchanged.
 - Verification: `npm.cmd test`, `npm.cmd run typecheck`, `npm.cmd run build`, `git diff --check`, and in-app browser checks at mobile and desktop widths passed; mouse, Enter, and Space group toggles worked and the browser console was clean.
 - Next session should read first: this section, `src/app/components/app-topbar.tsx`, and the topbar rules in `src/app/globals.css`.
+
+## Signed-in locale toggle and topbar cleanup
+
+### Deviations
+
+- The login page uses URL links, but the signed-in toggle submits the existing locale action so the account preference persists and the user returns to the current path.
+
+### Discovered edge cases
+
+- The shared locale link class also styles login links, so signed-in buttons need explicit transparent-button resets while preserving the same compact visual treatment.
+- At narrow widths, locale and sign-out controls must remain a single flex row; the topbar action layout was adjusted from the previous mobile column layout.
+
+### Questions for review
+
+None.
+
+### End-of-session summary
+
+- Deviations: 1 conservative implementation difference from the login reference: persisted action buttons instead of URL-only links.
+- Most likely to revisit: the topbar action spacing if additional account controls are added later.
+- Edge cases found: current-path redirects preserve nested routes and query strings; active locale remains exposed through `aria-current` and `aria-pressed`.
+- Verification: 20 critical workflow tests, typecheck, production build, diff checks, and mobile/nested-route in-app browser smoke checks passed.
+- Next session should read first: this section, `src/app/components/app-topbar.tsx`, and the topbar rules in `src/app/globals.css`.

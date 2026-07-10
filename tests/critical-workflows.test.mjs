@@ -55,6 +55,12 @@ test("public landing and shared role shortcuts preserve the UI entry points", as
   assert.match(appTopbar, /shortcut-scroll-hint/);
   assert.match(appTopbar, /adminPrimaryShortcuts/);
   assert.match(appTopbar, /adminShortcutGroups/);
+  assert.match(appTopbar, /updateOwnLocaleAction/);
+  assert.match(appTopbar, /accountLocaleOptions/);
+  assert.match(appTopbar, /topbar-locale-form/);
+  assert.match(appTopbar, /name="redirectTo"/);
+  assert.match(appTopbar, /name="locale"/);
+  assert.match(appTopbar, /useSearchParams/);
   assert.match(appTopbar, /ShortcutGroupNav/);
   assert.match(appTopbar, /<details/);
   assert.match(appTopbar, /<summary\s+className="shortcut-group-trigger"/);
@@ -78,6 +84,8 @@ test("public landing and shared role shortcuts preserve the UI entry points", as
   assert.match(styles, /\.shortcut-group-links/);
   assert.match(styles, /overflow-x: auto/);
   assert.match(styles, /body\[data-theme="dark"\]/);
+  assert.doesNotMatch(styles, /\.topbar\s*\{[^}]*border-top/s);
+  assert.match(styles, /\.topbar-locale-form/);
   assert.match(translations, /landing\.title/);
   assert.match(translations, /auth\.backToLanding/);
   assert.match(translations, /navigation\.primary/);
@@ -227,8 +235,8 @@ test("account management supports reset tokens and admin staff setup", async () 
   assert.match(accountPage, /name="locale"/);
   assert.match(accountPage, /name="redirectTo"/);
   assert.match(accountPage, /AppTopbar currentUser=\{currentUser\}/);
-  assert.doesNotMatch(appTopbar, /updateOwnLocaleAction/);
-  assert.doesNotMatch(appTopbar, /accountLocaleOptions/);
+  assert.match(appTopbar, /updateOwnLocaleAction/);
+  assert.match(appTopbar, /accountLocaleOptions/);
   assert.match(accountPage, /getTranslations\(currentUser\.locale\)/);
   assert.match(appTopbar, /t\("app\.name"\)/);
   assert.match(appTopbar, /t\("label\.signOut"\)/);
@@ -1146,7 +1154,7 @@ test("locale selection persists and critical workflows use translated text", asy
   assert.match(accountPage, /accountLocaleOptions\.map\(\(option\) =>/);
   assert.match(accountPage, /form action=\{updateOwnLocaleAction\}/);
   assert.match(accountPage, /name="redirectTo"/);
-  assert.doesNotMatch(appTopbar, /form action=\{updateOwnLocaleAction\}/);
+  assert.match(appTopbar, /form action=\{updateOwnLocaleAction\}/);
   assert.match(appTopbar, /document\.body\.dataset\.theme = formatThemeAttribute\(currentUser\.theme\)/);
   assert.match(globalStyles, /\.auth-topbar/);
   assert.match(globalStyles, /justify-content: flex-end/);
