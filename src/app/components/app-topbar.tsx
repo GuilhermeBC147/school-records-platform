@@ -326,9 +326,6 @@ function ShortcutGroupNav({
                 }}
               >
                 <span>{t(group.labelKey)}</span>
-                <span aria-hidden="true" className="shortcut-group-chevron">
-                  {"\u2304"}
-                </span>
               </summary>
               <div className="shortcut-group-links">
                 {group.shortcuts.map(renderShortcut)}

@@ -201,12 +201,14 @@ button {
 
 .admin-group-nav {
   align-items: center;
-  border-top: 1px solid var(--line);
+  background: var(--background);
+  border: 1px solid var(--line);
+  border-radius: 14px;
   display: flex;
   flex-wrap: nowrap;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
-  padding-top: 12px;
+  padding: 6px;
   scrollbar-color: var(--brand-line) transparent;
   scrollbar-width: thin;
 }
@@ -234,19 +236,25 @@ button {
 
 .shortcut-group-trigger {
   align-items: center;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
   color: var(--muted);
   cursor: pointer;
   display: inline-flex;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
-  gap: 8px;
+  gap: 7px;
   justify-content: center;
+  letter-spacing: 0.06em;
   list-style: none;
-  min-height: 40px;
-  padding: 8px 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+  text-transform: uppercase;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
   white-space: nowrap;
 }
 
@@ -258,22 +266,27 @@ button {
   content: "";
 }
 
+.shortcut-group-trigger::before {
+  background: var(--accent);
+  border-radius: 999px;
+  content: "";
+  flex: 0 0 6px;
+  height: 6px;
+  opacity: 0.8;
+  width: 6px;
+}
+
 .shortcut-group-trigger:hover,
-.shortcut-group[open] .shortcut-group-trigger,
-.shortcut-group.has-active .shortcut-group-trigger {
+.shortcut-group[open] .shortcut-group-trigger {
   background: var(--brand-soft);
   border-color: var(--brand-line);
   color: var(--brand);
 }
 
-.shortcut-group-chevron {
-  font-size: 16px;
-  line-height: 1;
-  transition: transform 160ms ease;
-}
-
-.shortcut-group[open] .shortcut-group-chevron {
-  transform: rotate(180deg);
+.shortcut-group.has-active .shortcut-group-trigger {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--on-brand);
 }
 
 .shortcut-group-links {
@@ -284,8 +297,15 @@ button {
 }
 
 .shortcut-group[open] .shortcut-group-links {
-  border-left: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
   padding-left: 8px;
+}
+
+.shortcut-group-links .shortcut-link {
+  border-radius: 8px;
+  font-size: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
 }
 
 .shortcut-nav-shell.has-left-overflow::before,
@@ -2978,12 +2998,12 @@ th {
 
   .shortcut-group[open] .shortcut-group-links {
     border-left: 0;
-    border-top: 1px solid var(--line);
+    border-top: 2px solid var(--accent);
     display: grid;
     gap: 4px;
     min-width: 190px;
     padding-left: 0;
-    padding-top: 6px;
+    padding-top: 8px;
   }
 
   .shortcut-group[open] .shortcut-group-links .shortcut-link {

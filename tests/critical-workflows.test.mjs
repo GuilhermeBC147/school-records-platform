@@ -62,6 +62,7 @@ test("public landing and shared role shortcuts preserve the UI entry points", as
   assert.match(appTopbar, /event\.preventDefault\(\)/);
   assert.match(appTopbar, /event\.key === "Enter"/);
   assert.match(appTopbar, /event\.key === " "/);
+  assert.doesNotMatch(appTopbar, /shortcut-group-chevron/);
   assert.match(appTopbar, /dashboard\.navManagement/);
   assert.match(appTopbar, /dashboard\.navWork/);
   assert.match(appTopbar, /dashboard\.navOperations/);
