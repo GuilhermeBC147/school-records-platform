@@ -77,7 +77,7 @@ Reason:
 The current data model already contains the information needed for the first calendar increment. A projection keeps the change reversible and avoids introducing a second scheduling write path or schema migration.
 
 Consequences:
-The first calendar increment does not model holidays, date ranges, recurring exceptions, or drag-and-drop editing. Classes without start times are shown outside the time grid, and the week view preserves the existing 07:00–22:00 range.
+The first calendar increment does not model holidays, date ranges, recurring exceptions, or drag-and-drop editing. Classes without start times are shown outside the time grid, and the week view uses an 08:00–21:00 range.
 
 ## 2026-07-10 - Project admin meetings into role-scoped calendars
 

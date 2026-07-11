@@ -23,7 +23,7 @@ type DashboardPageProps = {
 };
 
 const teacherWeekdayOptions = weekdayOptions.filter(
-  (option) => option.value !== "SATURDAY" && option.value !== "SUNDAY",
+  (option) => option.value !== "SUNDAY",
 );
 
 function getCurrentWeekday() {

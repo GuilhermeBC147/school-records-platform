@@ -36,7 +36,7 @@ Calendar views project existing records rather than creating a new event table.
 Active classes repeat on their configured weekdays, while non-canceled bonus
 classes appear on their scheduled dates, and admin-created meeting work logs
 appear on the selected teachers' scheduled dates. Classes without a start time remain in
-an unscheduled list instead of the 07:00–22:00 time grid. In admin and reception
+an unscheduled list instead of the 08:00–21:00 time grid. In admin and reception
 views, events with the same day and start time are grouped into an expandable
 card so the week remains scannable without hiding any class details. Event cards
 show the current class book, teacher, and class metadata, and use their duration

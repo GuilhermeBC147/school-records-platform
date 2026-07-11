@@ -273,7 +273,7 @@ export default async function TeacherCalendarPage({
         ) : null}
 
         <p className="calendar-note">
-          {t("calendar.timeRangeCopy")} {formatStartTime("07:00")}–{formatStartTime("22:00")}
+          {t("calendar.timeRangeCopy")} {formatStartTime("08:00")}–{formatStartTime("21:00")}
         </p>
       </div>
     </main>

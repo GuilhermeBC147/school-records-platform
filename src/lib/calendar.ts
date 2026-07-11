@@ -2,8 +2,8 @@ import type { Weekday } from "@/generated/prisma/client";
 import { readIsoDate } from "@/lib/bonus-classes";
 
 export const calendarTimeSlots = Array.from(
-  { length: 31 },
-  (_, index) => 7 * 60 + index * 30,
+  { length: 27 },
+  (_, index) => 8 * 60 + index * 30,
 );
 
 const weekdayByJavaScriptDay: Record<number, Weekday> = {

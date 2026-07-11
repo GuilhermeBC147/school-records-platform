@@ -2690,7 +2690,7 @@ input[type="time"],
 .calendar-grid-time-column {
   background: var(--panel);
   display: grid;
-  grid-template-rows: repeat(31, var(--calendar-row-height));
+  grid-template-rows: repeat(27, var(--calendar-row-height));
   left: 0;
   position: sticky;
   z-index: 2;
@@ -2712,7 +2712,7 @@ input[type="time"],
     var(--line) 70px
   );
   border-left: 1px solid var(--line);
-  height: 2170px;
+  height: 1890px;
   min-width: 0;
   overflow: visible;
   position: relative;

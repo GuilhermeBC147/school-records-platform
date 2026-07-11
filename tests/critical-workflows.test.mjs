@@ -21,6 +21,17 @@ test("teacher class pages restrict class access to assigned teachers", async () 
   assert.match(dashboard, /teacherId: currentUser\.id/);
   assert.match(dashboard, /dashboard\.teacherWorkflows/);
   assert.match(dashboard, /teacher-class-card/);
+  assert.match(
+    dashboard,
+    /const teacherWeekdayOptions = weekdayOptions\.filter\(\s*\(option\) => option\.value !== "SUNDAY",\s*\);/s,
+  );
+  assert.match(
+    dashboard,
+    /return teacherWeekdayOptions\.some\(\(option\) => option\.value === weekday\)/,
+  );
+  assert.match(dashboard, /const currentWeekday = getCurrentWeekday\(\)/);
+  assert.match(dashboard, /return currentWeekday \? \[currentWeekday\] : \[\]/);
+  assert.match(dashboard, /defaultChecked=\{selectedDaySet\.has\(weekday\.value\)\}/);
   assert.match(classDetail, /currentUser\.role === "TEACHER"/);
   assert.match(
     classDetail,
@@ -1027,6 +1038,8 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(teacherCalendarPage, /category: "MEETING"/);
   assert.match(teacherCalendarPage, /createdBy: \{ role: "ADMIN" \}/);
   assert.match(calendarLib, /calendarTimeSlots/);
+  assert.match(calendarLib, /length: 27/);
+  assert.match(calendarLib, /8 \* 60 \+ index \* 30/);
   assert.match(calendarLib, /CalendarMeetingEvent/);
   assert.match(calendarLib, /getCalendarWeekStart/);
   assert.match(calendarLib, /weekdayByJavaScriptDay/);
@@ -1095,6 +1108,8 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(teacherBonusPage, /dateFrom/);
   assert.match(teacherBonusPage, /formatBonusClassResultMessage/);
   assert.match(globalStyles, /schedule-table/);
+  assert.match(globalStyles, /grid-template-rows: repeat\(27, var\(--calendar-row-height\)\)/);
+  assert.match(globalStyles, /height: 1890px/);
   assert.match(dashboardPage, /currentUser\.role === "RECEPTION"/);
   assert.match(dashboardPage, /dashboard\.adminDashboard/);
   assert.match(dashboardPage, /AppTopbar currentUser=\{currentUser\}/);
