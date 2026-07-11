@@ -389,7 +389,10 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(classActions, /updateClassRosterAction/);
   assert.match(classActions, /readClassType/);
   assert.match(classActions, /readOptionalStartTime\(formData\.get\("startTime"\)\)/);
-  assert.match(classActions, /requiresSingleStudent/);
+  assert.match(classActions, /hasSingleStudentLimit/);
+  assert.match(classActions, /hasSingleStudentLimit\(classData\.classType\) && selectedStudentIds\.length > 1/);
+  assert.match(classActions, /hasSingleStudentLimit\(classData\.classType\) && activeStudentIds\.length > 1/);
+  assert.match(classActions, /hasSingleStudentLimit\(schoolClass\.classType\)[\s\S]*selectedStudentIds\.length > 1/);
   assert.match(classActions, /hasClassScheduleConflict/);
   assert.match(classActions, /hasMoreThanThreeConcurrentPersonalStudents/);
   assert.match(classActions, /segmentStart/);

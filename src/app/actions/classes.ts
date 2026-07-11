@@ -102,7 +102,7 @@ async function hasInvalidStudents(studentIds: string[], activeOnly: boolean) {
   return students.length !== studentIds.length;
 }
 
-function requiresSingleStudent(classType: ClassTypeValue) {
+function hasSingleStudentLimit(classType: ClassTypeValue) {
   return classType === "VIP" || classType === "PERSONAL";
 }
 
@@ -330,7 +330,7 @@ export async function createClassAction(formData: FormData) {
   }
 
   if (
-    (requiresSingleStudent(classData.classType) && selectedStudentIds.length !== 1) ||
+    (hasSingleStudentLimit(classData.classType) && selectedStudentIds.length > 1) ||
     (await hasClassScheduleConflict({
       ...classData,
       selectedStudentIds,
@@ -384,7 +384,7 @@ export async function updateClassAction(formData: FormData) {
     (enrollment) => enrollment.studentId,
   );
 
-  if (requiresSingleStudent(classData.classType) && activeStudentIds.length !== 1) {
+  if (hasSingleStudentLimit(classData.classType) && activeStudentIds.length > 1) {
     redirect(buildEditClassUrl(classId, "class-roster-size"));
   }
 
@@ -436,8 +436,8 @@ export async function updateClassRosterAction(formData: FormData) {
   }
 
   if (
-    requiresSingleStudent(schoolClass.classType) &&
-    selectedStudentIds.length !== 1
+    hasSingleStudentLimit(schoolClass.classType) &&
+    selectedStudentIds.length > 1
   ) {
     redirect(buildEditClassUrl(classId, "roster-size"));
   }

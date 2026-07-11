@@ -151,7 +151,7 @@ export const translationResources = {
     "adminClasses.scheduleError":
       "Check the class type, roster size, start time, and teacher schedule before saving.",
     "adminClasses.singleStudentRosterError":
-      "VIP and personal classes must have exactly one active student.",
+      "VIP and personal classes may have zero or one active student.",
     "adminClasses.bookPlaceholder": "Book 1",
     "adminClasses.searchEnrolledStudents": "Search enrolled students",
     "adminClasses.searchStudents": "Search students",
@@ -948,7 +948,7 @@ export const translationResources = {
     "adminClasses.scheduleError":
       "Confira o tipo de turma, tamanho da lista, horário inicial e agenda do professor antes de salvar.",
     "adminClasses.singleStudentRosterError":
-      "Turmas VIP e personal devem ter exatamente um aluno ativo.",
+      "Turmas VIP e personal podem ter zero ou um aluno ativo.",
     "adminClasses.bookPlaceholder": "Livro 1",
     "adminClasses.searchEnrolledStudents": "Buscar alunos matriculados",
     "adminClasses.searchStudents": "Buscar alunos",

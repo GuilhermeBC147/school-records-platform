@@ -26,8 +26,8 @@ Removing a student from a class roster marks that enrollment inactive instead of
 ## Class Types and Scheduling
 
 - Regular classes can have multiple students.
-- VIP classes must have exactly one active roster student.
-- Personal classes must have exactly one active roster student.
+- VIP classes may have zero or one active roster student.
+- Personal classes may have zero or one active roster student.
 - A teacher cannot have overlapping regular or VIP classes.
 - Personal classes may overlap other personal classes for the same teacher only when the overlapping group has no more than three distinct students.
 - Schedule conflict checks require a start time, duration, and at least one shared weekday.
