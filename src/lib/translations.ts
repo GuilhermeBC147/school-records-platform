@@ -417,7 +417,11 @@ export const translationResources = {
     "substitution.availableClasses": "Classes available for substitution",
     "substitution.chooseClassCopy":
       "Choose the class you are covering, then record attendance and homework while the details are fresh.",
+    "substitution.filterCopy":
+      "Filter by primary teacher or weekday before choosing a substitution.",
     "substitution.noClassesAvailable": "No classes available",
+    "substitution.noClassesMatchCopy":
+      "Try a different primary teacher or weekday.",
     "substitution.noClassesCopy":
       "Other teachers' active classes will appear here when they are available for substitute records.",
     "substitution.recordSubstituteLesson": "Record substitute lesson",
@@ -1216,7 +1220,11 @@ export const translationResources = {
     "substitution.availableClasses": "Turmas disponiveis para substituicao",
     "substitution.chooseClassCopy":
       "Escolha a turma que voce vai cobrir e registre presenca e tarefa enquanto os detalhes estao recentes.",
+    "substitution.filterCopy":
+      "Filtre por professor principal ou dia da semana antes de escolher uma substituição.",
     "substitution.noClassesAvailable": "Nenhuma turma disponivel",
+    "substitution.noClassesMatchCopy":
+      "Tente outro professor principal ou dia da semana.",
     "substitution.noClassesCopy":
       "Turmas ativas de outros professores aparecerao aqui quando estiverem disponiveis para registros de substituicao.",
     "substitution.recordSubstituteLesson": "Registrar aula substituta",

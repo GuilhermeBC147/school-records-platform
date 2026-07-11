@@ -847,6 +847,7 @@ test("substitute teachers can submit lessons pending admin approval", async () =
   const adminSubstitutionsPage = await readProjectFile(
     "src/app/admin/substitutions/page.tsx",
   );
+  const translations = await readProjectFile("src/lib/translations.ts");
   const dashboardPage = await readProjectFile("src/app/dashboard/page.tsx");
   const workLib = await readProjectFile("src/lib/teacher-work.ts");
   const dataModelDoc = await readProjectFile("docs/data-model.md");
@@ -877,11 +878,30 @@ test("substitute teachers can submit lessons pending admin approval", async () =
   assert.match(substitutionPage, /substitution\.chooseClassCopy/);
   assert.match(substitutionPage, /substitution\.recordSubstituteLesson/);
   assert.match(substitutionPage, /substitution\.noClassesAvailable/);
+  assert.match(substitutionPage, /searchParams/);
+  assert.match(substitutionPage, /name="teacherId"/);
+  assert.match(substitutionPage, /name="weekDayFilter"/);
+  assert.match(substitutionPage, /name="weekDay"/);
+  assert.match(substitutionPage, /type="checkbox"/);
+  assert.match(substitutionPage, /defaultChecked=\{selectedWeekdaySet\.has\(weekday\.value\)\}/);
+  assert.match(substitutionPage, /getCurrentWeekday/);
+  assert.match(substitutionPage, /America\/Sao_Paulo/);
+  assert.match(substitutionPage, /selectedTeacherId/);
+  assert.match(substitutionPage, /weekDays: \{ hasSome: selectedWeekdays \}/);
+  assert.match(substitutionPage, /substitution\.filterCopy/);
+  assert.match(substitutionPage, /substitution\.noClassesMatchCopy/);
+  assert.match(substitutionPage, /filter-panel substitution-filter-panel/);
+  assert.match(substitutionPage, /filter-panel-heading/);
+  assert.match(substitutionPage, /role="group"/);
+  assert.doesNotMatch(substitutionPage, /<fieldset className="weekday-filter">/);
+  assert.doesNotMatch(substitutionPage, /name="classSearch"/);
   assert.match(substitutionPage, /not: currentUser\.id/);
   assert.match(substitutionPage, /substitute=1/);
   assert.match(substitutionPage, /formatWeekdays\(schoolClass\.weekDays, currentUser\.locale\)/);
   assert.doesNotMatch(substitutionPage, /Substitute lesson/);
   assert.doesNotMatch(substitutionPage, /No classes available/);
+  assert.match(translations, /"substitution\.filterCopy"/);
+  assert.match(translations, /"substitution\.noClassesMatchCopy"/);
   assert.match(substitutionActions, /approveSubstitutionAction/);
   assert.match(substitutionActions, /rejectSubstitutionAction/);
   assert.match(substitutionActions, /undoSubstitutionApprovalAction/);

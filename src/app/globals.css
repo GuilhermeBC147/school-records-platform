@@ -1446,6 +1446,64 @@ input[type="time"],
   grid-template-columns: minmax(220px, 1.1fr) minmax(190px, 0.8fr) minmax(320px, 1.4fr) auto;
 }
 
+.substitution-filter-panel {
+  gap: 12px;
+  padding: 18px;
+}
+
+.substitution-filter-panel .filter-panel-heading {
+  align-items: center;
+  padding-bottom: 10px;
+}
+
+.substitution-filter-panel .filter-panel-heading h2 {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.substitution-filter-panel .muted-copy {
+  font-size: 13px;
+}
+
+.substitution-filter-form {
+  align-items: start;
+  gap: 12px;
+  grid-template-columns: minmax(190px, 0.75fr) minmax(360px, 1.75fr) auto;
+}
+
+.substitution-filter-form .weekday-filter {
+  min-width: 0;
+}
+
+.substitution-weekday-picker {
+  grid-template-columns: repeat(3, minmax(80px, 1fr));
+  padding: 4px;
+}
+
+.substitution-weekday-picker .checkbox-label {
+  font-size: 12px;
+  min-height: 34px;
+  padding: 4px 6px;
+}
+
+.substitution-filter-form .filter-actions {
+  align-self: end;
+  gap: 8px;
+}
+
+.substitution-filter-form .primary-button,
+.substitution-filter-form .text-link {
+  min-height: 36px;
+}
+
+.substitution-filter-form .primary-button {
+  padding: 8px 14px;
+}
+
+.substitution-filter-form .text-link {
+  padding: 8px 4px;
+}
+
 .teacher-classes-panel {
   border-top: 4px solid var(--accent);
   box-shadow: var(--shadow);
@@ -3095,6 +3153,10 @@ th {
   }
 
   .admin-classes-filter-panel .compact-weekday-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .substitution-weekday-picker {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
