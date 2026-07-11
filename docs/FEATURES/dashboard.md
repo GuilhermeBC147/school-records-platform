@@ -6,10 +6,12 @@ blue visual system with light and dark account themes.
 
 The dashboard redirects users into role-specific workflows:
 
-- Teachers see their active assigned classes, default weekday filtering, recent
+- Teachers see their active assigned classes, date or weekday filtering, recent
   records, grades, work summaries, bonus classes, substitute workflows, and a
   weekly calendar for their recurring classes, bonus classes, and included
-  admin-created meetings.
+  admin-created meetings. The selected-date dashboard also shows assigned,
+  non-canceled personal-slot bookings as class-style cards with start times,
+  student and purpose details, and inline attendance confirmation.
 - Admins see account, class, student, record, grade, risk, import, substitution,
   work-summary, and all-teacher calendar entry points. Calendar events open the
   existing protected class or bonus-class edit workflows. Admin-created meetings
@@ -20,7 +22,9 @@ The dashboard redirects users into role-specific workflows:
   lookup.
 
 All signed-in dashboards also expose role-aware shortcut navigation in the
-shared topbar. Teachers and reception keep one direct-link row. Admins get a
+shared topbar. Teachers and reception keep one direct-link row; teacher
+personal-slot confirmation is part of the dashboard instead of a separate
+shortcut. Admins get a
 core workflow row for dashboard, calendar, classes, students, and records,
 plus a second horizontally scrollable row of collapsible groups for management,
 work, operations, and account tools. The group containing the current route
@@ -48,3 +52,7 @@ event grid kept horizontally aligned on touch devices.
 Meetings without a start time are retained in the same unscheduled list.
 The admin calendar collapses the per-teacher meeting records produced by the
 admin meeting workflow so the same meeting is not repeated once per teacher.
+
+The legacy teacher `/dashboard/personal-slots` path redirects to the dashboard
+for bookmarked links. Admin and reception booking management remains at
+`/reception/personal-slots`.

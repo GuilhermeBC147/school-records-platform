@@ -64,7 +64,6 @@ const shortcutsByRole = {
   TEACHER: [
     { href: "/dashboard", labelKey: "dashboard.home" },
     { href: "/dashboard/calendar", labelKey: "dashboard.calendar" },
-    { href: "/dashboard/personal-slots", labelKey: "personalSlots.title" },
     { href: "/dashboard/work", labelKey: "dashboard.monthlySummary" },
     { href: "/dashboard/work/new", labelKey: "dashboard.addActivity" },
     { href: "/dashboard/bonus-classes", labelKey: "dashboard.bonusClasses" },

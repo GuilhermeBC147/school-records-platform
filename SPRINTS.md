@@ -14,7 +14,7 @@ Keep the repository documentation synchronized with the implemented platform bef
 - Role navigation has been streamlined: the shared top bar now exposes each role's primary routes with a visible horizontal-overflow affordance; admins use a core row plus collapsible groups for management, work, operations, and account tools, while signed-in language selection lives in account settings and landing/login language controls are compact and URL-based.
 - Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular classes, bonus classes, and admin-created meetings across a Monday-to-Sunday week, with teachers shown on staff event cards. The admin view shows one card per meeting, and all calendar views keep the weekday header visible while scrolling.
 - Personal booth scheduling supports dated review, make-up lesson, test, and other bookings for any active student and teacher. Recurring personal classes and ad-hoc bookings share three-booth capacity, appear in calendars, and overlapping completed personal work counts once in teacher hours.
-- Overlapping calendar events now group into expandable cards spanning their combined time range; personal groups show occupancy, and teachers can confirm assigned bookings as Present, Absent, or Excused from their personal-slots page.
+- Overlapping calendar events now group into expandable cards spanning their combined time range; personal groups show occupancy, and teachers can confirm assigned bookings as Present, Absent, or Excused from date-filtered class cards on the teacher dashboard. The legacy personal-slots path redirects there.
 - Sprint 19 production readiness is not complete.
 
 ## Completed workflow decisions

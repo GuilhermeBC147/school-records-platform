@@ -7,6 +7,7 @@ import {
   readDurationMinutes,
   readIsoDate,
 } from "@/lib/bonus-classes";
+import { dateKey } from "@/lib/calendar";
 import { hasPersonalSlotCapacityConflict } from "@/lib/personal-slots";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -53,6 +54,22 @@ function readAttendanceStatus(formData: FormData) {
   }
 
   return status as BonusClassAttendanceStatus;
+}
+
+function redirectToTeacherDashboard(formData: FormData, query: string) {
+  const returnDate = value(formData, "returnDate");
+
+  if (returnDate) {
+    try {
+      redirect(
+        `/dashboard?dateFilter=date&date=${dateKey(readIsoDate(returnDate))}&${query}`,
+      );
+    } catch (error) {
+      if (isRedirectError(error)) throw error;
+    }
+  }
+
+  redirect(`/dashboard?${query}`);
 }
 
 export async function createPersonalSlotBookingAction(formData: FormData) {
@@ -166,8 +183,8 @@ export async function confirmPersonalSlotBookingAction(formData: FormData) {
     });
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    redirect("/dashboard/personal-slots?error=invalid");
+    redirectToTeacherDashboard(formData, "error=invalid");
   }
 
-  redirect("/dashboard/personal-slots?status=confirmed");
+  redirectToTeacherDashboard(formData, "status=confirmed");
 }

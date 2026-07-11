@@ -1,17 +1,25 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { confirmPersonalSlotBookingAction } from "@/app/actions/personal-slots";
+import { DateInput } from "@/app/components/date-input";
+import { AppTopbar } from "@/app/components/app-topbar";
+import { formatStartTime } from "@/lib/bonus-classes";
+import {
+  dateKey,
+  getCalendarWeekday,
+  safeCalendarDate,
+  todayDateInputValue,
+} from "@/lib/calendar";
 import {
   formatDuration,
   formatWeekdays,
   weekdayOptions,
 } from "@/lib/class-schedule";
 import { formatShortDate } from "@/lib/date-format";
-import { formatStartTime } from "@/lib/bonus-classes";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getTranslations, type TranslationKey } from "@/lib/translations";
 import type { Weekday } from "@/generated/prisma/client";
-import { AppTopbar } from "@/app/components/app-topbar";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +27,10 @@ type DashboardPageProps = {
   searchParams: Promise<{
     day?: string | string[];
     dayFilter?: string;
+    date?: string;
+    dateFilter?: string;
+    error?: string;
+    status?: string;
   }>;
 };
 
@@ -82,9 +94,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const params = await searchParams;
   const t = getTranslations(currentUser.locale);
+  const dateViewActive =
+    params.dateFilter !== "weekdays" &&
+    params.dayFilter !== "custom" &&
+    params.day !== "all";
+  const selectedDate = safeCalendarDate(
+    dateViewActive ? params.date : todayDateInputValue(),
+  ).date;
+  const selectedDateKey = dateKey(selectedDate);
+  const selectedDateWeekday = getCalendarWeekday(selectedDate);
   const submittedDayFilter = params.dayFilter === "custom" || params.day === "all";
   const selectedDays =
-    currentUser.role === "TEACHER"
+    currentUser.role === "TEACHER" && !dateViewActive
       ? (() => {
           const weekdays = readWeekdays(params.day);
 
@@ -105,14 +126,19 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       : t("dashboard.teacherLede");
 
   const classes =
-    currentUser.role === "TEACHER"
+    currentUser.role === "TEACHER" &&
+    !(dateViewActive && selectedDateWeekday === "SUNDAY")
       ? await prisma.class.findMany({
           where: {
             teacherId: currentUser.id,
             isActive: true,
-            ...(selectedDays.length > 0 ? { weekDays: { hasSome: selectedDays } } : {}),
+            ...(dateViewActive
+              ? { weekDays: { has: selectedDateWeekday } }
+              : selectedDays.length > 0
+                ? { weekDays: { hasSome: selectedDays } }
+                : {}),
           },
-          orderBy: { name: "asc" },
+          orderBy: [{ startTime: "asc" }, { name: "asc" }],
           select: {
             id: true,
             name: true,
@@ -121,6 +147,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             year: true,
             durationMinutes: true,
             weekDays: true,
+            startTime: true,
             isActive: true,
             teacher: {
               select: { name: true },
@@ -134,14 +161,77 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           },
         })
       : [];
-  const allClassesHref = "/dashboard?day=all";
+  const personalBookings =
+    currentUser.role === "TEACHER" && dateViewActive
+      ? await prisma.personalSlotBooking.findMany({
+          orderBy: [{ startTime: "asc" }, { id: "asc" }],
+          where: {
+            teacherId: currentUser.id,
+            scheduledDate: selectedDate,
+            status: { not: "CANCELED" },
+          },
+          select: {
+            attendanceStatus: true,
+            durationMinutes: true,
+            id: true,
+            purpose: true,
+            startTime: true,
+            status: true,
+            student: { select: { fullName: true } },
+          },
+        })
+      : [];
+  const allClassesHref = "/dashboard?dateFilter=weekdays&day=all";
   const visibleClassesLabel =
-    selectedDays.length === 0
-      ? t("dashboard.allClasses")
-      : selectedDays.length === 1
-        ? t(weekdayTranslationKeys[selectedDays[0]])
-        : formatWeekdays(selectedDays, currentUser.locale);
-  const selectedDaySet = new Set(selectedDays);
+    dateViewActive
+      ? formatShortDate(selectedDate, currentUser.dateFormat)
+      : selectedDays.length === 0
+        ? t("dashboard.allClasses")
+        : selectedDays.length === 1
+          ? t(weekdayTranslationKeys[selectedDays[0]])
+          : formatWeekdays(selectedDays, currentUser.locale);
+  const weekdayFilterDays = dateViewActive
+    ? (() => {
+        const currentWeekday = getCurrentWeekday();
+
+        return currentWeekday ? [currentWeekday] : [];
+      })()
+    : selectedDays;
+  const selectedDaySet = new Set(weekdayFilterDays);
+  const personalStatusLabel = (status: string) =>
+    status === "COMPLETED"
+      ? t("personalSlots.completed")
+      : t("personalSlots.scheduled");
+  const personalAttendanceLabel = (status: string) => {
+    switch (status) {
+      case "PRESENT":
+        return t("personalSlots.present");
+      case "ABSENT":
+        return t("personalSlots.absent");
+      case "EXCUSED":
+        return t("personalSlots.excused");
+      default:
+        return t("personalSlots.attendancePending");
+    }
+  };
+  const scheduleCards = [
+    ...classes.map((schoolClass) => ({
+      ...schoolClass,
+      kind: "CLASS" as const,
+    })),
+    ...personalBookings.map((booking) => ({
+      ...booking,
+      kind: "PERSONAL_SLOT" as const,
+    })),
+  ].sort((left, right) => {
+    const leftTime = left.startTime ?? "99:99";
+    const rightTime = right.startTime ?? "99:99";
+
+    return (
+      leftTime.localeCompare(rightTime) ||
+      (left.kind === right.kind ? left.id.localeCompare(right.id) : left.kind.localeCompare(right.kind))
+    );
+  });
   const today = getTodayRange();
   const adminDashboard =
     currentUser.role === "ADMIN"
@@ -332,68 +422,149 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <>
             {teacherDashboard ? (
               <>
-                <section className="panel teacher-classes-panel" aria-label={visibleClassesLabel}>
-                  <form className="filter-form compact-filter-form teacher-day-filter-form">
-                    <input name="dayFilter" type="hidden" value="custom" />
-                    <fieldset className="weekday-filter">
-                      <legend className="form-section-label">{t("dashboard.day")}</legend>
-                      <div className="weekday-picker compact-weekday-picker teacher-weekday-picker">
-                        {teacherWeekdayOptions.map((weekday) => (
-                          <label className="checkbox-label" key={weekday.value}>
-                            <input
-                              defaultChecked={selectedDaySet.has(weekday.value)}
-                              name="day"
-                              type="checkbox"
-                              value={weekday.value}
-                            />
-                            {t(weekdayTranslationKeys[weekday.value])}
-                          </label>
-                        ))}
+                {params.error ? (
+                  <p className="form-error">{t("personalSlots.confirmError")}</p>
+                ) : null}
+                {params.status === "confirmed" ? (
+                  <p className="form-success">{t("personalSlots.confirmed")}</p>
+                ) : null}
+
+                <section
+                  className="panel teacher-classes-panel"
+                  aria-label={visibleClassesLabel}
+                  id="teacher-schedule"
+                >
+                  <div className="teacher-dashboard-filter-stack">
+                    <form className="filter-form compact-filter-form teacher-date-filter-form">
+                      <input name="dateFilter" type="hidden" value="date" />
+                      <label>
+                        <span>{t("label.date")}</span>
+                        <DateInput
+                          calendarLabel={t("dashboard.calendar")}
+                          dateFormat={currentUser.dateFormat}
+                          defaultValue={selectedDateKey}
+                          name="date"
+                          required
+                        />
+                      </label>
+                      <div className="filter-actions">
+                        <button className="primary-button" type="submit">
+                          {t("dashboard.apply")}
+                        </button>
                       </div>
-                    </fieldset>
-                    <div className="filter-actions">
-                      <button className="primary-button" type="submit">
-                        {t("dashboard.apply")}
-                      </button>
-                      <Link className="text-link" href={allClassesHref}>
-                        {t("dashboard.showAll")}
-                      </Link>
-                    </div>
-                  </form>
+                    </form>
+
+                    <form className="filter-form compact-filter-form teacher-day-filter-form">
+                      <input name="dateFilter" type="hidden" value="weekdays" />
+                      <input name="dayFilter" type="hidden" value="custom" />
+                      <fieldset className="weekday-filter">
+                        <legend className="form-section-label">{t("dashboard.day")}</legend>
+                        <div className="weekday-picker compact-weekday-picker teacher-weekday-picker">
+                          {teacherWeekdayOptions.map((weekday) => (
+                            <label className="checkbox-label" key={weekday.value}>
+                              <input
+                                defaultChecked={selectedDaySet.has(weekday.value)}
+                                name="day"
+                                type="checkbox"
+                                value={weekday.value}
+                              />
+                              {t(weekdayTranslationKeys[weekday.value])}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                      <div className="filter-actions">
+                        <button className="primary-button" type="submit">
+                          {t("dashboard.apply")}
+                        </button>
+                        <Link className="text-link" href={allClassesHref}>
+                          {t("dashboard.showAll")}
+                        </Link>
+                      </div>
+                    </form>
+                  </div>
 
                   <div className="class-grid teacher-class-grid">
-                    {classes.map((schoolClass) => (
-                      <Link
-                        className="class-card teacher-class-card"
-                        href={`/dashboard/classes/${schoolClass.id}`}
-                        key={schoolClass.id}
-                      >
-                        <div>
-                          <p className="eyebrow">
-                            {schoolClass.book ?? t("dashboard.classFallback")}
-                            {schoolClass.semester && schoolClass.year
-                              ? ` | ${t("dashboard.semester")} ${schoolClass.semester}/${schoolClass.year}`
-                              : ""}
-                          </p>
-                          <h2>{schoolClass.name}</h2>
-                          <p>
-                            {formatWeekdays(schoolClass.weekDays, currentUser.locale)} |{" "}
-                            {formatDuration(schoolClass.durationMinutes)}
-                          </p>
-                        </div>
-                        <dl>
+                    {scheduleCards.map((card) =>
+                      card.kind === "CLASS" ? (
+                        <Link
+                          className="class-card teacher-class-card"
+                          href={`/dashboard/classes/${card.id}`}
+                          key={`class-${card.id}`}
+                        >
                           <div>
-                            <dt>{t("dashboard.students")}</dt>
-                            <dd>{schoolClass._count.enrollments}</dd>
+                            <p className="eyebrow">
+                              {card.book ?? t("dashboard.classFallback")}
+                              {card.semester && card.year
+                                ? ` | ${t("dashboard.semester")} ${card.semester}/${card.year}`
+                                : ""}
+                            </p>
+                            <h2>{card.name}</h2>
+                            <p>
+                              {formatStartTime(card.startTime)} |{" "}
+                              {formatDuration(card.durationMinutes)} |{" "}
+                              {formatWeekdays(card.weekDays, currentUser.locale)}
+                            </p>
                           </div>
+                          <dl>
+                            <div>
+                              <dt>{t("dashboard.students")}</dt>
+                              <dd>{card._count.enrollments}</dd>
+                            </div>
+                            <div>
+                              <dt>{t("dashboard.lessons")}</dt>
+                              <dd>{card._count.lessons}</dd>
+                            </div>
+                          </dl>
+                        </Link>
+                      ) : (
+                        <article
+                          className="class-card teacher-class-card teacher-personal-slot-card"
+                          key={`personal-slot-${card.id}`}
+                        >
                           <div>
-                            <dt>{t("dashboard.lessons")}</dt>
-                            <dd>{schoolClass._count.lessons}</dd>
+                            <p className="eyebrow">{t("personalSlots.personalBooths")}</p>
+                            <h2>{card.student.fullName}</h2>
+                            <p>
+                              {formatStartTime(card.startTime)} |{" "}
+                              {formatDuration(card.durationMinutes)}
+                            </p>
+                            <p>{card.purpose}</p>
                           </div>
-                        </dl>
-                      </Link>
-                    ))}
-                    {classes.length === 0 ? (
+                          <dl>
+                            <div>
+                              <dt>{t("personalSlots.attendance")}</dt>
+                              <dd>{personalAttendanceLabel(card.attendanceStatus)}</dd>
+                            </div>
+                            <div>
+                              <dt>{t("personalSlots.status")}</dt>
+                              <dd>{personalStatusLabel(card.status)}</dd>
+                            </div>
+                          </dl>
+                          {card.status === "SCHEDULED" ? (
+                            <form
+                              action={confirmPersonalSlotBookingAction}
+                              className="personal-slot-confirm-form"
+                            >
+                              <input name="bookingId" type="hidden" value={card.id} />
+                              <input name="returnDate" type="hidden" value={selectedDateKey} />
+                              <label>
+                                <span>{t("personalSlots.attendance")}</span>
+                                <select defaultValue="PRESENT" name="attendanceStatus">
+                                  <option value="PRESENT">{t("personalSlots.present")}</option>
+                                  <option value="ABSENT">{t("personalSlots.absent")}</option>
+                                  <option value="EXCUSED">{t("personalSlots.excused")}</option>
+                                </select>
+                              </label>
+                              <button className="primary-button" type="submit">
+                                {t("personalSlots.confirmAttendance")}
+                              </button>
+                            </form>
+                          ) : null}
+                        </article>
+                      ),
+                    )}
+                    {scheduleCards.length === 0 ? (
                       <article className="class-card teacher-empty-class-card">
                         <h2>
                           {t("dashboard.noClassesFor")} {visibleClassesLabel.toLowerCase()}

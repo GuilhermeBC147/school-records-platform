@@ -152,7 +152,7 @@ export default async function TeacherCalendarPage({
     teacherName: currentUser.name,
     title: meeting.title,
   }));
-  const personalEvents: CalendarEvent[] = personalBookings.map((booking)=>({kind:"PERSONAL_SLOT",id:booking.id,date:booking.scheduledDate,startTime:booking.startTime,durationMinutes:booking.durationMinutes,purpose:booking.purpose,status:booking.status,attendanceStatus:booking.attendanceStatus,studentName:booking.student.fullName,teacherId:currentUser.id,teacherName:currentUser.name,href:`/dashboard/personal-slots?bookingId=${booking.id}`}));
+  const personalEvents: CalendarEvent[] = personalBookings.map((booking)=>({kind:"PERSONAL_SLOT",id:booking.id,date:booking.scheduledDate,startTime:booking.startTime,durationMinutes:booking.durationMinutes,purpose:booking.purpose,status:booking.status,attendanceStatus:booking.attendanceStatus,studentName:booking.student.fullName,teacherId:currentUser.id,teacherName:currentUser.name,href:`/dashboard?dateFilter=date&date=${dateKey(booking.scheduledDate)}#teacher-schedule`}));
   const events = [...classEvents, ...bonusEvents, ...meetingEvents, ...personalEvents];
   const unscheduledClasses = classes.filter((schoolClass) => !schoolClass.startTime);
   const unscheduledMeetings = meetings.filter((meeting) => !meeting.startTime);

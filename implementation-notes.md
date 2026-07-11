@@ -252,3 +252,27 @@ None.
 - Edge cases found: same-time bookings for different teachers, partial overlaps with different durations, and manager versus teacher confirmation semantics.
 - Verification: migration deploy, Prisma generation, typecheck, critical workflow tests, and diff checks.
 - Next session should read first: this section, `src/app/components/calendar-grid.tsx`, and `src/app/dashboard/personal-slots/page.tsx`.
+
+## Teacher dashboard date-filter redesign
+
+### Deviations
+
+None yet.
+
+### Discovered edge cases
+
+- Sunday is intentionally excluded from recurring class results even if a malformed or future record contains `SUNDAY`; dated personal bookings remain independently visible for a selected Sunday.
+- Personal booking confirmation must preserve the selected dashboard date when redirecting back after the server action.
+- The existing full-card class link cannot contain the personal attendance form, so personal cards need a non-link card shell.
+
+### Questions for review
+
+None yet.
+
+### End-of-session summary
+
+- Deviations: 0 from the approved dashboard redesign; the legacy route is a redirect-only compatibility path as planned.
+- Most likely to revisit: whether teachers want a month-level personal-booking overview in addition to the exact-date dashboard view.
+- Edge cases found: Sunday date views omit recurring classes, weekday mode intentionally shows no dated personal bookings, and confirmation redirects preserve the selected date.
+- Verification: `npm.cmd test` (21 passed), `npm.cmd run typecheck`, `npm.cmd run build`, and `git diff --check` passed.
+- Next session should read first: this section, `src/app/dashboard/page.tsx`, and `docs/FEATURES/dashboard.md`.

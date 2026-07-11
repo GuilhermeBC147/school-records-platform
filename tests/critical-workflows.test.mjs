@@ -767,7 +767,7 @@ test("teacher work summaries count lessons and paid activity logs", async () => 
   assert.match(teacherWorkPage, /dashboard\.monthlySummary/);
   assert.match(teacherWorkPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(teacherWorkPage, /dashboard\.forTeacher/);
-  assert.match(dashboardPage, /formatWeekdays\(schoolClass\.weekDays, currentUser\.locale\)/);
+  assert.match(dashboardPage, /formatWeekdays\(card\.weekDays, currentUser\.locale\)/);
   assert.match(teacherWorkPage, /\/dashboard\/work\/new/);
   assert.match(teacherWorkPage, /dashboard\.addActivity/);
   assert.doesNotMatch(teacherWorkPage, /Add event/);
@@ -1232,10 +1232,10 @@ test("locale selection persists and critical workflows use translated text", asy
 });
 
 test("personal slot bookings share three-booth capacity and deduplicate paid time", async () => {
-  const [schema, actions, slots, work, staffCalendar, teacherCalendar, dashboard, topbar, translations, personalPage, picker] = await Promise.all([
+  const [schema, actions, slots, work, staffCalendar, teacherCalendar, dashboard, topbar, translations, personalPage, personalRedirect, picker] = await Promise.all([
     readProjectFile("prisma/schema.prisma"), readProjectFile("src/app/actions/personal-slots.ts"), readProjectFile("src/lib/personal-slots.ts"), readProjectFile("src/lib/teacher-work.ts"), readProjectFile("src/app/components/staff-calendar-page.tsx"), readProjectFile("src/app/dashboard/calendar/page.tsx"),
     readProjectFile("src/app/dashboard/page.tsx"), readProjectFile("src/app/components/app-topbar.tsx"), readProjectFile("src/lib/translations.ts"),
-    readProjectFile("src/app/reception/personal-slots/page.tsx"), readProjectFile("src/app/admin/classes/roster-picker.tsx"),
+    readProjectFile("src/app/reception/personal-slots/page.tsx"), readProjectFile("src/app/dashboard/personal-slots/page.tsx"), readProjectFile("src/app/admin/classes/roster-picker.tsx"),
   ]);
   assert.match(schema, /model PersonalSlotBooking/);
   assert.match(actions, /requirePersonalSlotManager/);
@@ -1248,12 +1248,22 @@ test("personal slot bookings share three-booth capacity and deduplicate paid tim
   assert.match(staffCalendar, /PERSONAL_SLOT/);
   assert.match(teacherCalendar, /PERSONAL_SLOT/);
   assert.match(teacherCalendar, /collapseOverlaps/);
+  assert.match(teacherCalendar, /\/dashboard\?dateFilter=date&date=/);
+  assert.match(dashboard, /DateInput/);
+  assert.match(dashboard, /dateFilter/);
+  assert.match(dashboard, /personalSlotBooking\.findMany/);
+  assert.match(dashboard, /confirmPersonalSlotBookingAction/);
+  assert.match(dashboard, /formatStartTime\(card\.startTime\)/);
+  assert.match(dashboard, /selectedDateWeekday === "SUNDAY"/);
+  assert.match(dashboard, /name="returnDate"/);
   assert.match(dashboard, /reception\/personal-slots/);
+  assert.doesNotMatch(topbar, /href: "\/dashboard\/personal-slots"/);
   assert.match(topbar, /personalSlots\.title/);
   assert.match(translations, /"personalSlots\.capacityError"/);
   assert.match(translations, /As três cabines estão ocupadas/);
   assert.match(personalPage, /selectionName="studentId"/);
   assert.match(personalPage, /singleSelection/);
+  assert.match(personalRedirect, /redirect\(`/);
   assert.match(picker, /singleSelection && !currentStudentIds\.has/);
   assert.match(schema, /attendanceConfirmedById/);
   assert.match(schema, /attendanceStatus\s+BonusClassAttendanceStatus/);

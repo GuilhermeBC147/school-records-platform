@@ -1554,6 +1554,43 @@ input[type="time"],
   padding: 8px 4px;
 }
 
+.teacher-dashboard-filter-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.teacher-date-filter-form {
+  grid-template-columns: minmax(220px, 1fr) auto;
+}
+
+.teacher-personal-slot-card {
+  border-left-color: var(--accent);
+}
+
+.teacher-personal-slot-card dl dd {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.personal-slot-confirm-form {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.personal-slot-confirm-form label {
+  display: grid;
+  gap: 7px;
+  min-width: 150px;
+}
+
+.personal-slot-confirm-form label > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .teacher-class-grid {
   border-top: 1px solid var(--line);
   padding-top: 14px;

@@ -101,6 +101,19 @@ Teachers, admins, and reception need to understand class length and concurrent a
 Consequences:
 Grouped cards use the longest duration of their grouped events, while events with different start times remain separate. The layout remains read-only for scheduling purposes; existing event links continue to open the relevant protected workflow.
 
+---
+
+## 2026-07-11 - Show teacher personal bookings on the date dashboard
+
+Decision:
+Use the teacher dashboard as the date-focused view for recurring classes and non-canceled personal-slot bookings. Show start time on recurring class cards, render personal bookings with the same card treatment, and keep teacher attendance confirmation inline. Retain the existing weekday filter as a separate broader recurring-class view. Sunday remains unavailable for recurring classes, while dated personal bookings can still be displayed for a selected Sunday.
+
+Reason:
+Teachers need the day’s complete schedule and personal-slot attendance workflow in one place without changing the existing `PersonalSlotBooking` model or server actions.
+
+Consequences:
+The teacher topbar no longer links to a separate personal-slots page. The legacy path redirects to the dashboard, and calendar links return to the relevant date. Admin and reception booking management remain unchanged at `/reception/personal-slots`.
+
 ## 2026-07-10 - Use Hostinger VPS for production
 
 Decision:

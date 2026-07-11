@@ -53,7 +53,7 @@ Teacher and admin dashboard routes:
 - `/dashboard/classes/[classId]`
 - `/dashboard/classes/[classId]/record`
 - `/dashboard/calendar`
-- `/dashboard/personal-slots`
+- `/dashboard/personal-slots` (legacy redirect)
 - `/dashboard/work`, `/dashboard/work/new`
 - `/dashboard/bonus-classes`
 - `/dashboard/substitutions/new`
@@ -102,6 +102,7 @@ Important invariants:
 - Teachers and admins create class records with attendance, homework, notes, drafts, and submissions.
 - Teachers enter partial and test grades for their assigned classes.
 - Teachers can view a weekly calendar of their active recurring classes, assigned bonus classes, and admin-created meetings that include them.
+- The teacher dashboard supports exact-date and weekday views. Exact-date views combine recurring classes for that weekday with non-canceled personal-slot bookings, which appear as class-style cards with inline attendance confirmation. The legacy `/dashboard/personal-slots` path redirects to the dashboard.
 - Overlapping calendar events in the same teacher/date column are grouped into expandable cards in all calendars. Personal groups show booth occupancy; expanded rows retain each event's student, class, purpose, teacher, duration, and status details.
 - Admins review records, exports, grades, risk signals, substitutions, imports, and work summaries.
 - Admins can view all-teacher Monday-to-Sunday class, bonus-class, and meeting schedules and open existing edit forms.
