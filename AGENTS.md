@@ -14,6 +14,8 @@ The user is a beginner developer. Explain important technical decisions clearly 
 - Admins and reception may use the constrained personal-slot workflow. Do not broaden reception into general class administration.
 - Teacher work summaries must count concurrent personal teaching time once. Merge submitted recurring personal lesson intervals and completed personal-slot booking intervals by teacher and date; do not simply add each personal record's duration.
 - Personal-slot calendar events must remain visible in teacher, admin, and reception calendars and should identify the student, purpose, teacher, duration, and status.
+- Overlapping calendar events in the same calendar column must render as one expandable card spanning their combined time range; expanded rows must keep each event readable. Adjacent events that only touch at an endpoint remain separate.
+- Personal-slot groups should show occupancy such as `2/3` or `3/3`; mixed groups should show the number of overlapping events. This is a visual grouping rule and must not change scheduling conflict or payroll logic.
 - Personal-slot UI, validation messages, statuses, navigation labels, and calendar text must be localized in English and Brazilian Portuguese. User-entered purposes remain unchanged.
 - Any future schema change involving scheduling must explain its migration and preserve both recurring personal classes and ad-hoc personal-slot bookings.
 

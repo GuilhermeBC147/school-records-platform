@@ -248,7 +248,7 @@ None.
 ### End-of-session summary
 
 - Deviations: 0.
-- Most likely to revisit: whether personal groups should eventually merge partially overlapping bookings with different start times.
-- Edge cases found: same-time bookings for different teachers and manager versus teacher confirmation semantics.
+- Most likely to revisit: whether broad mixed-event groups need a different summary treatment after staff use.
+- Edge cases found: same-time bookings for different teachers, partial overlaps with different durations, and manager versus teacher confirmation semantics.
 - Verification: migration deploy, Prisma generation, typecheck, critical workflow tests, and diff checks.
 - Next session should read first: this section, `src/app/components/calendar-grid.tsx`, and `src/app/dashboard/personal-slots/page.tsx`.

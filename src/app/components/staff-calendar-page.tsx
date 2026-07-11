@@ -340,7 +340,7 @@ export async function StaffCalendarPage({
             <span className="status-pill">{events.length}</span>
           </div>
           <CalendarGrid
-            collapsePersonalSlots
+            collapseOverlaps
             dateFormat={currentUser.dateFormat}
             dates={weekDates}
             events={events}

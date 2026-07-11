@@ -6,7 +6,9 @@ export const translationResources = {
     "app.name": "School Records Platform",
     "calendar.currentWeek": "Current week",
     "calendar.expandGroup": "Expand to see all",
+    "calendar.expandOverlaps": "Expand to see each event",
     "calendar.groupedEvents": "events at this time",
+    "calendar.overlappingEvents": "overlapping events",
     "calendar.nextWeek": "Next week",
     "calendar.noBook": "No book",
     "calendar.noEvents":
@@ -799,7 +801,9 @@ export const translationResources = {
     "app.name": "School Records Platform",
     "calendar.currentWeek": "Semana atual",
     "calendar.expandGroup": "Expandir para ver todas",
+    "calendar.expandOverlaps": "Expandir para ver cada evento",
     "calendar.groupedEvents": "eventos neste horário",
+    "calendar.overlappingEvents": "eventos sobrepostos",
     "calendar.nextWeek": "Próxima semana",
     "calendar.noBook": "Sem livro",
     "calendar.noEvents":

@@ -989,7 +989,7 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(staffCalendarPage, /calendar\.weeklyTitle/);
   assert.match(staffCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(staffCalendarPage, /CalendarGrid/);
-  assert.match(staffCalendarPage, /collapsePersonalSlots/);
+  assert.match(staffCalendarPage, /collapseOverlaps/);
   assert.match(staffCalendarPage, /getCalendarWeekDates/);
   assert.match(staffCalendarPage, /schoolClass\.weekDays\.includes\(weekday\)/);
   assert.match(staffCalendarPage, /mode="week"/);
@@ -1004,7 +1004,10 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(staffCalendarPage, /teacherNames\.join\(", "\)/);
   assert.match(calendarGrid, /schedule-event-meta">\{event\.teacherName\}/);
   assert.match(calendarGrid, /event\.kind === "MEETING"/);
-  assert.match(calendarGrid, /groupPersonalSlotEvents/);
+  assert.match(calendarGrid, /groupOverlappingEvents/);
+  assert.match(calendarGrid, /calendar\.overlappingEvents/);
+  assert.match(calendarGrid, /groupEndMinutes/);
+  assert.match(calendarGrid, /startMinutes >= currentGroupEnd/);
   assert.match(calendarGrid, /personalSlots\.occupied/);
   assert.match(calendarGrid, /schedule-event-personal-group/);
   assert.match(calendarGrid, /schedule-event-group/);
@@ -1205,7 +1208,7 @@ test("personal slot bookings share three-booth capacity and deduplicate paid tim
   assert.match(work, /personalSlotMinutes/);
   assert.match(staffCalendar, /PERSONAL_SLOT/);
   assert.match(teacherCalendar, /PERSONAL_SLOT/);
-  assert.match(teacherCalendar, /collapsePersonalSlots/);
+  assert.match(teacherCalendar, /collapseOverlaps/);
   assert.match(dashboard, /reception\/personal-slots/);
   assert.match(topbar, /personalSlots\.title/);
   assert.match(translations, /"personalSlots\.capacityError"/);

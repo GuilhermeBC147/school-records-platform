@@ -102,7 +102,7 @@ Important invariants:
 - Teachers and admins create class records with attendance, homework, notes, drafts, and submissions.
 - Teachers enter partial and test grades for their assigned classes.
 - Teachers can view a weekly calendar of their active recurring classes, assigned bonus classes, and admin-created meetings that include them.
-- Personal booth events are grouped by teacher, date, and exact start time into expandable occupancy cards in all calendars; unrelated regular, VIP, bonus, and meeting events remain separate.
+- Overlapping calendar events in the same teacher/date column are grouped into expandable cards in all calendars. Personal groups show booth occupancy; expanded rows retain each event's student, class, purpose, teacher, duration, and status details.
 - Admins review records, exports, grades, risk signals, substitutions, imports, and work summaries.
 - Admins can view all-teacher Monday-to-Sunday class, bonus-class, and meeting schedules and open existing edit forms.
 - Reception schedules bonus classes, uses student/class lookup, and confirms bonus attendance.

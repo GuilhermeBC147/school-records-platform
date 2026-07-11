@@ -132,4 +132,15 @@ Reason:
 Three narrow side-by-side cards do not remain readable, and attendance confirmation needs ownership checks and enough space for a clear status selection.
 
 Consequences:
-Personal-only groups display occupancy and individual student details while regular, VIP, bonus, and meeting events stay separate. Completed personal time counts toward payroll regardless of the selected attendance status, matching the existing bonus-class rule.
+Overlapping events in the same calendar column are grouped to prevent unreadable side-by-side cards. Personal-only groups display booth occupancy, while mixed groups display the overlapping-event count. Expanded rows retain the individual event details. Completed personal time counts toward payroll regardless of the selected attendance status, matching the existing bonus-class rule.
+
+## 2026-07-10 - Group all overlapping calendar events
+
+Decision:
+When event time intervals overlap within a calendar column, render one expandable card spanning the combined time range and show each event as a nested row.
+
+Reason:
+Side-by-side cards become unreadable when several classes overlap, including partial overlaps with different start times or durations.
+
+Consequences:
+Adjacent events that only touch at an endpoint remain separate. Unscheduled events remain in the existing unscheduled list. The grouping is visual only and does not alter scheduling conflicts or payroll calculations.

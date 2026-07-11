@@ -2748,6 +2748,10 @@ input[type="time"],
   overflow: hidden;
 }
 
+.schedule-event-overlap-group {
+  border-left: 3px solid var(--brand);
+}
+
 .schedule-event-group-summary {
   cursor: pointer;
   display: grid;

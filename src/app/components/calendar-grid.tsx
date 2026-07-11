@@ -34,7 +34,7 @@ const weekdayTranslationKeys = {
 } as const satisfies Record<Weekday, TranslationKey>;
 
 type CalendarGridProps = {
-  collapsePersonalSlots?: boolean;
+  collapseOverlaps?: boolean;
   dateFormat: AccountDateFormat;
   dates: Date[];
   events: CalendarEvent[];
@@ -149,28 +149,45 @@ function eventLabel(
   );
 }
 
-function groupPersonalSlotEvents(events: CalendarEvent[]) {
-  const groups = new Map<string, CalendarEvent[]>();
+function groupOverlappingEvents(events: CalendarEvent[]) {
+  const sortedEvents = events
+    .filter((event) => eventStartMinutes(event) !== null)
+    .sort(
+      (left, right) =>
+        eventStartMinutes(left)! - eventStartMinutes(right)!,
+    );
+  const groups: CalendarEvent[][] = [];
+  let currentGroup: CalendarEvent[] = [];
+  let currentGroupEnd = -1;
 
-  for (const event of events) {
-    if (event.kind !== "PERSONAL_SLOT") {
-      groups.set(`${event.kind}-${event.id}`, [event]);
-      continue;
+  for (const event of sortedEvents) {
+    const startMinutes = eventStartMinutes(event);
+    if (startMinutes === null) continue;
+    const endMinutes = startMinutes + event.durationMinutes;
+
+    if (currentGroup.length > 0 && startMinutes >= currentGroupEnd) {
+      groups.push(currentGroup);
+      currentGroup = [];
+      currentGroupEnd = -1;
     }
 
-    const key = `${event.teacherId}-${dateKey(event.date)}-${event.startTime}`;
-    groups.set(key, [...(groups.get(key) ?? []), event]);
+    currentGroup.push(event);
+    currentGroupEnd = Math.max(currentGroupEnd, endMinutes);
   }
 
-  return Array.from(groups.values());
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
 }
 
 function buildCalendarItems(
   events: CalendarEvent[],
-  collapsePersonalSlots: boolean,
+  collapseOverlaps: boolean,
 ) {
-  const eventGroups = collapsePersonalSlots
-    ? groupPersonalSlotEvents(events)
+  const eventGroups = collapseOverlaps
+    ? groupOverlappingEvents(events)
     : events.map((event) => [event]);
   const items: CalendarGridItem[] = [];
 
@@ -185,10 +202,14 @@ function buildCalendarItems(
       continue;
     }
 
-    items.push({
-      durationMinutes: Math.max(
-        ...eventGroup.map((event) => event.durationMinutes),
+    const groupEndMinutes = Math.max(
+      ...eventGroup.map(
+        (event) => eventStartMinutes(event)! + event.durationMinutes,
       ),
+    );
+
+    items.push({
+      durationMinutes: groupEndMinutes - startMinutes,
       events: eventGroup,
       lane: 0,
       startMinutes,
@@ -264,7 +285,7 @@ function CalendarEventCard({
 }
 
 export function CalendarGrid({
-  collapsePersonalSlots = false,
+  collapseOverlaps = false,
   dateFormat,
   dates,
   events,
@@ -335,7 +356,7 @@ export function CalendarGrid({
             const columnEvents = events.filter(
               (event) => eventColumnKey(event, mode) === column.key,
             );
-            const items = buildCalendarItems(columnEvents, collapsePersonalSlots);
+            const items = buildCalendarItems(columnEvents, collapseOverlaps);
             const laneCount = Math.max(
               1,
               ...items.map((item) => item.lane + 1),
@@ -370,7 +391,7 @@ export function CalendarGrid({
 
                   return (
                     <details
-                      className={`schedule-event-group schedule-event-positioned${isPersonalGroup ? " schedule-event-personal-group" : ""}`}
+                      className={`schedule-event-group schedule-event-positioned schedule-event-overlap-group${isPersonalGroup ? " schedule-event-personal-group" : ""}`}
                       key={`group-${item.startMinutes}-${item.events.map((event) => `${event.kind}-${event.id}`).join("-")}`}
                       style={style}
                     >
@@ -387,10 +408,10 @@ export function CalendarGrid({
                         ) : (
                           <>
                             <strong>
-                              {item.events.length} {t("calendar.groupedEvents")}
+                              {item.events.length} {t("calendar.overlappingEvents")}
                             </strong>
                             <span>
-                              {formatStartTime(item.events[0].startTime)} | {t("calendar.expandGroup")}
+                              {formatStartTime(item.events[0].startTime)} | {t("calendar.expandOverlaps")}
                             </span>
                           </>
                         )}
