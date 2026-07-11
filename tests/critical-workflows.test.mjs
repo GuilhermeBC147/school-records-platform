@@ -334,6 +334,7 @@ test("date filters display account format while submitting ISO dates", async () 
   assert.match(dateInput, /date-calendar-input/);
   assert.match(dateInput, /calendarLabel/);
   assert.match(dateInput, /placeholderLabels/);
+  assert.match(dateInput, /hideFormatHint = true/);
   assert.match(dateInput, /hideFormatHint/);
   assert.match(dateInput, /title=\{placeholder\}/);
   assert.match(dateInput, /name=\{name\}/);

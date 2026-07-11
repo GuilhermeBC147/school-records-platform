@@ -29,7 +29,7 @@ export function DateInput({
   className,
   dateFormat,
   defaultValue = "",
-  hideFormatHint = false,
+  hideFormatHint = true,
   name,
   placeholderLabels,
   required = false,
