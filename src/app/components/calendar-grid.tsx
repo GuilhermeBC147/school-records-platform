@@ -34,7 +34,7 @@ const weekdayTranslationKeys = {
 } as const satisfies Record<Weekday, TranslationKey>;
 
 type CalendarGridProps = {
-  collapseSameStart?: boolean;
+  collapsePersonalSlots?: boolean;
   dateFormat: AccountDateFormat;
   dates: Date[];
   events: CalendarEvent[];
@@ -113,6 +113,26 @@ function eventLabel(
     );
   }
 
+  if (event.kind === "PERSONAL_SLOT") {
+    const status =
+      event.status === "COMPLETED"
+        ? t("personalSlots.completed")
+        : event.status === "CANCELED"
+          ? t("personalSlots.canceled")
+          : t("personalSlots.scheduled");
+
+    const attendance =
+      event.attendanceStatus === "PRESENT"
+        ? t("personalSlots.present")
+        : event.attendanceStatus === "ABSENT"
+          ? t("personalSlots.absent")
+          : event.attendanceStatus === "EXCUSED"
+            ? t("personalSlots.excused")
+            : t("personalSlots.attendancePending");
+
+    return <><strong>{formatStartTime(event.startTime)} | {formatDuration(event.durationMinutes)}</strong><span className="schedule-event-title">{event.studentName}</span><span className="schedule-event-book">{event.purpose}</span><span className="schedule-event-meta">{event.teacherName} / {status} / {attendance}</span></>;
+  }
+
   return (
     <>
       <strong>
@@ -129,11 +149,16 @@ function eventLabel(
   );
 }
 
-function groupEventsByStartTime(events: CalendarEvent[]) {
+function groupPersonalSlotEvents(events: CalendarEvent[]) {
   const groups = new Map<string, CalendarEvent[]>();
 
   for (const event of events) {
-    const key = event.startTime ?? "";
+    if (event.kind !== "PERSONAL_SLOT") {
+      groups.set(`${event.kind}-${event.id}`, [event]);
+      continue;
+    }
+
+    const key = `${event.teacherId}-${dateKey(event.date)}-${event.startTime}`;
     groups.set(key, [...(groups.get(key) ?? []), event]);
   }
 
@@ -142,10 +167,10 @@ function groupEventsByStartTime(events: CalendarEvent[]) {
 
 function buildCalendarItems(
   events: CalendarEvent[],
-  collapseSameStart: boolean,
+  collapsePersonalSlots: boolean,
 ) {
-  const eventGroups = collapseSameStart
-    ? groupEventsByStartTime(events)
+  const eventGroups = collapsePersonalSlots
+    ? groupPersonalSlotEvents(events)
     : events.map((event) => [event]);
   const items: CalendarGridItem[] = [];
 
@@ -239,7 +264,7 @@ function CalendarEventCard({
 }
 
 export function CalendarGrid({
-  collapseSameStart = false,
+  collapsePersonalSlots = false,
   dateFormat,
   dates,
   events,
@@ -310,7 +335,7 @@ export function CalendarGrid({
             const columnEvents = events.filter(
               (event) => eventColumnKey(event, mode) === column.key,
             );
-            const items = buildCalendarItems(columnEvents, collapseSameStart);
+            const items = buildCalendarItems(columnEvents, collapsePersonalSlots);
             const laneCount = Math.max(
               1,
               ...items.map((item) => item.lane + 1),
@@ -336,20 +361,39 @@ export function CalendarGrid({
                     );
                   }
 
+                  const personalEvents = item.events.filter(
+                    (event) => event.kind === "PERSONAL_SLOT",
+                  );
+                  const isPersonalGroup =
+                    personalEvents.length === item.events.length &&
+                    personalEvents.length > 1;
+
                   return (
                     <details
-                      className="schedule-event-group schedule-event-positioned"
-                      key={`group-${item.startMinutes}`}
+                      className={`schedule-event-group schedule-event-positioned${isPersonalGroup ? " schedule-event-personal-group" : ""}`}
+                      key={`group-${item.startMinutes}-${item.events.map((event) => `${event.kind}-${event.id}`).join("-")}`}
                       style={style}
                     >
                       <summary className="schedule-event-group-summary">
-                        <strong>
-                          {item.events.length} {t("calendar.groupedEvents")}
-                        </strong>
-                        <span>
-                          {formatStartTime(item.events[0].startTime)} |{" "}
-                          {t("calendar.expandGroup")}
-                        </span>
+                        {isPersonalGroup ? (
+                          <>
+                            <strong>
+                              {personalEvents.length}/3 {t("personalSlots.occupied")}
+                            </strong>
+                            <span>
+                              {t("personalSlots.title")} | {formatDuration(item.durationMinutes)} | {t("personalSlots.expand")}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <strong>
+                              {item.events.length} {t("calendar.groupedEvents")}
+                            </strong>
+                            <span>
+                              {formatStartTime(item.events[0].startTime)} | {t("calendar.expandGroup")}
+                            </span>
+                          </>
+                        )}
                       </summary>
                       <div className="schedule-event-group-items">
                         {item.events.map((event) => (

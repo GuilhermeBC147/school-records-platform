@@ -250,6 +250,19 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         {currentUser.role === "ADMIN" && adminDashboard ? (
           <>
+            <section className="panel dashboard-feed" aria-labelledby="personal-slots-admin-title">
+              <div className="section-heading-row">
+                <div>
+                  <p className="eyebrow">{t("personalSlots.personalBooths")}</p>
+                  <h2 id="personal-slots-admin-title">{t("personalSlots.title")}</h2>
+                  <p className="muted-copy">{t("personalSlots.copy")}</p>
+                </div>
+                <Link className="primary-link" href="/reception/personal-slots">
+                  {t("personalSlots.book")}
+                </Link>
+              </div>
+            </section>
+
             <section className="dashboard-metric-grid" aria-label={t("dashboard.adminOverview")}>
               <article className="metric">
                 <span>{adminDashboard.activeStaff}</span>

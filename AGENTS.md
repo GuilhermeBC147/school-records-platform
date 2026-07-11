@@ -6,6 +6,17 @@ This is a school records platform for an English school. The goal is to replace 
 
 The user is a beginner developer. Explain important technical decisions clearly and educationally, but still follow good professional development practices.
 
+## Scheduling and personal booth rules
+
+- Regular, VIP, and recurring `PERSONAL` classes remain represented by the `Class` model and must continue to use their existing roster, attendance, homework, grade, and lesson workflows.
+- Temporary personal-booth uses such as reviews, make-up lessons, make-up tests, and other one-off activities are represented by `PersonalSlotBooking`. Do not create a permanent class or enrollment for an ad-hoc booth use.
+- A personal time slot has capacity for three concurrent occupants per teacher. Capacity is shared between recurring `PERSONAL` classes and non-canceled dated `PersonalSlotBooking` records, including partial overlaps.
+- Admins and reception may use the constrained personal-slot workflow. Do not broaden reception into general class administration.
+- Teacher work summaries must count concurrent personal teaching time once. Merge submitted recurring personal lesson intervals and completed personal-slot booking intervals by teacher and date; do not simply add each personal record's duration.
+- Personal-slot calendar events must remain visible in teacher, admin, and reception calendars and should identify the student, purpose, teacher, duration, and status.
+- Personal-slot UI, validation messages, statuses, navigation labels, and calendar text must be localized in English and Brazilian Portuguese. User-entered purposes remain unchanged.
+- Any future schema change involving scheduling must explain its migration and preserve both recurring personal classes and ad-hoc personal-slot bookings.
+
 ## Before editing
 
 Before making changes, Codex should:

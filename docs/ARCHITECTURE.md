@@ -53,6 +53,7 @@ Teacher and admin dashboard routes:
 - `/dashboard/classes/[classId]`
 - `/dashboard/classes/[classId]/record`
 - `/dashboard/calendar`
+- `/dashboard/personal-slots`
 - `/dashboard/work`, `/dashboard/work/new`
 - `/dashboard/bonus-classes`
 - `/dashboard/substitutions/new`
@@ -82,7 +83,7 @@ Legacy `/admin/teachers` routes redirect to account management. `/reception/stud
 
 ## Data model
 
-The schema currently contains `User`, `PasswordResetToken`, `Class`, `Student`, `Enrollment`, `Lesson`, `AttendanceRecord`, `HomeworkRecord`, `PartialEvaluationGrade`, `TestGrade`, `StudentRiskResolution`, `TeacherWorkLog`, `TeacherWorkLogStudent`, `BonusClass`, `ImportBatch`, and `ImportRow`.
+The schema currently contains `User`, `PasswordResetToken`, `Class`, `Student`, `Enrollment`, `Lesson`, `AttendanceRecord`, `HomeworkRecord`, `PartialEvaluationGrade`, `TestGrade`, `StudentRiskResolution`, `TeacherWorkLog`, `TeacherWorkLogStudent`, `BonusClass`, `PersonalSlotBooking`, `ImportBatch`, and `ImportRow`.
 
 Important invariants:
 
@@ -92,6 +93,8 @@ Important invariants:
 - Partial and test grades are unique per class, student, and period.
 - Substitute lessons retain the submitting teacher, the teacher who taught, and admin approval state.
 - Monthly work summaries combine submitted lessons, completed bonus classes, and teacher work logs.
+- Dated personal-slot bookings can use any active student and teacher. Together with recurring personal classes they share a three-concurrent-booth capacity. Overlapping completed personal work counts once by the union of its time intervals.
+- Personal-slot bookings record attendance status and confirmation actor/time. Teachers may confirm only their own bookings; admins and reception retain booking management access.
 - Imports are previewed, validated, and recorded through import batches and rows.
 
 ## Main workflows
@@ -99,11 +102,13 @@ Important invariants:
 - Teachers and admins create class records with attendance, homework, notes, drafts, and submissions.
 - Teachers enter partial and test grades for their assigned classes.
 - Teachers can view a weekly calendar of their active recurring classes, assigned bonus classes, and admin-created meetings that include them.
+- Personal booth events are grouped by teacher, date, and exact start time into expandable occupancy cards in all calendars; unrelated regular, VIP, bonus, and meeting events remain separate.
 - Admins review records, exports, grades, risk signals, substitutions, imports, and work summaries.
 - Admins can view all-teacher Monday-to-Sunday class, bonus-class, and meeting schedules and open existing edit forms.
 - Reception schedules bonus classes, uses student/class lookup, and confirms bonus attendance.
 - Reception can view regular classes, bonus classes, and admin-created meetings together across a Monday-to-Sunday calendar.
 - Users can select English or Brazilian Portuguese, a date format, and a light/dark theme.
+- Teachers confirm assigned personal booth attendance from `/dashboard/personal-slots` using Present, Absent, or Excused; completed personal time remains included in merged payroll intervals.
 
 ## Development and verification
 

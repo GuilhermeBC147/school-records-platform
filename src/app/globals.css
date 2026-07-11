@@ -1527,7 +1527,7 @@ input[type="time"],
   gap: 7px;
 }
 
-.filter-form label span {
+.filter-form label > span {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
@@ -1607,7 +1607,7 @@ input[type="time"],
   gap: 7px;
 }
 
-.admin-form label span {
+.admin-form label > span {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
@@ -2624,6 +2624,11 @@ input[type="time"],
   border-left: 3px solid var(--muted);
 }
 
+.schedule-event-personal_slot {
+  border-color: var(--accent-line);
+  border-left: 3px solid var(--accent);
+}
+
 .calendar-grid-board {
   --calendar-row-height: 70px;
   display: grid;
@@ -2775,6 +2780,15 @@ input[type="time"],
   content: "-";
 }
 
+.schedule-event-personal-group {
+  border-color: var(--accent-line);
+  border-left: 3px solid var(--accent);
+}
+
+.schedule-event-personal-group .schedule-event-group-summary {
+  background: var(--accent-soft);
+}
+
 .schedule-event-group-summary strong,
 .schedule-event-group-summary span {
   min-width: 0;
@@ -2812,6 +2826,10 @@ input[type="time"],
   position: relative;
   top: auto;
   width: auto;
+}
+
+.schedule-event-personal-group .schedule-event-group-items {
+  background: var(--panel);
 }
 
 .calendar-controls {

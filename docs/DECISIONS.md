@@ -111,3 +111,25 @@ This keeps the application and PostgreSQL under one provider while providing a B
 
 Consequences:
 The VPS remains self-managed, so the handoff must include automation for deployment, restart/recovery, HTTPS renewal, migrations, security updates, monitoring, and backup-failure alerts. Use Hostinger VPS backups as one layer and nightly logical PostgreSQL dumps stored outside the VPS as another. Keep the account, billing, credentials, and runbook under school ownership.
+
+## 2026-07-10 - Model ad-hoc personal booth use separately
+
+Decision:
+Keep recurring one-student personal classes as `Class` records, and use dated `PersonalSlotBooking` records for reviews, make-up lessons, tests, and other booth uses involving any active student and teacher.
+
+Reason:
+Creating a class enrollment for temporary booth use would incorrectly attach that student to grades, attendance, and the permanent roster. Both sources still consume the same three-booth capacity.
+
+Consequences:
+Admins and reception schedule ad-hoc bookings. Completed bookings and submitted recurring personal lessons are combined as time intervals in teacher work summaries, so concurrent personal work counts once rather than once per student.
+
+## 2026-07-10 - Confirm personal booth attendance through a teacher workflow
+
+Decision:
+Group personal bookings by teacher, date, and exact start time in expandable calendar cards. Let teachers confirm their own bookings as Present, Absent, or Excused from a dedicated personal-slots page.
+
+Reason:
+Three narrow side-by-side cards do not remain readable, and attendance confirmation needs ownership checks and enough space for a clear status selection.
+
+Consequences:
+Personal-only groups display occupancy and individual student details while regular, VIP, bonus, and meeting events stay separate. Completed personal time counts toward payroll regardless of the selected attendance status, matching the existing bonus-class rule.

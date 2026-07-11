@@ -183,3 +183,72 @@ None.
 - Edge cases found: current-path redirects preserve nested routes and query strings; active locale remains exposed through `aria-current` and `aria-pressed`.
 - Verification: 20 critical workflow tests, typecheck, production build, diff checks, and mobile/nested-route in-app browser smoke checks passed.
 - Next session should read first: this section, `src/app/components/app-topbar.tsx`, and the topbar rules in `src/app/globals.css`.
+
+## Personal booth scheduling
+
+### Deviations
+
+- The original plan derived every occupant from a one-student `Class`. The clarified requirement includes one-off reviews, make-up lessons, and tests for any student, so an additive dated `PersonalSlotBooking` model is used instead.
+
+### Discovered edge cases
+
+- Existing recurring `PERSONAL` classes and ad-hoc bookings consume the same three-booth capacity.
+- Different activities can partially overlap, so payroll uses the union of completed/submitted personal intervals rather than grouping identical start times.
+
+### Questions for review
+
+- Confirm after trying the workflow whether physical booths need stable names/numbers; this increment treats them as interchangeable capacity.
+
+### End-of-session summary
+
+- Deviations: 1, the additive booking model described above.
+- Most likely to revisit: whether booth identities should be stored.
+- Edge cases found: recurring/ad-hoc shared capacity and partial-duration overlap.
+- Verification: Prisma generation, schema validation, typecheck, and critical workflow tests.
+- Next session should read first: this section, `src/lib/personal-slots.ts`, and `src/lib/teacher-work.ts`.
+
+## Personal booth follow-up
+
+### Deviations
+
+- None. The follow-up exposes the existing authorized workflow directly on the admin dashboard and localizes its page/calendar presentation.
+
+### Discovered edge cases
+
+- Permission alone did not make the feature discoverable to admins; both the dashboard and grouped operations navigation need direct entry points.
+- Booking purposes remain staff-entered free text and are intentionally not translated after they are saved.
+
+### Questions for review
+
+- None.
+
+### End-of-session summary
+
+- Deviations: 0.
+- Most likely to revisit: whether personal-slot status controls should also appear directly in calendar cards.
+- Edge cases found: admin discoverability and user-entered purpose localization boundaries.
+- Verification: typecheck and critical workflow tests.
+- Next session should read first: this section and `src/app/reception/personal-slots/page.tsx`.
+
+## Personal booth calendar and teacher confirmation
+
+### Deviations
+
+- None from the approved plan. Existing bonus-class attendance terminology and confirmation metadata were reused.
+
+### Discovered edge cases
+
+- Staff calendar columns represent dates, so the personal grouping key must include `teacherId` to avoid merging different teachers who start bookings at the same time.
+- Admin/reception completion sets a booking to Present; teacher confirmation supports the full Present, Absent, and Excused set.
+
+### Questions for review
+
+- None.
+
+### End-of-session summary
+
+- Deviations: 0.
+- Most likely to revisit: whether personal groups should eventually merge partially overlapping bookings with different start times.
+- Edge cases found: same-time bookings for different teachers and manager versus teacher confirmation semantics.
+- Verification: migration deploy, Prisma generation, typecheck, critical workflow tests, and diff checks.
+- Next session should read first: this section, `src/app/components/calendar-grid.tsx`, and `src/app/dashboard/personal-slots/page.tsx`.

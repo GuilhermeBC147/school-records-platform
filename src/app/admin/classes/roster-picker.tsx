@@ -21,11 +21,15 @@ type RosterPickerProps = {
     shown: string;
   };
   students: RosterStudent[];
+  selectionName?: string;
+  singleSelection?: boolean;
 };
 
 export function RosterPicker({
   emptyMessage,
   labels,
+  selectionName = "studentIds",
+  singleSelection = false,
   students,
 }: RosterPickerProps) {
   const [query, setQuery] = useState("");
@@ -52,6 +56,10 @@ export function RosterPicker({
 
   function toggleStudent(studentId: string) {
     setSelectedStudentIds((currentStudentIds) => {
+      if (singleSelection && !currentStudentIds.has(studentId)) {
+        return new Set([studentId]);
+      }
+
       const nextStudentIds = new Set(currentStudentIds);
 
       if (nextStudentIds.has(studentId)) {
@@ -67,7 +75,7 @@ export function RosterPicker({
   return (
     <div className="roster-picker">
       {Array.from(selectedStudentIds).map((studentId) => (
-        <input key={studentId} name="studentIds" type="hidden" value={studentId} />
+        <input key={studentId} name={selectionName} type="hidden" value={studentId} />
       ))}
 
       <label>

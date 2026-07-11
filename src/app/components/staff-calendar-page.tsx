@@ -109,7 +109,7 @@ export async function StaffCalendarPage({
   const teachers = selectedTeacherId
     ? allTeachers.filter((teacher) => teacher.id === selectedTeacherId)
     : allTeachers;
-  const [classes, bonusClasses, meetings] = await Promise.all([
+  const [classes, bonusClasses, meetings, personalBookings] = await Promise.all([
     prisma.class.findMany({
       orderBy: [{ startTime: "asc" }, { name: "asc" }],
       where: {
@@ -168,6 +168,7 @@ export async function StaffCalendarPage({
         workDate: true,
       },
     }),
+    prisma.personalSlotBooking.findMany({where:{scheduledDate:{gte:weekStart,lt:weekEnd},status:{not:"CANCELED"},...(selectedTeacherId?{teacherId:selectedTeacherId}:{})},select:{id:true,scheduledDate:true,startTime:true,durationMinutes:true,purpose:true,status:true,attendanceStatus:true,student:{select:{fullName:true}},teacherId:true,teacher:{select:{name:true}}}}),
   ]);
   const canEditClasses = currentUser.role === "ADMIN";
   const meetingHref = canEditClasses
@@ -240,7 +241,8 @@ export async function StaffCalendarPage({
     teacherName: meeting.teacherNames.join(", "),
     title: meeting.title,
   }));
-  const events = [...classEvents, ...bonusEvents, ...meetingEvents];
+  const personalEvents: CalendarEvent[] = personalBookings.map((booking)=>({kind:"PERSONAL_SLOT",id:booking.id,date:booking.scheduledDate,startTime:booking.startTime,durationMinutes:booking.durationMinutes,purpose:booking.purpose,status:booking.status,attendanceStatus:booking.attendanceStatus,studentName:booking.student.fullName,teacherId:booking.teacherId,teacherName:booking.teacher.name,href:"/reception/personal-slots"}));
+  const events = [...classEvents, ...bonusEvents, ...meetingEvents, ...personalEvents];
   const unscheduledClasses = classes.filter((schoolClass) => !schoolClass.startTime);
   const unscheduledMeetings = calendarMeetings.filter(
     (meeting) => !meeting.startTime,
@@ -338,7 +340,7 @@ export async function StaffCalendarPage({
             <span className="status-pill">{events.length}</span>
           </div>
           <CalendarGrid
-            collapseSameStart
+            collapsePersonalSlots
             dateFormat={currentUser.dateFormat}
             dates={weekDates}
             events={events}

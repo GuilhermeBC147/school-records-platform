@@ -441,7 +441,7 @@ test("class management supports metadata and active teacher assignment", async (
   assert.match(durationInput, /formatDuration\(valueMinutes\)/);
   assert.match(rosterPicker, /labels\.search/);
   assert.match(rosterPicker, /labels\.noMatches/);
-  assert.match(rosterPicker, /name="studentIds"/);
+  assert.match(rosterPicker, /selectionName = "studentIds"/);
   assert.doesNotMatch(classesPage, /Create class/);
   assert.doesNotMatch(classesPage, /Class results/);
   assert.doesNotMatch(newClassPage, /Class roster/);
@@ -989,7 +989,7 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(staffCalendarPage, /calendar\.weeklyTitle/);
   assert.match(staffCalendarPage, /AppTopbar currentUser=\{currentUser\}/);
   assert.match(staffCalendarPage, /CalendarGrid/);
-  assert.match(staffCalendarPage, /collapseSameStart/);
+  assert.match(staffCalendarPage, /collapsePersonalSlots/);
   assert.match(staffCalendarPage, /getCalendarWeekDates/);
   assert.match(staffCalendarPage, /schoolClass\.weekDays\.includes\(weekday\)/);
   assert.match(staffCalendarPage, /mode="week"/);
@@ -1004,7 +1004,9 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(staffCalendarPage, /teacherNames\.join\(", "\)/);
   assert.match(calendarGrid, /schedule-event-meta">\{event\.teacherName\}/);
   assert.match(calendarGrid, /event\.kind === "MEETING"/);
-  assert.match(calendarGrid, /groupEventsByStartTime/);
+  assert.match(calendarGrid, /groupPersonalSlotEvents/);
+  assert.match(calendarGrid, /personalSlots\.occupied/);
+  assert.match(calendarGrid, /schedule-event-personal-group/);
   assert.match(calendarGrid, /schedule-event-group/);
   assert.match(calendarGrid, /event\.book/);
   assert.match(calendarGrid, /durationMinutes \/ 30/);
@@ -1185,6 +1187,36 @@ test("locale selection persists and critical workflows use translated text", asy
   assert.match(receptionDashboard, /t\("dashboard\.receptionDashboard"\)/);
   assert.match(receptionStudentsPage, /const t = getTranslations\(currentUser\.locale\)/);
   assert.match(receptionStudentsPage, /t\("receptionLookup\.studentResults"\)/);
+});
+
+test("personal slot bookings share three-booth capacity and deduplicate paid time", async () => {
+  const [schema, actions, slots, work, staffCalendar, teacherCalendar, dashboard, topbar, translations, personalPage, picker] = await Promise.all([
+    readProjectFile("prisma/schema.prisma"), readProjectFile("src/app/actions/personal-slots.ts"), readProjectFile("src/lib/personal-slots.ts"), readProjectFile("src/lib/teacher-work.ts"), readProjectFile("src/app/components/staff-calendar-page.tsx"), readProjectFile("src/app/dashboard/calendar/page.tsx"),
+    readProjectFile("src/app/dashboard/page.tsx"), readProjectFile("src/app/components/app-topbar.tsx"), readProjectFile("src/lib/translations.ts"),
+    readProjectFile("src/app/reception/personal-slots/page.tsx"), readProjectFile("src/app/admin/classes/roster-picker.tsx"),
+  ]);
+  assert.match(schema, /model PersonalSlotBooking/);
+  assert.match(actions, /requirePersonalSlotManager/);
+  assert.match(actions, /confirmPersonalSlotBookingAction/);
+  assert.match(actions, /teacher\.id/);
+  assert.match(slots, /hasPersonalSlotCapacityConflict/);
+  assert.match(slots, /> 3/);
+  assert.match(work, /mergedIntervalMinutes/);
+  assert.match(work, /personalSlotMinutes/);
+  assert.match(staffCalendar, /PERSONAL_SLOT/);
+  assert.match(teacherCalendar, /PERSONAL_SLOT/);
+  assert.match(teacherCalendar, /collapsePersonalSlots/);
+  assert.match(dashboard, /reception\/personal-slots/);
+  assert.match(topbar, /personalSlots\.title/);
+  assert.match(translations, /"personalSlots\.capacityError"/);
+  assert.match(translations, /As três cabines estão ocupadas/);
+  assert.match(personalPage, /selectionName="studentId"/);
+  assert.match(personalPage, /singleSelection/);
+  assert.match(picker, /singleSelection && !currentStudentIds\.has/);
+  assert.match(schema, /attendanceConfirmedById/);
+  assert.match(schema, /attendanceStatus\s+BonusClassAttendanceStatus/);
+  assert.match(translations, /personalSlots\.confirmAttendance/);
+  assert.match(translations, /personalSlots\.teacherTitle/);
 });
 
 test("account theme selection persists and applies globally", async () => {

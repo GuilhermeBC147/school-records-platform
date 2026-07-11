@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { mergedIntervalMinutes } from "@/lib/personal-slots";
 import type { AccountLocale } from "@/lib/locale";
 import { defaultUnauthenticatedLocale } from "@/lib/locale";
 import { translate } from "@/lib/translations";
@@ -76,7 +77,7 @@ export async function getTeacherWorkSummary({
     return null;
   }
 
-  const [lessons, bonusClasses, workLogs] = await Promise.all([
+  const [lessons, bonusClasses, workLogs, personalSlotBookings] = await Promise.all([
     prisma.lesson.findMany({
       where: {
         lessonDate: {
@@ -106,6 +107,8 @@ export async function getTeacherWorkSummary({
         class: {
           select: {
             durationMinutes: true,
+            classType: true,
+            startTime: true,
             name: true,
             teacher: {
               select: {
@@ -176,6 +179,7 @@ export async function getTeacherWorkSummary({
         workDate: true,
       },
     }),
+    prisma.personalSlotBooking.findMany({where:{teacherId,scheduledDate:{gte:start,lt:end},status:"COMPLETED"},select:{id:true,scheduledDate:true,startTime:true,durationMinutes:true,purpose:true,student:{select:{fullName:true}}},orderBy:[{scheduledDate:"asc"},{startTime:"asc"}]}),
   ]);
   const pendingSubstituteLessons = await prisma.lesson.findMany({
     where: {
@@ -206,10 +210,12 @@ export async function getTeacherWorkSummary({
     },
   });
 
-  const lessonMinutes = lessons.reduce(
-    (total, lesson) => total + lesson.class.durationMinutes,
-    0,
-  );
+  const ordinaryLessonMinutes = lessons.filter((lesson)=>lesson.class.classType!=="PERSONAL"||!lesson.class.startTime).reduce((total,lesson)=>total+lesson.class.durationMinutes,0);
+  const personalByDate = new Map<string,Array<{startTime:string;durationMinutes:number}>>();
+  for(const lesson of lessons.filter((lesson)=>lesson.class.classType==="PERSONAL"&&lesson.class.startTime)){const key=lesson.lessonDate.toISOString().slice(0,10); personalByDate.set(key,[...(personalByDate.get(key)??[]),{startTime:lesson.class.startTime!,durationMinutes:lesson.class.durationMinutes}]);}
+  for(const booking of personalSlotBookings){const key=booking.scheduledDate.toISOString().slice(0,10); personalByDate.set(key,[...(personalByDate.get(key)??[]),{startTime:booking.startTime,durationMinutes:booking.durationMinutes}]);}
+  const personalSlotMinutes=[...personalByDate.values()].reduce((total,items)=>total+mergedIntervalMinutes(items),0);
+  const lessonMinutes = ordinaryLessonMinutes + personalSlotMinutes;
   const bonusClassMinutes = bonusClasses.reduce(
     (total, bonusClass) => total + bonusClass.durationMinutes,
     0,
@@ -225,6 +231,8 @@ export async function getTeacherWorkSummary({
     lessonMinutes,
     lessons,
     pendingSubstituteLessons,
+    personalSlotBookings,
+    personalSlotMinutes,
     teacher,
     totalMinutes: lessonMinutes + bonusClassMinutes + workLogMinutes,
     workLogMinutes,

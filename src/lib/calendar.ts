@@ -56,11 +56,26 @@ export type CalendarMeetingEvent = {
   durationMinutes: number;
   href: string;
 };
+export type CalendarPersonalSlotEvent = {
+  kind: "PERSONAL_SLOT";
+  id: string;
+  date: Date;
+  teacherId: string;
+  teacherName: string;
+  studentName: string;
+  purpose: string;
+  status: string;
+  attendanceStatus: string;
+  startTime: string;
+  durationMinutes: number;
+  href: string;
+};
 
 export type CalendarEvent =
   | CalendarClassEvent
   | CalendarBonusEvent
-  | CalendarMeetingEvent;
+  | CalendarMeetingEvent
+  | CalendarPersonalSlotEvent;
 
 export function dateKey(date: Date) {
   return date.toISOString().slice(0, 10);

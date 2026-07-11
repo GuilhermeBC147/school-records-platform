@@ -126,6 +126,12 @@ enum ClassType {
   PERSONAL
 }
 
+enum PersonalSlotBookingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
 enum Weekday {
   MONDAY
   TUESDAY
@@ -161,6 +167,9 @@ model User {
   taughtLessons       Lesson[]             @relation("TaughtBy")
   taughtBonusClasses  BonusClass[]         @relation("TaughtBonusClasses")
   teacherWorkLogs     TeacherWorkLog[]     @relation("TeacherWorkLogs")
+  personalSlotBookings PersonalSlotBooking[] @relation("PersonalSlotTeacher")
+  createdPersonalSlotBookings PersonalSlotBooking[] @relation("CreatedPersonalSlotBookings")
+  confirmedPersonalSlotBookings PersonalSlotBooking[] @relation("ConfirmedPersonalSlotBookings")
 }
 
 model PasswordResetToken {
@@ -218,6 +227,38 @@ model Student {
   riskResolutions         StudentRiskResolution[]
   testGrades              TestGrade[]
   teacherWorkLogs         TeacherWorkLogStudent[]
+  personalSlotBookings    PersonalSlotBooking[]
+}
+
+model PersonalSlotBooking {
+  id              String                    @id @default(cuid())
+  purpose         String
+  scheduledDate   DateTime
+  startTime       String
+  durationMinutes Int
+  status          PersonalSlotBookingStatus @default(SCHEDULED)
+  attendanceStatus BonusClassAttendanceStatus @default(PENDING)
+  notes           String?
+  completedAt     DateTime?
+  attendanceConfirmedAt DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  studentId   String
+  student     Student @relation(fields: [studentId], references: [id])
+  teacherId   String
+  teacher     User    @relation("PersonalSlotTeacher", fields: [teacherId], references: [id])
+  createdById String
+  createdBy   User    @relation("CreatedPersonalSlotBookings", fields: [createdById], references: [id])
+  attendanceConfirmedById String?
+  attendanceConfirmedBy   User?   @relation("ConfirmedPersonalSlotBookings", fields: [attendanceConfirmedById], references: [id])
+
+  @@index([teacherId, scheduledDate])
+  @@index([studentId])
+  @@index([createdById])
+  @@index([status])
+  @@index([attendanceConfirmedById])
+  @@index([attendanceStatus])
 }
 
 model ImportBatch {
