@@ -58,13 +58,13 @@ Future tasks should start from the current schema, routes, actions, tests, and a
 ## 2026-07-10 - Warn about bonus and regular schedule overlap
 
 Decision:
-If a bonus class overlaps a teacher's regular class schedule, show a clear warning with the conflicting class/time and allow the user to cancel or explicitly save anyway. Keep overlapping non-canceled bonus classes blocked.
+If a bonus class overlaps a teacher's recurring class schedule, return the validated proposal to the create/edit form with a clear localized warning and allow the user to leave, edit the proposal, or explicitly save anyway. Keep overlapping non-canceled bonus classes blocked.
 
 Reason:
 The school wants the conflict to be visible without preventing legitimate exceptions. Bonus-vs-bonus conflicts remain a hard scheduling error.
 
 Consequences:
-Implement conflict detection and warning UX, add focused tests, and do not add a database uniqueness rule for the regular-class overlap.
+The server checks bonus conflicts first, then active recurring `REGULAR`, `VIP`, and `PERSONAL` schedules on the same weekday. A save-anyway value records intent only: the server reruns both checks before writing. The first implementation keeps the proposed schedule visible rather than enumerating conflicting class details. Focused PostgreSQL and bilingual browser checks cover create and edit, and no database uniqueness rule is added for recurring-class overlaps.
 
 ---
 

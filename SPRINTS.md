@@ -4,7 +4,7 @@ Last updated: 2026-07-12
 
 ## Current focus
 
-Resolve the regular-class overlap warning/save-anyway launch blocker before continuing the Sprint 19 infrastructure checklist.
+Continue Sprint 19 with the production environment and Hostinger VPS operations checklist now that the regular-class overlap warning/save-anyway launch blocker is resolved.
 
 ## Current implementation status
 
@@ -15,10 +15,11 @@ Resolve the regular-class overlap warning/save-anyway launch blocker before cont
 - Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular classes, bonus classes, and admin-created meetings across a Monday-to-Sunday week, with teachers shown on staff event cards. The admin view shows one card per meeting, and all calendar views keep the weekday header visible while scrolling.
 - Personal booth scheduling supports dated review, make-up lesson, test, and other bookings for any active student and teacher. Recurring personal classes and ad-hoc bookings share three-booth capacity, appear in calendars, and overlapping completed personal work counts once in teacher hours.
 - Overlapping calendar events now group into expandable cards spanning their combined time range; personal groups show occupancy, and teachers can confirm assigned bookings as Present, Absent, or Excused from date-filtered class cards on the teacher dashboard. The legacy personal-slots path redirects there.
-- The first Sprint 19 quality-control baseline is documented in `docs/sprint-19-quality-control.md`: 21 workflow assertions, typecheck, Prisma validation, and the production build pass on the full feature branch.
+- The Sprint 19 quality-control baseline and scheduling follow-up are documented in `docs/sprint-19-quality-control.md`: 22 workflow assertions, PostgreSQL scheduling coverage, typecheck, Prisma validation, production build, and bilingual create/edit browser checks pass.
 - English and Brazilian Portuguese critical-screen browser testing is documented in `docs/sprint-19-bilingual-screen-matrix.md`; all public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed locally.
 - PostgreSQL-backed student and class import testing is documented in `docs/sprint-19-import-quality-control.md`; valid, invalid, duplicate, partial-failure, audit-count, and cleanup scenarios pass twice consecutively.
-- Sprint 19 production readiness is not complete; browser/database checks, the regular-class overlap warning, and production infrastructure validation remain.
+- Bonus scheduling now hard-blocks overlapping non-canceled bonus classes and warns on active recurring `REGULAR`, `VIP`, or `PERSONAL` class overlaps. Create and edit require an explicit localized save-anyway action, restore the validated proposal after warning, and rerun both conflict checks before writing. Static, PostgreSQL, and bilingual browser checks pass.
+- Sprint 19 production readiness is not complete; school-owned infrastructure, SMTP, monitoring, backup-alert, and restore validation remain.
 
 ## Completed workflow decisions
 
@@ -31,14 +32,14 @@ Resolve the regular-class overlap warning/save-anyway launch blocker before cont
 ## Known issues / questions
 
 - Production password-reset email delivery still requires a Hostinger SMTP mailbox and configuration.
-- The intended regular-class overlap behavior is a warning with an explicit “save anyway” path; implementation and focused tests remain.
 - The production target is a Hostinger VPS in Brazil; deployment, restart, monitoring, security-update, and backup automation plus an operator runbook still need implementation.
 - Layered backup ownership, retention, off-VPS storage, and restore testing still need production confirmation.
-- The current test suite is a static source-level critical-workflow suite, not browser or production database coverage.
+- The default `npm test` suite remains source-level; PostgreSQL scheduling/import suites are opt-in, and broader critical-write browser/database coverage is still needed.
+- The local seed is not repeatable against an already-populated database and can fail with Prisma `P2002` on duplicate IDs.
 
 ## Next recommended task
 
-Switch to High reasoning, then implement and test the warning plus explicit save-anyway path when a bonus class overlaps a recurring regular class. Bonus-versus-bonus conflicts must remain blocked. Afterward, return to the production environment and Hostinger checklist; keep the non-repeatable seed `P2002` as a focused follow-up.
+Add the production environment checklist and concrete Hostinger VPS setup/operations automation: deployment with migrations and restart, HTTPS renewal, security updates, health/resource monitoring, layered backups with failure alerts, and an operator runbook. Keep the non-repeatable seed `P2002` as a separate focused follow-up and do not provision school-owned infrastructure without the required credentials and ownership decisions.
 
 ---
 # Sprint Plan

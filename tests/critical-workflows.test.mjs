@@ -999,10 +999,10 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(bonusActions, /readAttendanceStatus/);
   assert.match(bonusActions, /normalizeStartTime/);
   assert.match(bonusActions, /readDurationMinutes\(formData\.get\("durationMinutes"\)\)/);
-  assert.match(bonusActions, /hasTeacherBonusClassOverlap/);
+  assert.match(bonusActions, /createBonusClassWithConflictCheck/);
   assert.match(bonusLib, /formatBonusClassResultMessage/);
   assert.match(bonusLib, /formatBonusClassErrorMessage/);
-  assert.match(bonusLib, /startMinutes < existingEnd/);
+  assert.match(bonusLib, /intervalsOverlap/);
   assert.match(receptionDashboardPage, /dashboard-metric-grid/);
   assert.doesNotMatch(receptionDashboardPage, /dashboard-action-grid/);
   assert.doesNotMatch(receptionDashboardPage, /dashboard-action-card/);
@@ -1138,6 +1138,80 @@ test("reception can schedule bonus classes for teacher confirmation", async () =
   assert.match(workLib, /bonusClasses/);
   assert.match(workLib, /status: "COMPLETED"/);
   assert.match(dataModelDoc, /Reception accounts can schedule independent bonus classes/);
+});
+
+test("bonus class recurring overlaps require an explicit localized confirmation", async () => {
+  const bonusActions = await readProjectFile("src/app/actions/bonus-classes.ts");
+  const bonusLib = await readProjectFile("src/lib/bonus-classes.ts");
+  const receptionPage = await readProjectFile(
+    "src/app/reception/bonus-classes/page.tsx",
+  );
+  const receptionEditPage = await readProjectFile(
+    "src/app/reception/bonus-classes/[bonusClassId]/page.tsx",
+  );
+  const translations = await readProjectFile("src/lib/translations.ts");
+
+  assert.match(
+    bonusActions,
+    /currentUser\.role !== "RECEPTION" && currentUser\.role !== "ADMIN"/,
+  );
+  assert.match(
+    bonusLib,
+    /const hasBonusOverlap = await hasTeacherBonusClassOverlap\([\s\S]*if \(hasBonusOverlap\)[\s\S]*return "BONUS_OVERLAP"[\s\S]*hasTeacherRecurringClassOverlap\(data\)/,
+  );
+  assert.match(
+    bonusLib,
+    /hasRecurringOverlap && !confirmRegularClassOverlap/,
+  );
+  assert.match(
+    bonusActions,
+    /readRequiredString\(formData, "confirmRegularClassOverlap"\) === "true"/,
+  );
+  assert.match(bonusActions, /warning: "regularOverlap"/);
+  assert.match(bonusActions, /studentId: data\.studentId/);
+  assert.match(bonusActions, /scheduledDate: data\.scheduledDate\.toISOString\(\)\.slice\(0, 10\)/);
+  assert.match(
+    bonusActions,
+    /updateBonusClassWithConflictCheck\(\{[\s\S]*bonusClassId,[\s\S]*confirmRegularClassOverlap/,
+  );
+  assert.match(
+    bonusActions,
+    /result\.status === "BONUS_OVERLAP"[\s\S]*result\.status === "RECURRING_OVERLAP"/,
+  );
+  assert.match(bonusLib, /createBonusClassWithConflictCheck/);
+  assert.match(bonusLib, /updateBonusClassWithConflictCheck/);
+
+  assert.match(bonusLib, /classType: \{ in: \["REGULAR", "VIP", "PERSONAL"\] \}/);
+  assert.match(bonusLib, /isActive: true/);
+  assert.match(bonusLib, /weekDays: \{ has: weekday \}/);
+  assert.match(bonusLib, /if \(!schoolClass\.startTime \|\| schoolClass\.durationMinutes <= 0\)/);
+  assert.match(bonusLib, /firstStartMinutes < secondEndMinutes/);
+  assert.match(bonusLib, /secondStartMinutes < firstEndMinutes/);
+
+  for (const page of [receptionPage, receptionEditPage]) {
+    assert.match(page, /query\.warning === "regularOverlap"/);
+    assert.match(page, /message\.bonusRegularOverlapWarning/);
+    assert.match(page, /name="confirmRegularClassOverlap"/);
+    assert.match(page, /value="true"/);
+    assert.match(page, /label\.saveBonusClassAnyway/);
+  }
+
+  assert.match(
+    translations,
+    /"label\.saveBonusClassAnyway": "Save anyway"/,
+  );
+  assert.match(
+    translations,
+    /"label\.saveBonusClassAnyway": "Salvar mesmo assim"/,
+  );
+  assert.match(
+    translations,
+    /"message\.bonusRegularOverlapWarning":[\s\S]*This bonus class overlaps an active recurring class/,
+  );
+  assert.match(
+    translations,
+    /"message\.bonusRegularOverlapWarning":[\s\S]*Esta aula bônus coincide com uma turma recorrente ativa/,
+  );
 });
 
 test("locale selection persists and critical workflows use translated text", async () => {

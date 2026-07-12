@@ -99,7 +99,10 @@ Also smoke-test the current role-specific scope:
 
 - Production password-reset email delivery still needs Hostinger SMTP configuration and a delivery test.
 - Hostinger VPS deployment automation, the operator runbook, and a successful restore test must be completed.
-- The regular-class overlap warning still needs implementation and focused tests; it should warn and allow an explicit save rather than block the bonus class.
+
+## Resolved scheduling blocker
+
+The bonus-versus-recurring-class warning is complete: bonus conflicts remain blocked, recurring `REGULAR`, `VIP`, and `PERSONAL` overlaps require an explicit save-anyway submission, and the server recomputes conflicts before every write.
 
 ## Recovery Notes
 

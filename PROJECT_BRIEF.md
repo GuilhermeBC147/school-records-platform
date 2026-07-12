@@ -73,7 +73,7 @@ Recommended stack:
 - Password reset needs a production-ready email path before school use.
 - Admin setup screens need enough validation to avoid broken class rosters.
 - Reception scheduling needs conflict checks to avoid assigning one teacher to two sessions at the same time. Bonus-vs-bonus conflicts should remain blocked; a bonus class overlapping a regular class should warn and allow an explicit save.
-- The regular-class overlap warning still needs implementation and focused tests.
+- The regular-class overlap warning and explicit save-anyway path are implemented and covered by source-level, PostgreSQL, and bilingual browser checks.
 - Hostinger VPS operations, password-reset email delivery, and layered backup/restore procedures must be automated and documented before handoff.
 - Payroll counts need to distinguish the teacher who submitted a record from the teacher who should be paid for it.
 - The app needs a clear backup/export strategy before production use.

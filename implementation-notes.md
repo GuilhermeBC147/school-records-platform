@@ -349,3 +349,33 @@ None yet.
 - Edge cases found: preview writes audit data, fixtures must self-clean, and CommonJS tests cannot use top-level `await`.
 - Verification: student and class valid/invalid/duplicate/partial-failure scenarios passed twice consecutively with exact audit-count and persistence assertions.
 - Next session should read first: this section, `tests/import-workflows.integration.test.ts`, and `docs/sprint-19-import-quality-control.md`.
+
+## Bonus class recurring-overlap confirmation
+
+### Deviations
+
+- The initial partial implementation kept conflict decisions and writes directly in both server actions. They now delegate to shared create/update conflict-check services so PostgreSQL tests can prove warning/no-write and confirmed-write behavior; authorization and redirect handling remain in the actions.
+
+### Discovered edge cases
+
+- Create and edit warnings must preserve validated schedule values, while every confirmation submission still reruns bonus and recurring-class conflict queries.
+- Edit conflict checks must exclude the edited bonus class only from bonus-versus-bonus results; recurring class checks have no such exclusion.
+- Recurring classes with a missing or malformed start time, non-positive duration, a different weekday, or inactive status must not create false warnings.
+- The legacy static bonus-overlap assertion was coupled to inline interval arithmetic; it now targets the shared strict-overlap helper used by both conflict types.
+- Create warning repopulation must not submit a hidden student ID alongside the editable student search; otherwise changing the visible student would still save the original one. The server re-resolves the visible active-student name instead.
+- A submitted confirmation value is treated only as intent: the service still reruns the hard bonus-conflict query first and the recurring-class query second before writing.
+- Warning redirects preserve validated free text in the URL to match the existing action redirect convention; subject and notes may therefore appear in browser history or request logs.
+- Conflict checks and writes remain separate application-level database operations, so simultaneous scheduling requests retain the pre-existing race window; closing it would require broader transactional or schema work.
+- Integration fixtures must use a future schedule date outside seeded bonus-class data. A first pass correctly returned the hard bonus conflict before the expected recurring warning because the proposed time matched an existing seeded bonus class.
+
+### Questions for review
+
+- The 2026-07-10 decision note originally mentioned enumerating the conflicting class/time. The completed scope uses a generic localized warning and restores the full proposed schedule; add conflict-detail enumeration later only if staff find the populated form insufficient.
+
+### End-of-session summary
+
+- Deviations: 1 conservative service extraction so PostgreSQL tests cover real create/update write decisions without moving authorization out of server actions.
+- Most likely to revisit: warning values currently round-trip through the URL, including subject and notes.
+- Edge cases found: seeded bonus fixtures can mask recurring warnings by correctly winning as hard conflicts; malformed/missing recurring times are ignored; endpoint adjacency remains allowed; edit must self-exclude only the current bonus class.
+- Verification: 22 workflow assertions, PostgreSQL scheduling integration, bilingual create/edit browser smoke tests, typecheck, Prisma validation, production build, import integration, and diff checks.
+- Next session should read first: this section, `docs/sprint-19-quality-control.md`, and the current handoff in `SPRINTS.md`.

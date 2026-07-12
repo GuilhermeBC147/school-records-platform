@@ -5,10 +5,11 @@ import { BonusClassAttendanceStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import {
-  hasTeacherBonusClassOverlap,
+  createBonusClassWithConflictCheck,
   normalizeStartTime,
   readDurationMinutes,
   readIsoDate,
+  updateBonusClassWithConflictCheck,
 } from "@/lib/bonus-classes";
 
 function readRequiredString(formData: FormData, key: string) {
@@ -116,23 +117,46 @@ async function validateBonusClassForm(formData: FormData) {
   };
 }
 
+function buildRegularOverlapWarningUrl(
+  pathname: string,
+  data: Awaited<ReturnType<typeof validateBonusClassForm>>,
+) {
+  const query = new URLSearchParams({
+    durationMinutes: String(data.durationMinutes),
+    notes: data.notes ?? "",
+    scheduledDate: data.scheduledDate.toISOString().slice(0, 10),
+    startTime: data.startTime,
+    studentId: data.studentId,
+    subject: data.subject,
+    teacherId: data.teacherId,
+    warning: "regularOverlap",
+  });
+
+  return `${pathname}?${query.toString()}`;
+}
+
+function confirmsRegularClassOverlap(formData: FormData) {
+  return readRequiredString(formData, "confirmRegularClassOverlap") === "true";
+}
+
 export async function createBonusClassAction(formData: FormData) {
   const currentUser = await requireReceptionOrAdmin();
 
   try {
     const data = await validateBonusClassForm(formData);
-    const hasOverlap = await hasTeacherBonusClassOverlap(data);
+    const result = await createBonusClassWithConflictCheck({
+      confirmRegularClassOverlap: confirmsRegularClassOverlap(formData),
+      createdById: currentUser.id,
+      data,
+    });
 
-    if (hasOverlap) {
+    if (result.status === "BONUS_OVERLAP") {
       redirect("/reception/bonus-classes?error=overlap");
     }
 
-    await prisma.bonusClass.create({
-      data: {
-        ...data,
-        createdById: currentUser.id,
-      },
-    });
+    if (result.status === "RECURRING_OVERLAP") {
+      redirect(buildRegularOverlapWarningUrl("/reception/bonus-classes", data));
+    }
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
@@ -163,19 +187,24 @@ export async function updateBonusClassAction(formData: FormData) {
     }
 
     const data = await validateBonusClassForm(formData);
-    const hasOverlap = await hasTeacherBonusClassOverlap({
-      ...data,
+    const result = await updateBonusClassWithConflictCheck({
       bonusClassId,
+      confirmRegularClassOverlap: confirmsRegularClassOverlap(formData),
+      data,
     });
 
-    if (hasOverlap) {
+    if (result.status === "BONUS_OVERLAP") {
       redirect(`/reception/bonus-classes/${bonusClassId}?error=overlap`);
     }
 
-    await prisma.bonusClass.update({
-      where: { id: bonusClassId },
-      data,
-    });
+    if (result.status === "RECURRING_OVERLAP") {
+      redirect(
+        buildRegularOverlapWarningUrl(
+          `/reception/bonus-classes/${bonusClassId}`,
+          data,
+        ),
+      );
+    }
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;

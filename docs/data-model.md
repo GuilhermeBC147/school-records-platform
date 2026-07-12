@@ -108,4 +108,3 @@ Only `ABSENT` attendance records count as missed classes by default. `EXCUSED` a
 
 - Which Hostinger mailbox/sender address and SMTP credentials should production use?
 - What backup retention and off-VPS storage policy will production use?
-- What warning wording and confirmation UX should the regular-class overlap warning use?

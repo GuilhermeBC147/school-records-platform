@@ -665,6 +665,7 @@ export const translationResources = {
     "label.riskFilters": "Risk filters",
     "label.riskReport": "Risk report",
     "label.saveBonusClass": "Save bonus class",
+    "label.saveBonusClassAnyway": "Save anyway",
     "label.saveActivity": "Save activity",
     "label.saveDraft": "Save draft",
     "label.saveGrades": "Save grades",
@@ -709,6 +710,8 @@ export const translationResources = {
     "message.bonusMissing": "That bonus class could not be found.",
     "message.bonusOverlap":
       "This teacher already has a bonus class during that time.",
+    "message.bonusRegularOverlapWarning":
+      "This bonus class overlaps an active recurring class for this teacher. Review the details, then choose Save anyway to schedule it.",
     "message.bonusUpdated": "Bonus class updated.",
     "message.classCreated": "Class created.",
     "message.classUpdated": "Class updated.",
@@ -1468,6 +1471,7 @@ export const translationResources = {
     "label.riskFilters": "Filtros de risco",
     "label.riskReport": "Relatório de risco",
     "label.saveBonusClass": "Salvar aula bônus",
+    "label.saveBonusClassAnyway": "Salvar mesmo assim",
     "label.saveActivity": "Salvar atividade",
     "label.saveDraft": "Salvar rascunho",
     "label.saveGrades": "Salvar notas",
@@ -1512,6 +1516,8 @@ export const translationResources = {
     "message.bonusMissing": "Essa aula bônus não foi encontrada.",
     "message.bonusOverlap":
       "Este professor já tem uma aula bônus nesse horário.",
+    "message.bonusRegularOverlapWarning":
+      "Esta aula bônus coincide com uma turma recorrente ativa deste professor. Confira os dados e escolha Salvar mesmo assim para agendá-la.",
     "message.bonusUpdated": "Aula bônus atualizada.",
     "message.classCreated": "Turma criada.",
     "message.classUpdated": "Turma atualizada.",
