@@ -52,10 +52,33 @@ test("deployment and recovery scripts protect migrations and backups", () => {
   assert.match(restore, /pg_restore/);
 });
 
+test("first-admin bootstrap is interactive, one-time, and does not echo passwords", () => {
+  const bootstrap = read("ops/bootstrap-first-admin.mjs");
+  const bootstrapWrapper = read("ops/bootstrap-first-admin.sh");
+  const dockerfile = read("Dockerfile");
+
+  assert.match(bootstrap, /terminal interativo/);
+  assert.match(bootstrap, /password\.length < 12/);
+  assert.match(bootstrap, /password !== confirmationPassword/);
+  assert.match(bootstrap, /LOCK TABLE "User" IN ACCESS EXCLUSIVE MODE/);
+  assert.match(bootstrap, /count\(\*\)::int AS count/);
+  assert.match(bootstrap, /não pode ser executado novamente/);
+  assert.match(bootstrap, /pbkdf2Sync/);
+  assert.ok(
+    bootstrap.indexOf("const currentUserCount") < bootstrap.indexOf("const password = await askPassword"),
+    "an existing user must be detected before a password is requested",
+  );
+  assert.doesNotMatch(bootstrap, /console\.log\(.*password/i);
+  assert.match(bootstrapWrapper, /current-migration-image/);
+  assert.match(bootstrapWrapper, /--entrypoint node migration/);
+  assert.match(dockerfile, /COPY ops\/bootstrap-first-admin\.mjs/);
+});
+
 test("production templates and operator automation do not contain real secrets", () => {
   const environment = read(".env.production.example");
   const workflow = read(".github/workflows/deploy.yml");
   const monitor = read("ops/monitor.sh");
+  const PortugueseGuide = read("docs/guia-producao-pt-BR.md");
 
   assert.match(environment, /APP_DATABASE_USER/);
   assert.match(environment, /MIGRATION_DATABASE_URL/);
@@ -64,4 +87,7 @@ test("production templates and operator automation do not contain real secrets",
   assert.match(workflow, /PRODUCTION_SSH_PRIVATE_KEY/);
   assert.match(monitor, /docker stats/);
   assert.match(monitor, /disk usage/);
+  assert.match(PortugueseGuide, /primeiro administrador/);
+  assert.match(PortugueseGuide, /bootstrap-first-admin\.sh/);
+  assert.match(PortugueseGuide, /Não usa terminal/);
 });

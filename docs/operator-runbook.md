@@ -1,6 +1,6 @@
 # Production Operator Runbook
 
-This runbook is for the school operator responsible for the Hostinger VPS. It explains how to operate the application without exposing secrets or treating a CSV export as a full backup. Complete the launch checklist before accepting real school records.
+This runbook is for the technical operator responsible for the Hostinger VPS. It explains how to operate the application without exposing secrets or treating a CSV export as a full backup. Complete the launch checklist before accepting real school records. The school-facing Brazilian Portuguese guide is [guia-producao-pt-BR.md](guia-producao-pt-BR.md); it is the default document for non-technical school staff.
 
 ## Ownership before provisioning
 
@@ -52,6 +52,17 @@ Only Caddy accepts public traffic on ports 80 and 443. The PostgreSQL and applic
 6. Install timers: copy `ops/systemd/*.service` and `*.timer` to `/etc/systemd/system/`, then run `sudo systemctl daemon-reload`, `sudo systemctl enable --now school-records-backup.timer school-records-backup-check.timer school-records-monitor.timer school-records-restore-rehearsal.timer`, and check `systemctl list-timers 'school-records-*'`.
 
 The deployment runs migrations before bringing up the new application. On its first run there is no existing data volume to back up; every later deployment takes a verified backup before migrations. It never runs the local seed command.
+
+## First administrator after an empty production deployment
+
+Migrations intentionally create no user accounts, and the local development seed must never be used in production. After the first healthy deployment, the technical operator must run this interactive command once:
+
+```bash
+cd /opt/school-records-platform/current
+ENV_FILE=/etc/school-records-platform/production.env ./ops/bootstrap-first-admin.sh
+```
+
+It requires a terminal, asks for the administrator's name/email and a 12-character minimum password without echoing it, locks the user table, and refuses to run if any user already exists. Use an institutional school email and store the password only in the school password manager.
 
 ## Normal deployment and rollback
 

@@ -78,6 +78,7 @@ PRs #49 and #50 are merged, and the scheduling follow-up branch starts from the 
 | Disposable migration and health | Pass | Fresh private Compose PostgreSQL applied all 26 migrations; application liveness and database readiness returned HTTP 200 |
 | Application database role | Pass | The application route reached PostgreSQL; a direct application-role `CREATE TABLE` was rejected with schema permission denied |
 | Backup and restore | Pass locally | Seeded disposable data was dumped in custom format, read by `pg_restore --list`, SHA-256 checked, and restored into a fresh temporary database with matching source/restored record counts |
+| First administrator bootstrap | Pass locally | A fresh migrated database accepted one interactive institutional admin without echoing the password; a second non-interactive attempt refused immediately because a user already existed |
 | Shell and workflow static checks | Pass | ShellCheck checked all operations scripts; actionlint checked `.github/workflows/deploy.yml` |
 
 The local backup test deliberately set `REQUIRE_OFFSITE_BACKUP=false` because no school-owned remote exists. It therefore does not prove `rclone`, Hostinger backup, alert-webhook, TLS/DNS, external uptime monitoring, or a real production restore. The temporary test containers, volume, and backup archives were removed after validation.

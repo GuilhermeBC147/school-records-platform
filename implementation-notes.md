@@ -407,3 +407,27 @@ None yet.
 - Edge cases found: first deploy without a database volume, Prisma post-install schema availability, preserving immutable images across restarts, and schema-only restores that could otherwise mask missing data.
 - Verification: 26 source/operations tests, typecheck, Prisma validation, production build, Compose/Caddy validation, runner/migration images, disposable migrations and health, role permissions, seeded dump/checksum/temporary restore, ShellCheck, actionlint, and diff checks.
 - Next session should read first: `docs/operator-runbook.md`, `docs/sprint-19-quality-control.md`, and the current handoff in `SPRINTS.md`.
+
+## Portuguese operator-guide follow-up
+
+### Deviations
+
+- Paused documentation edits after confirming that a clean production database has no safe first-admin path: the existing account-creation action requires an authenticated admin, while `prisma/seed.sql` is demo data and must not run in production.
+- The approved solution is a small operational bootstrap script rather than a public registration route or a production seed. It uses the migration database connection, an interactive password prompt, a pre-check plus locked re-check, and refuses non-empty user tables.
+
+### Discovered edge cases
+
+- A detailed first-deployment guide alone would be misleading: successful migrations and health checks still leave the school unable to sign in until an initial `ADMIN` account exists.
+- The first bootstrap version collected a password before checking whether the database already had users. It now checks first and rechecks inside the locked write transaction, so a repeated run refuses before requesting a password.
+
+### Questions for review
+
+- The approved bootstrap command is intentionally not an everyday school operation. The school must record the initial administrator in its password manager and create all later accounts through the application.
+
+### End-of-session summary
+
+- Deviations: 1 approved small operational-code addition for the missing first-admin path.
+- Most likely to revisit: screenshots or a school-specific copy of the Portuguese guide after the actual Hostinger and backup providers are selected.
+- Edge cases found: a clean migrated database has no admin, the development seed is unsafe for production, and repeated bootstrap attempts must not request a password.
+- Verification: syntax check, 27 source/operations assertions, migration-image build, fresh disposable migrations, interactive first-admin creation with no password echo, and second-attempt refusal.
+- Next session should read first: `docs/guia-producao-pt-BR.md`, `ops/bootstrap-first-admin.mjs`, and `docs/operator-runbook.md`.
