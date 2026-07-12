@@ -1110,6 +1110,7 @@ input[type="time"],
 }
 
 .form-error,
+.form-warning,
 .form-success {
   border: 1px solid var(--danger-line);
   border-radius: 6px;
@@ -1118,6 +1119,12 @@ input[type="time"],
   font-size: 14px;
   margin: 18px 0 0;
   padding: 10px 12px;
+}
+
+.form-warning {
+  border-color: var(--warning-line);
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .form-success {

@@ -24,10 +24,26 @@ export const dynamic = "force-dynamic";
 
 type ReceptionBonusClassesPageProps = {
   searchParams: Promise<{
+    durationMinutes?: string;
     error?: string;
+    notes?: string;
+    scheduledDate?: string;
+    startTime?: string;
     status?: string;
+    studentId?: string;
+    subject?: string;
+    teacherId?: string;
+    warning?: string;
   }>;
 };
+
+function readWarningDuration(value: string | undefined) {
+  const durationMinutes = Number(value);
+
+  return Number.isInteger(durationMinutes) && durationMinutes > 0
+    ? durationMinutes
+    : undefined;
+}
 
 export default async function ReceptionBonusClassesPage({
   searchParams,
@@ -87,6 +103,20 @@ export default async function ReceptionBonusClassesPage({
       },
     }),
   ]);
+  const hasRegularOverlapWarning = query.warning === "regularOverlap";
+  const warningStudent = hasRegularOverlapWarning
+    ? students.find((student) => student.id === query.studentId)
+    : undefined;
+  const warningSubject = hasRegularOverlapWarning ? query.subject ?? "" : "";
+  const warningTeacherId = hasRegularOverlapWarning ? query.teacherId ?? "" : "";
+  const warningScheduledDate = hasRegularOverlapWarning
+    ? query.scheduledDate
+    : undefined;
+  const warningStartTime = hasRegularOverlapWarning ? query.startTime : undefined;
+  const warningDurationMinutes = hasRegularOverlapWarning
+    ? readWarningDuration(query.durationMinutes)
+    : undefined;
+  const warningNotes = hasRegularOverlapWarning ? query.notes ?? "" : "";
 
   return (
     <main className="app-shell">
@@ -114,6 +144,11 @@ export default async function ReceptionBonusClassesPage({
 
         {successMessage ? <p className="form-success">{successMessage}</p> : null}
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
+        {hasRegularOverlapWarning ? (
+          <p className="form-warning" role="alert">
+            {t("message.bonusRegularOverlapWarning")}
+          </p>
+        ) : null}
 
         <section className="panel data-panel" aria-labelledby="new-bonus-title">
           <h2 id="new-bonus-title">{t("label.bonusClassDetails")}</h2>
@@ -122,6 +157,7 @@ export default async function ReceptionBonusClassesPage({
               <span>{t("label.studentSearch")}</span>
               <input
                 autoComplete="off"
+                defaultValue={warningStudent?.fullName ?? ""}
                 list="bonus-students"
                 name="studentSearch"
                 placeholder={t("receptionLookup.studentSearchPlaceholder")}
@@ -136,11 +172,11 @@ export default async function ReceptionBonusClassesPage({
             </label>
             <label>
               <span>{t("label.subject")}</span>
-              <input name="subject" required type="text" />
+              <input defaultValue={warningSubject} name="subject" required type="text" />
             </label>
             <label>
               <span>{t("label.teacher")}</span>
-              <select name="teacherId" required>
+              <select defaultValue={warningTeacherId} name="teacherId" required>
                 <option value="">{t("label.chooseTeacher")}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
@@ -154,26 +190,42 @@ export default async function ReceptionBonusClassesPage({
               <DateInput
                 calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
+                defaultValue={warningScheduledDate}
                 name="scheduledDate"
                 required
               />
             </label>
             <label>
               <span>{t("label.startTime")}</span>
-              <TimeInput name="startTime" required />
+              <TimeInput defaultValue={warningStartTime} name="startTime" required />
             </label>
             <label>
               <span>{t("label.duration")}</span>
-              <DurationInput name="durationMinutes" required />
+              <DurationInput
+                name="durationMinutes"
+                required
+                valueMinutes={warningDurationMinutes}
+              />
             </label>
             <label>
               <span>{t("label.notes")}</span>
-              <textarea name="notes" rows={3} />
+              <textarea defaultValue={warningNotes} name="notes" rows={3} />
             </label>
             <div className="record-actions">
-              <button className="primary-button" type="submit">
-                {t("label.scheduleBonusClass")}
-              </button>
+              {hasRegularOverlapWarning ? (
+                <button
+                  className="primary-button"
+                  name="confirmRegularClassOverlap"
+                  type="submit"
+                  value="true"
+                >
+                  {t("label.saveBonusClassAnyway")}
+                </button>
+              ) : (
+                <button className="primary-button" type="submit">
+                  {t("label.scheduleBonusClass")}
+                </button>
+              )}
             </div>
           </form>
         </section>

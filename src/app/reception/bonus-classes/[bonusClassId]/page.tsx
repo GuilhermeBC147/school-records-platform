@@ -24,8 +24,16 @@ type EditBonusClassPageProps = {
     bonusClassId: string;
   }>;
   searchParams: Promise<{
+    durationMinutes?: string;
     error?: string;
+    notes?: string;
+    scheduledDate?: string;
+    startTime?: string;
     status?: string;
+    studentId?: string;
+    subject?: string;
+    teacherId?: string;
+    warning?: string;
   }>;
 };
 
@@ -35,6 +43,14 @@ function dateInputValue(date: Date) {
   const year = date.getUTCFullYear();
 
   return `${year}-${month}-${day}`;
+}
+
+function readWarningDuration(value: string | undefined, fallback: number) {
+  const durationMinutes = Number(value);
+
+  return Number.isInteger(durationMinutes) && durationMinutes > 0
+    ? durationMinutes
+    : fallback;
 }
 
 export default async function EditBonusClassPage({
@@ -110,6 +126,29 @@ export default async function EditBonusClassPage({
     notFound();
   }
 
+  const hasRegularOverlapWarning = query.warning === "regularOverlap";
+  const formStudentId = hasRegularOverlapWarning
+    ? query.studentId ?? bonusClass.studentId
+    : bonusClass.studentId;
+  const formTeacherId = hasRegularOverlapWarning
+    ? query.teacherId ?? bonusClass.teacherId
+    : bonusClass.teacherId;
+  const formSubject = hasRegularOverlapWarning
+    ? query.subject ?? bonusClass.subject
+    : bonusClass.subject;
+  const formScheduledDate = hasRegularOverlapWarning
+    ? query.scheduledDate ?? dateInputValue(bonusClass.scheduledDate)
+    : dateInputValue(bonusClass.scheduledDate);
+  const formStartTime = hasRegularOverlapWarning
+    ? query.startTime ?? bonusClass.startTime
+    : bonusClass.startTime;
+  const formDurationMinutes = hasRegularOverlapWarning
+    ? readWarningDuration(query.durationMinutes, bonusClass.durationMinutes)
+    : bonusClass.durationMinutes;
+  const formNotes = hasRegularOverlapWarning
+    ? query.notes ?? bonusClass.notes ?? ""
+    : bonusClass.notes ?? "";
+
   return (
     <main className="app-shell">
       <AppTopbar currentUser={currentUser} />
@@ -141,6 +180,11 @@ export default async function EditBonusClassPage({
 
         {successMessage ? <p className="form-success">{successMessage}</p> : null}
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
+        {hasRegularOverlapWarning ? (
+          <p className="form-warning" role="alert">
+            {t("message.bonusRegularOverlapWarning")}
+          </p>
+        ) : null}
 
         <section className="panel data-panel" aria-label={t("label.bonusClassDetails")}>
           <form action={updateBonusClassAction} className="admin-form">
@@ -148,7 +192,7 @@ export default async function EditBonusClassPage({
             <label>
               <span>{t("label.student")}</span>
               <select
-                defaultValue={bonusClass.studentId}
+                defaultValue={formStudentId}
                 disabled={currentUser.role === "TEACHER"}
                 name="studentId"
                 required
@@ -160,17 +204,17 @@ export default async function EditBonusClassPage({
                 ))}
               </select>
               {currentUser.role === "TEACHER" ? (
-                <input name="studentId" type="hidden" value={bonusClass.studentId} />
+                <input name="studentId" type="hidden" value={formStudentId} />
               ) : null}
             </label>
             <label>
               <span>{t("label.subject")}</span>
-              <input defaultValue={bonusClass.subject} name="subject" required type="text" />
+              <input defaultValue={formSubject} name="subject" required type="text" />
             </label>
             <label>
               <span>{t("label.teacher")}</span>
               <select
-                defaultValue={bonusClass.teacherId}
+                defaultValue={formTeacherId}
                 disabled={currentUser.role === "TEACHER"}
                 name="teacherId"
                 required
@@ -182,7 +226,7 @@ export default async function EditBonusClassPage({
                 ))}
               </select>
               {currentUser.role === "TEACHER" ? (
-                <input name="teacherId" type="hidden" value={bonusClass.teacherId} />
+                <input name="teacherId" type="hidden" value={formTeacherId} />
               ) : null}
             </label>
             <label>
@@ -190,7 +234,7 @@ export default async function EditBonusClassPage({
               <DateInput
                 calendarLabel={t("dashboard.calendar")}
                 dateFormat={currentUser.dateFormat}
-                defaultValue={dateInputValue(bonusClass.scheduledDate)}
+                defaultValue={formScheduledDate}
                 name="scheduledDate"
                 required
               />
@@ -198,7 +242,7 @@ export default async function EditBonusClassPage({
             <label>
               <span>{t("label.startTime")}</span>
               <TimeInput
-                defaultValue={bonusClass.startTime}
+                defaultValue={formStartTime}
                 name="startTime"
                 required
               />
@@ -208,17 +252,28 @@ export default async function EditBonusClassPage({
               <DurationInput
                 name="durationMinutes"
                 required
-                valueMinutes={bonusClass.durationMinutes}
+                valueMinutes={formDurationMinutes}
               />
             </label>
             <label>
               <span>{t("label.notes")}</span>
-              <textarea defaultValue={bonusClass.notes ?? ""} name="notes" rows={3} />
+              <textarea defaultValue={formNotes} name="notes" rows={3} />
             </label>
             <div className="record-actions">
-              <button className="primary-button" type="submit">
-                {t("label.saveBonusClass")}
-              </button>
+              {hasRegularOverlapWarning ? (
+                <button
+                  className="primary-button"
+                  name="confirmRegularClassOverlap"
+                  type="submit"
+                  value="true"
+                >
+                  {t("label.saveBonusClassAnyway")}
+                </button>
+              ) : (
+                <button className="primary-button" type="submit">
+                  {t("label.saveBonusClass")}
+                </button>
+              )}
             </div>
           </form>
         </section>

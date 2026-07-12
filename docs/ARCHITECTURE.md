@@ -107,6 +107,7 @@ Important invariants:
 - Admins review records, exports, grades, risk signals, substitutions, imports, and work summaries.
 - Admins can view all-teacher Monday-to-Sunday class, bonus-class, and meeting schedules and open existing edit forms.
 - Reception schedules bonus classes, uses student/class lookup, and confirms bonus attendance.
+- Bonus scheduling blocks overlapping non-canceled bonus classes. An overlap with an active recurring `REGULAR`, `VIP`, or `PERSONAL` class returns the validated proposal to the create/edit form with a localized warning; only the explicit save-anyway submit proceeds, after the server reruns both conflict checks.
 - Reception can view regular classes, bonus classes, and admin-created meetings together across a Monday-to-Sunday calendar.
 - Users can select English or Brazilian Portuguese, a date format, and a light/dark theme.
 - Teachers confirm assigned personal booth attendance from `/dashboard/personal-slots` using Present, Absent, or Excused; completed personal time remains included in merged payroll intervals.

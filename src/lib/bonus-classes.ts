@@ -145,6 +145,20 @@ export function readDurationMinutes(value: FormDataEntryValue | null) {
   return durationMinutes;
 }
 
+export function intervalsOverlap(
+  firstStartMinutes: number,
+  firstDurationMinutes: number,
+  secondStartMinutes: number,
+  secondDurationMinutes: number,
+) {
+  const firstEndMinutes = firstStartMinutes + firstDurationMinutes;
+  const secondEndMinutes = secondStartMinutes + secondDurationMinutes;
+
+  return (
+    firstStartMinutes < secondEndMinutes && secondStartMinutes < firstEndMinutes
+  );
+}
+
 export async function hasTeacherBonusClassOverlap({
   bonusClassId,
   durationMinutes,
@@ -159,7 +173,6 @@ export async function hasTeacherBonusClassOverlap({
   teacherId: string;
 }) {
   const startMinutes = readTimeMinutes(startTime);
-  const endMinutes = startMinutes + durationMinutes;
   const existingBonusClasses = await prisma.bonusClass.findMany({
     where: {
       scheduledDate,
@@ -177,8 +190,164 @@ export async function hasTeacherBonusClassOverlap({
 
   return existingBonusClasses.some((bonusClass) => {
     const existingStart = readTimeMinutes(bonusClass.startTime);
-    const existingEnd = existingStart + bonusClass.durationMinutes;
-
-    return startMinutes < existingEnd && existingStart < endMinutes;
+    return intervalsOverlap(
+      startMinutes,
+      durationMinutes,
+      existingStart,
+      bonusClass.durationMinutes,
+    );
   });
+}
+
+const weekdayByUtcDay = [
+  "SUNDAY",
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+] as const;
+
+export async function hasTeacherRecurringClassOverlap({
+  durationMinutes,
+  scheduledDate,
+  startTime,
+  teacherId,
+}: {
+  durationMinutes: number;
+  scheduledDate: Date;
+  startTime: string;
+  teacherId: string;
+}) {
+  const weekday = weekdayByUtcDay[scheduledDate.getUTCDay()];
+  const startMinutes = readTimeMinutes(startTime);
+  const recurringClasses = await prisma.class.findMany({
+    where: {
+      classType: { in: ["REGULAR", "VIP", "PERSONAL"] },
+      isActive: true,
+      teacherId,
+      weekDays: { has: weekday },
+    },
+    select: {
+      durationMinutes: true,
+      startTime: true,
+    },
+  });
+
+  return recurringClasses.some((schoolClass) => {
+    if (!schoolClass.startTime || schoolClass.durationMinutes <= 0) {
+      return false;
+    }
+
+    try {
+      return intervalsOverlap(
+        startMinutes,
+        durationMinutes,
+        readTimeMinutes(schoolClass.startTime),
+        schoolClass.durationMinutes,
+      );
+    } catch {
+      return false;
+    }
+  });
+}
+
+export type BonusClassScheduleData = {
+  durationMinutes: number;
+  notes: string | null;
+  scheduledDate: Date;
+  startTime: string;
+  studentId: string;
+  subject: string;
+  teacherId: string;
+};
+
+export type BonusClassScheduleResult =
+  | { status: "BONUS_OVERLAP" }
+  | { status: "RECURRING_OVERLAP" }
+  | { bonusClassId: string; status: "SAVED" };
+
+async function findBonusClassScheduleConflict({
+  bonusClassId,
+  confirmRegularClassOverlap,
+  data,
+}: {
+  bonusClassId?: string;
+  confirmRegularClassOverlap: boolean;
+  data: BonusClassScheduleData;
+}) {
+  const hasBonusOverlap = await hasTeacherBonusClassOverlap({
+    ...data,
+    bonusClassId,
+  });
+
+  if (hasBonusOverlap) {
+    return "BONUS_OVERLAP" as const;
+  }
+
+  const hasRecurringOverlap = await hasTeacherRecurringClassOverlap(data);
+
+  if (hasRecurringOverlap && !confirmRegularClassOverlap) {
+    return "RECURRING_OVERLAP" as const;
+  }
+
+  return null;
+}
+
+export async function createBonusClassWithConflictCheck({
+  confirmRegularClassOverlap,
+  createdById,
+  data,
+}: {
+  confirmRegularClassOverlap: boolean;
+  createdById: string;
+  data: BonusClassScheduleData;
+}): Promise<BonusClassScheduleResult> {
+  const conflict = await findBonusClassScheduleConflict({
+    confirmRegularClassOverlap,
+    data,
+  });
+
+  if (conflict) {
+    return { status: conflict };
+  }
+
+  const bonusClass = await prisma.bonusClass.create({
+    data: {
+      ...data,
+      createdById,
+    },
+    select: { id: true },
+  });
+
+  return { bonusClassId: bonusClass.id, status: "SAVED" };
+}
+
+export async function updateBonusClassWithConflictCheck({
+  bonusClassId,
+  confirmRegularClassOverlap,
+  data,
+}: {
+  bonusClassId: string;
+  confirmRegularClassOverlap: boolean;
+  data: BonusClassScheduleData;
+}): Promise<BonusClassScheduleResult> {
+  const conflict = await findBonusClassScheduleConflict({
+    bonusClassId,
+    confirmRegularClassOverlap,
+    data,
+  });
+
+  if (conflict) {
+    return { status: conflict };
+  }
+
+  const bonusClass = await prisma.bonusClass.update({
+    where: { id: bonusClassId },
+    data,
+    select: { id: true },
+  });
+
+  return { bonusClassId: bonusClass.id, status: "SAVED" };
 }
