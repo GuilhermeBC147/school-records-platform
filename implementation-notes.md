@@ -459,3 +459,33 @@ None yet.
 - Edge cases found: TLS port pairing, safe error suppression, strict environment typing, bounded SMTP timeouts, Compose environment allowlisting, audit noise outside Nodemailer, and literal password parsing.
 - Verification: 28 workflow/operations assertions, 8 focused SMTP tests, typecheck, Prisma validation, Compose config, production build, standalone runner image, npm audit review, and diff checks.
 - Next session should read first: this section, `src/lib/password-reset.ts`, `src/lib/password-reset-email.ts`, and the SMTP section of `docs/operator-runbook.md`.
+
+## Sprint 19 critical browser and PostgreSQL workflows
+
+### Deviations
+
+- The plan would normally update the current handoff in `SPRINTS.md`, but that file already contains unrelated user modifications. This branch will preserve it and record test evidence in the focused quality-control document and backlog instead.
+- The planned dedicated development server cannot run while another `next dev` process owns the project-wide lock, even on a different port. The repeatable command now builds first and gives Playwright a dedicated production server on port 3100; the unrelated port-3000 process remains untouched.
+- Playwright bundles project imports through a CommonJS worker, while the generated Prisma client uses `import.meta`; changing only the spec extension did not bridge that boundary. Fixture setup and assertions use the existing PostgreSQL driver, while the application under test continues using Prisma, avoiding package-wide module or production-code changes.
+- `next start` currently launches but explicitly warns that it is unsupported for `output: standalone`. The browser command now copies ignored static/public assets into the standalone tree and launches `server.js` with only the required test environment, matching the production image layout.
+
+### Discovered edge cases
+
+- The local seed is not repeatable, so browser integration fixtures must create unique accounts, classes, students, and history without calling `db:seed`, then clean up only their own records.
+- Risk threshold coverage should preload three known submitted lessons and use the browser to create the fourth, proving both the real teacher write and the threshold boundary without four slow UI submissions.
+- An existing development server is using port 3000; the repeatable Playwright harness must own a separate port so it cannot accidentally test stale code from another process.
+- DateInput submits the selected school calendar day as São Paulo local midnight, which is `03:00Z` for the February fixture. Browser/database assertions must compare the local year/month/day rather than incorrectly requiring UTC midnight.
+- Risk resolve and undo redirect back to the same filtered URL, so an immediate database query can race the Server Action commit. The test uses bounded database polling rather than fixed sleeps or URL-change assumptions.
+- A production build regenerates `next-env.d.ts` from the development route-type import to the tracked production import. The pre-existing unrelated development-generated modification was restored after validation and remains excluded from this branch.
+
+### Questions for review
+
+- None yet. Substitution payroll and extra-activity approval remain the next separate integration slice rather than expanding this fixture.
+
+### End-of-session summary
+
+- Deviations: 2 conservative harness changes—preserve the user-modified handoff, and use a production standalone server because another process owns the development-server lock.
+- Most likely to revisit: split the serial scenario only if future additions make failure isolation or runtime materially worse.
+- Edge cases found: non-repeatable seed data, threshold setup cost, project-wide dev lock, Playwright/Prisma module mismatch, standalone static assets, São Paulo date semantics, combined record text, and same-URL Server Action races.
+- Verification: the production-built Chromium/PostgreSQL scenario passed twice; 28 workflow/operations assertions, 8 SMTP tests, typecheck, Prisma validation, bonus/import PostgreSQL suites, production build, standalone helper syntax, fixture cleanup count, and diff checks passed.
+- Next session should read first: this section, `tests/browser/critical-school-workflows.spec.ts`, and `docs/sprint-19-critical-workflows-qc.md`.

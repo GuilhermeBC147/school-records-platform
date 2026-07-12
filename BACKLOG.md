@@ -7,7 +7,8 @@
 
 ## Next
 
-- Run browser and production-database checks for remaining critical workflows where school-owned deployment access is available.
+- Add focused browser/PostgreSQL coverage for substitution approval/undo payroll attribution and extra-activity approval/counting.
+- Repeat the local critical-workflow browser check against production when school-owned deployment access is available.
 - Verify a restore from the real off-VPS logical PostgreSQL backup and record the evidence.
 
 ## Later

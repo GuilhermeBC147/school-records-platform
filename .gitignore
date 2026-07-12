@@ -5,6 +5,8 @@ node_modules/
 # Next.js
 .next/
 out/
+playwright-report/
+test-results/
 
 # TypeScript
 tsconfig.tsbuildinfo

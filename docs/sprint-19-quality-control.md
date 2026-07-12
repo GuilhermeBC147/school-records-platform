@@ -8,7 +8,8 @@ This document records the first Sprint 19 quality-control pass and the completed
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Critical workflow assertions | Pass | `npm.cmd test`: 22 tests passed |
+| Critical workflow assertions | Pass | `npm.cmd test`: 28 workflow/operations assertions plus 8 focused SMTP tests passed |
+| Critical workflow browser/PostgreSQL integration | Pass | `npm.cmd run test:critical:browser`; teacher record, grades, admin record/CSV review, risk resolve/undo, account activation, and inactive login passed twice |
 | Bonus scheduling PostgreSQL integration | Pass | `npm.cmd run test:bonus-scheduling:integration`; conflict queries plus create/update warning, confirmation, hard-block, and self-exclusion writes passed |
 | TypeScript | Pass | `npm.cmd run typecheck` |
 | Prisma schema | Pass | `npm.cmd run prisma:validate` |
@@ -20,15 +21,15 @@ The critical workflow suite reads source files and verifies important authorizat
 
 | Area | Automated evidence | Baseline result | Remaining runtime check |
 | --- | --- | --- | --- |
-| Admin | Account, class, student, record, risk, substitution, import, and work-summary assertions | Pass at source/build level | Exercise create, edit, review, export, and undo flows with production-like data |
-| Teacher | Assigned-class access, record submission, grades, substitutions, bonus attendance, personal bookings, and work summaries | Pass at source/build level | Submit and edit records in a browser using a teacher account |
+| Admin | Account, class, student, record, risk, substitution, import, and work-summary assertions; account create/deactivate, record/CSV review, and risk resolve/undo browser coverage | Pass locally | Repeat a focused admin smoke test after production deployment |
+| Teacher | Assigned-class access, record submission, grades, substitutions, bonus attendance, personal bookings, and work summaries; submitted-record browser/PostgreSQL coverage | Pass locally | Repeat record submission with a production teacher account |
 | Reception | Scoped scheduling and lookup permissions, bonus classes, calendars, personal bookings, and bilingual recurring-overlap create/edit smoke tests | Pass locally | Repeat a focused scheduling/permission smoke test after production deployment |
 | Localization | Locale persistence, translation resources, fallback behavior, localized critical sources, and the browser matrix in `docs/sprint-19-bilingual-screen-matrix.md` | Pass locally | Repeat a focused locale smoke test after production deployment |
 | Imports | Preview validation, duplicate detection, audit summaries, templates, error reports, and the PostgreSQL integration pass in `docs/sprint-19-import-quality-control.md` | Pass locally | Repeat a focused import smoke test after production deployment |
-| Grading | Grade schema, teacher access, value validation, display, and risk inputs | Pass at source/build level | Save and reload representative partial, mid-term, and final grades |
+| Grading | Grade schema, teacher access, value validation, display, risk inputs, and browser/PostgreSQL partial plus Mid-term persistence | Pass locally | Repeat representative grade save/reload after production deployment |
 | Scheduling | Hard bonus conflicts, recurring-class warnings, PostgreSQL create/update decisions, bilingual create/edit confirmation, personal capacity, calendars, and personal payroll interval merging | Pass locally | Repeat the focused conflict smoke test after production deployment |
-| Risk review | Attendance, homework, grade signals, resolution, and undo patterns | Pass at source/build level | Seed threshold-boundary records and confirm resolved/unresolved filters in the browser |
-| Reporting | Record CSV, teacher work summaries, substitutions, bonus classes, meetings, and extra activities | Pass at source/build level | Compare exports and monthly totals with known production-like fixtures |
+| Risk review | Attendance, homework, grade signals, exact four-record threshold, resolved/unresolved filters, resolution, and undo browser/PostgreSQL coverage | Pass locally | Repeat a focused risk smoke test after production deployment |
+| Reporting | Record CSV plus teacher work summary, substitution, bonus-class, meeting, and extra-activity assertions; filtered record CSV browser download | Partial local runtime evidence | Add payroll fixture totals for approved substitutions and extra activities, then repeat production export checks |
 
 ## Findings
 
@@ -59,8 +60,12 @@ npm.cmd run test:bonus-scheduling:browser-fixture -- cleanup
 
 ### Required before launch
 
-- Add browser/database integration coverage or execute and retain a signed manual test record for the remaining critical writes and permissions outside the now-covered scheduling workflow.
+- Add browser/database integration coverage for substitution payroll attribution and extra-activity approval/counting, or retain a signed manual record for those remaining writes.
 - Verify real Hostinger SMTP password reset, deployment, monitoring, backup alerts, and a restore rehearsal on school-owned infrastructure.
+
+### Critical workflow browser and PostgreSQL evidence
+
+The repeatable Chromium scenario now covers the highest-risk previously source-only chain: a teacher submits the fourth absent/incomplete record, saves partial and Mid-term grades, and an admin reviews/downloads that record, resolves and undoes the resulting threshold risk, creates/deactivates reception access, and confirms the inactive account cannot log in. PostgreSQL assertions accompany every write, fixture cleanup is uniquely scoped, and the scenario passed twice with no browser errors. See `docs/sprint-19-critical-workflows-qc.md`.
 
 ### Branch dependency
 
@@ -101,4 +106,4 @@ These tests use an in-memory repository and fake mail transport. They do not con
 
 ## Exit decision
 
-The automated baseline, local bilingual critical-screen pass, PostgreSQL import pass, PostgreSQL/browser scheduling conflict pass, repository-owned production operations checks, and fake-transport SMTP checks are healthy. The repository-owned SMTP implementation is complete, but the platform is not yet launch-ready: the school must complete external production provisioning, real Hostinger mailbox/DNS delivery evidence, and a real restore rehearsal.
+The automated baseline, local bilingual critical-screen pass, PostgreSQL import pass, PostgreSQL/browser scheduling and critical-write passes, repository-owned production operations checks, and fake-transport SMTP checks are healthy. Remaining repository-controlled integration work is substitution payroll attribution plus extra-activity approval/counting. The platform is not yet launch-ready: the school must later complete external production provisioning, real Hostinger mailbox/DNS delivery evidence, production smoke checks, and a real restore rehearsal.
