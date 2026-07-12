@@ -2,54 +2,47 @@
 
 ## Now
 
-- Finish teacher self-service and admin risk review on the current sprint branch.
-- Keep risk-review thresholds easy to adjust.
-- Confirm admin risk report links back to relevant class/student records.
+- Complete production-readiness checks across admin, teacher, and reception workflows.
+- Prepare Hostinger VPS deployment automation for the application and PostgreSQL.
+- Configure the Hostinger SMTP password-reset email path.
+- Configure layered PostgreSQL backups, failure alerts, and restore testing.
+- Implement and test the regular-class overlap warning with an explicit save-anyway path.
 
 ## Next
 
-- Add monthly teacher work summaries for payroll support.
-- Count regular submitted lessons by the teacher who actually taught them.
-- Add teacher-created paid activity records for events, game nights, Halloween, meetings, and other work.
-- Add admin review/correction for monthly teacher work totals.
+- Add browser and production-database checks for critical workflows.
+- Run a full quality-control pass for imports, localization, grading, risk review, scheduling, substitutions, exports, and work summaries.
+- Document any remaining launch blockers, the operator runbook, and handoff steps.
+- Verify a restore from the off-VPS logical PostgreSQL backup.
 
 ## Later
 
-- Add reception accounts with limited access.
-- Add independent bonus class scheduling.
-- Prevent double-booking a teacher for bonus classes.
-- Prevent bonus classes from overlapping regular class schedules when schedule data is available.
-- Count completed bonus classes in monthly teacher work summaries.
-- Add substitute teacher support for regular class lessons.
-- Separate lesson submitter/audit history from the teacher counted for payroll.
-- Add admin approval workflow for submitted records.
-- Add record edit history.
-- Add class/student archive workflow.
-- Add bilingual UI labels if needed.
-- Add broader workflow tests around admin setup.
+- Record edit history and broader audit history.
+- Class and student archive workflows.
+- Additional reporting or export formats beyond the current class-record CSV.
+- Additional roles or school-system integrations if the school requests them.
 
 ## Open Questions
 
-- What threshold counts as "a lot" of incomplete homework assignments?
-- What threshold counts as "a lot" of missed classes?
-- Should absences marked `EXCUSED` count as missed classes in the admin risk report?
-- Should late arrivals count in the risk report, or only absences?
-- Should grade entry be editable after the teacher saves it, or locked after an admin review?
-- Should admins be able to edit grades, or only view/export them?
-- Should grade reports be exportable to CSV in the first grading sprint?
-- Should an admin approve records before they become final?
-- Who is allowed to assign a substitute teacher: admins only, the primary teacher, or reception too?
-- Should substitute teachers be able to see the full class page, or only the lesson record they are covering?
-- Should extra activities require admin approval before they count for payroll?
-- What paid activity categories should be fixed options instead of free text?
-- What default duration should a bonus class have?
-- Can a bonus class include more than one student?
-- Should reception be able to edit or cancel bonus classes after the teacher confirms them?
-- Should payroll summaries count by lessons, hours, or both?
-- Does the school need Portuguese, English, or bilingual UI labels?
-- Should password reset emails be sent through the hosting provider, SMTP, or a transactional email service?
-- Should class books be free text or selected from an admin-managed book list?
-- Should semesters be fixed to 1 and 2, or support custom terms?
+- Which Hostinger mailbox/sender address and SMTP credentials should production use?
+- What backup retention and off-VPS storage policy should production use?
+- What warning wording and confirmation UX should the regular-class overlap warning use?
+- Should the school require additional exports for grades, imports, bonus classes, or payroll review?
+
+## Production decisions
+
+- Use a Hostinger VPS in Brazil for production, with the Next.js application and PostgreSQL hosted together, preferably through Docker Compose.
+- Keep blocking conflicts between overlapping non-canceled bonus classes. A bonus class overlapping a teacher's regular class should show a warning and allow an explicit save.
+- Use a dedicated Hostinger Email SMTP mailbox for low-volume password-reset messages, with credentials stored only in VPS environment configuration.
+- Use Hostinger VPS backups plus nightly logical PostgreSQL dumps stored outside the VPS. Alert on failures and test restores before launch and periodically afterward.
+
+## Decisions already reflected in code
+
+- Risk thresholds are 4 incomplete homework records, 4 missed classes, 2 consecutive missed classes, test total below 7, and oral grade C or below.
+- Only `ABSENT` attendance counts as a missed class by default; `LATE` and `EXCUSED` remain visible but do not trigger that signal.
+- Substitute lessons use teacher submission, taught-by attribution, and admin approval state.
+- Work summaries count lessons and hours, including approved substitutions, completed bonus classes, and work logs.
+- The interface supports English and Brazilian Portuguese; the default locale is Brazilian Portuguese.
 
 ## Learning Goals
 

@@ -36,6 +36,7 @@ export default async function EditStudentPage({
     where: { id: studentId },
     select: {
       id: true,
+      enrollmentIdentifier: true,
       fullName: true,
       isActive: true,
     },
@@ -62,6 +63,11 @@ export default async function EditStudentPage({
           {query.error === "invalid" ? (
             <p className="form-error">{t("adminStudents.invalidError")}</p>
           ) : null}
+          {query.error === "duplicate" ? (
+            <p className="form-error">
+              {t("adminStudents.duplicateIdentifierError")}
+            </p>
+          ) : null}
           <form action={updateStudentAction} className="admin-form">
             <input name="studentId" type="hidden" value={student.id} />
             <label>
@@ -70,6 +76,14 @@ export default async function EditStudentPage({
                 defaultValue={student.fullName}
                 name="fullName"
                 required
+                type="text"
+              />
+            </label>
+            <label>
+              <span>{t("adminStudents.enrollmentIdentifier")}</span>
+              <input
+                defaultValue={student.enrollmentIdentifier ?? ""}
+                name="enrollmentIdentifier"
                 type="text"
               />
             </label>

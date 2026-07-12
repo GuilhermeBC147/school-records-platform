@@ -52,7 +52,9 @@ export default async function AdminWorkSummaryPage({
   });
   const summaryTeacherIds = selectedTeacherId
     ? [selectedTeacherId]
-    : teachers.map((teacher) => teacher.id);
+    : teachers
+        .filter((teacher) => teacher.isActive)
+        .map((teacher) => teacher.id);
   const summaries = (
     await Promise.all(
       summaryTeacherIds.map((teacherId) =>
@@ -103,7 +105,12 @@ export default async function AdminWorkSummaryPage({
             </label>
             <label>
               <span>{t("label.month")}</span>
-              <input defaultValue={month.label} name="month" type="month" />
+              <input
+                defaultValue={month.label}
+                name="month"
+                title={t("label.month")}
+                type="month"
+              />
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
@@ -163,9 +170,15 @@ export default async function AdminWorkSummaryPage({
                   <span>{formatHours(summary.workLogMinutes)}</span>
                   <strong>{t("label.activityHours")}</strong>
                 </article>
+                <article className="metric">
+                  <span>{summary.pendingSubstituteLessons.length}</span>
+                  <strong>{t("label.pendingSubstituteLessons")}</strong>
+                </article>
               </div>
 
-              <div className="table-wrap">
+              <details className="work-summary-details">
+                <summary>{t("label.completeList")}</summary>
+                <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
@@ -267,7 +280,8 @@ export default async function AdminWorkSummaryPage({
                     ) : null}
                   </tbody>
                 </table>
-              </div>
+                </div>
+              </details>
             </article>
           ))}
         </section>

@@ -3,7 +3,12 @@ import { redirect } from "next/navigation";
 import { createClassAction } from "@/app/actions/classes";
 import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DurationInput } from "@/app/components/duration-input";
-import { formatWeekdays, weekdayOptions } from "@/lib/class-schedule";
+import { TimeInput } from "@/app/components/time-input";
+import {
+  classTypeOptions,
+  formatWeekdays,
+  weekdayOptions,
+} from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getTranslations } from "@/lib/translations";
@@ -76,6 +81,9 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
           {params.error === "invalid" ? (
             <p className="form-error">{t("adminClasses.invalidError")}</p>
           ) : null}
+          {params.error === "schedule" ? (
+            <p className="form-error">{t("adminClasses.scheduleError")}</p>
+          ) : null}
           <form action={createClassAction} className="admin-form">
             <label>
               <span>{t("label.name")}</span>
@@ -85,6 +93,16 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
                 required
                 type="text"
               />
+            </label>
+            <label>
+              <span>{t("adminClasses.classType")}</span>
+              <select defaultValue="REGULAR" name="classType" required>
+                {classTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.translationKey)}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               <span>{t("adminClasses.book")}</span>
@@ -114,6 +132,10 @@ export default async function NewClassPage({ searchParams }: NewClassPageProps) 
             <label>
               <span>{t("adminClasses.year")}</span>
               <input name="year" placeholder="2026" type="number" min="2000" max="2100" />
+            </label>
+            <label>
+              <span>{t("label.startTime")}</span>
+              <TimeInput name="startTime" />
             </label>
             <label>
               <span>{t("label.duration")}</span>

@@ -1,3 +1,43 @@
+# Current Handoff
+
+Last updated: 2026-07-10
+
+## Current focus
+
+Keep the repository documentation synchronized with the implemented platform before starting more product work.
+
+## Current implementation status
+
+- Core class records, accounts, classes, students, grades, risk review, teacher work summaries, substitutions, reception workflows, localization, and imports are present in the current source.
+- Sprint 17 localization and Sprint 18 student/class imports are implemented and covered by the current critical-workflow checks.
+- Account theme preferences were added after the Sprint 18 plan and are implemented.
+- Role navigation has been streamlined: the shared top bar now exposes each role's primary routes with a visible horizontal-overflow affordance; admins use a core row plus collapsible groups for management, work, operations, and account tools, while signed-in language selection lives in account settings and landing/login language controls are compact and URL-based.
+- Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular classes, bonus classes, and admin-created meetings across a Monday-to-Sunday week, with teachers shown on staff event cards. The admin view shows one card per meeting, and all calendar views keep the weekday header visible while scrolling.
+- Personal booth scheduling supports dated review, make-up lesson, test, and other bookings for any active student and teacher. Recurring personal classes and ad-hoc bookings share three-booth capacity, appear in calendars, and overlapping completed personal work counts once in teacher hours.
+- Overlapping calendar events now group into expandable cards spanning their combined time range; personal groups show occupancy, and teachers can confirm assigned bookings as Present, Absent, or Excused from date-filtered class cards on the teacher dashboard. The legacy personal-slots path redirects there.
+- Sprint 19 production readiness is not complete.
+
+## Completed workflow decisions
+
+- Use repository documentation as long-term memory.
+- Use AGENTS.md for Codex instructions.
+- Use codebase-memory-mcp for codebase navigation.
+- Use the repository's finding-unknowns-skills package through the `blindspot-pass` skill for larger planning work.
+- Keep Context Mode and Ultracode benched for now.
+
+## Known issues / questions
+
+- Production password-reset email delivery still requires a Hostinger SMTP mailbox and configuration.
+- The intended regular-class overlap behavior is a warning with an explicit “save anyway” path; implementation and focused tests remain.
+- The production target is a Hostinger VPS in Brazil; deployment, restart, monitoring, security-update, and backup automation plus an operator runbook still need implementation.
+- Layered backup ownership, retention, off-VPS storage, and restore testing still need production confirmation.
+- The current test suite is a static source-level critical-workflow suite, not browser or production database coverage.
+
+## Next recommended task
+
+Implement and test the regular-class overlap warning, then prepare the Hostinger VPS deployment automation and complete the production-readiness checklist.
+
+---
 # Sprint Plan
 
 ## Working Rhythm
@@ -412,13 +452,13 @@ Tasks:
 - Add an independent bonus class/session model separate from regular classes.
 - Store student, subject, assigned teacher, date, start time, duration, status, and notes for each bonus class.
 - Prevent two bonus classes from being scheduled for the same teacher at overlapping times.
-- Prevent bonus classes from overlapping with regular class schedules for the same teacher when schedule data is available.
+- Warn when a bonus class overlaps a regular class schedule for the same teacher, while allowing an explicit save.
 - Let reception assign or reassign the teacher before the bonus class happens.
 - Let the assigned teacher record or confirm that the bonus class happened.
 - Keep teacher-created bonus classes from the dashboard Add event flow aligned with reception-created bonus classes, including subject, date, start time, duration, and notes.
 - Add a reception student lookup for parent-facing questions, including last attended lesson, missed lessons, missed-class count, incomplete-homework count, and active class information.
 - Add a reception class lookup so reception can quickly confirm class teacher, schedule, roster, and recent lessons.
-- Show bonus classes in a calendar-style day grid with 30-minute rows and one column per teacher.
+- Show regular and bonus classes in a Monday-to-Sunday calendar-style grid with 30-minute rows and teacher details on staff event cards.
 - Let teachers, reception, or admins confirm bonus class attendance.
 - Split reception tools into focused dashboard, scheduling, calendar, and lookup pages.
 - Count completed bonus classes toward the assigned teacher's monthly paid work.
@@ -433,7 +473,8 @@ Done when:
 
 - Reception can schedule bonus classes and assign teachers.
 - Reception cannot access admin-only or teacher-only management areas.
-- The app blocks teacher double-booking for bonus classes.
+- The app blocks teacher double-booking between bonus classes.
+- The app warns about regular-class conflicts without blocking an explicitly confirmed bonus class.
 - Reception can answer student and class schedule questions without admin access.
 - Reception can visually scan a teacher-by-time bonus class calendar.
 - Bonus calendar entries open to edit details or confirm attendance.
@@ -581,8 +622,10 @@ Tasks:
 - Test English and Brazilian Portuguese language selection across critical screens.
 - Test student and class imports with valid files, invalid rows, duplicated data, and partial-failure cases.
 - Add production environment checklist.
-- Add hosted PostgreSQL setup notes.
+- Add Hostinger VPS-in-Brazil setup notes for the application and PostgreSQL.
+- Add automated deployment, restart, HTTPS renewal, security-update, and health/resource monitoring guidance.
 - Add backup/export routine.
+- Add layered Hostinger-plus-off-VPS PostgreSQL backup guidance, failure alerts, and restore testing.
 - Add basic monitoring/logging guidance.
 - Add tests for critical teacher, grading, account, and admin review workflows.
 - Confirm exports still include the records the school needs after grading, risk review, bonus classes, substitutions, and teacher work summaries are added.

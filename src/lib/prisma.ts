@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const connectionString = process.env.DATABASE_URL;
-const prismaSchemaVersion = "20260706090000_add_account_locale";
+const prismaSchemaVersion = "20260706190000_add_class_types_and_schedule_time";
 
 if (!connectionString) {
   throw new Error("DATABASE_URL is required to connect to the database.");

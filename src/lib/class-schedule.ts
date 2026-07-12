@@ -14,6 +14,14 @@ export const weekdayOptions = [
 
 export type WeekdayValue = (typeof weekdayOptions)[number]["value"];
 
+export const classTypeOptions = [
+  { value: "REGULAR", translationKey: "classType.regular" },
+  { value: "VIP", translationKey: "classType.vip" },
+  { value: "PERSONAL", translationKey: "classType.personal" },
+] as const;
+
+export type ClassTypeValue = (typeof classTypeOptions)[number]["value"];
+
 export function formatWeekdays(
   weekDays: string[],
   locale: AccountLocale = defaultUnauthenticatedLocale,
@@ -60,6 +68,25 @@ export function formatDuration(minutes: number | null) {
   return formatClockTimeFromMinutes(minutes);
 }
 
+export function formatCompactDuration(minutes: number | null) {
+  if (!minutes) {
+    return "-";
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours === 0) {
+    return `${remainingMinutes}M`;
+  }
+
+  if (remainingMinutes === 0) {
+    return `${hours}H`;
+  }
+
+  return `${hours}H${remainingMinutes}M`;
+}
+
 export function readDurationMinutes(value: FormDataEntryValue | null) {
   const duration = String(value ?? "").trim();
 
@@ -74,4 +101,56 @@ export function readDurationMinutes(value: FormDataEntryValue | null) {
   const [hours, minutes] = duration.split(":").map(Number);
 
   return hours * 60 + minutes;
+}
+
+export function normalizeStartTime(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(trimmedValue)) {
+    return null;
+  }
+
+  return trimmedValue;
+}
+
+export function readOptionalStartTime(value: FormDataEntryValue | null) {
+  const startTime = String(value ?? "").trim();
+
+  return startTime ? normalizeStartTime(startTime) : null;
+}
+
+export function readTimeMinutes(value: string) {
+  const normalizedTime = normalizeStartTime(value);
+
+  if (!normalizedTime) {
+    return null;
+  }
+
+  const [hours, minutes] = normalizedTime.split(":").map(Number);
+
+  return hours * 60 + minutes;
+}
+
+export function hasTimeOverlap({
+  durationMinutes,
+  existingDurationMinutes,
+  existingStartTime,
+  startTime,
+}: {
+  durationMinutes: number;
+  existingDurationMinutes: number;
+  existingStartTime: string;
+  startTime: string;
+}) {
+  const startMinutes = readTimeMinutes(startTime);
+  const existingStartMinutes = readTimeMinutes(existingStartTime);
+
+  if (startMinutes === null || existingStartMinutes === null) {
+    return false;
+  }
+
+  const endMinutes = startMinutes + durationMinutes;
+  const existingEndMinutes = existingStartMinutes + existingDurationMinutes;
+
+  return startMinutes < existingEndMinutes && existingStartMinutes < endMinutes;
 }

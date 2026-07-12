@@ -12,8 +12,19 @@ type AdminStudentsPageProps = {
   searchParams: Promise<{
     status?: string;
     studentSearch?: string;
+    studentStatus?: string;
   }>;
 };
+
+type StudentStatusFilter = "all" | "active" | "inactive";
+
+function readStudentStatusFilter(value: string | undefined): StudentStatusFilter {
+  if (value === "all" || value === "inactive") {
+    return value;
+  }
+
+  return "active";
+}
 
 export default async function AdminStudentsPage({
   searchParams,
@@ -31,6 +42,7 @@ export default async function AdminStudentsPage({
   const params = await searchParams;
   const t = getTranslations(currentUser.locale);
   const studentSearch = params.studentSearch?.trim() || undefined;
+  const studentStatus = readStudentStatusFilter(params.studentStatus?.trim());
   const successMessage = formatEntityResultMessage(
     "Student",
     params.status,
@@ -39,6 +51,8 @@ export default async function AdminStudentsPage({
   const students = await prisma.student.findMany({
     orderBy: [{ isActive: "desc" }, { fullName: "asc" }],
     where: {
+      ...(studentStatus === "active" ? { isActive: true } : {}),
+      ...(studentStatus === "inactive" ? { isActive: false } : {}),
       ...(studentSearch
         ? { fullName: { contains: studentSearch, mode: "insensitive" } }
         : {}),
@@ -66,6 +80,9 @@ export default async function AdminStudentsPage({
           <h1 id="students-title">{t("dashboard.students")}</h1>
           <p className="lede">{t("adminStudents.createCopy")}</p>
           <div className="action-row">
+            <Link className="secondary-link" href="/admin/students/import">
+              {t("imports.importStudents")}
+            </Link>
             <Link className="primary-link" href="/admin/students/new">
               {t("adminStudents.createStudent")}
             </Link>
@@ -90,6 +107,14 @@ export default async function AdminStudentsPage({
                   <option key={student.id} value={student.fullName} />
                 ))}
               </datalist>
+            </label>
+            <label>
+              <span>{t("label.status")}</span>
+              <select defaultValue={studentStatus} name="studentStatus">
+                <option value="active">{t("adminStudents.activeStudents")}</option>
+                <option value="inactive">{t("adminStudents.inactiveStudents")}</option>
+                <option value="all">{t("adminStudents.allStudents")}</option>
+              </select>
             </label>
             <div className="filter-actions">
               <button className="primary-button" type="submit">
@@ -118,7 +143,11 @@ export default async function AdminStudentsPage({
           </div>
           <div className="student-result-grid">
             {students.map((student) => (
-              <article className="student-result-card" key={student.id}>
+              <Link
+                className="student-result-card admin-student-result-card"
+                href={`/admin/students/${student.id}/view`}
+                key={student.id}
+              >
                 <span>
                   {student.isActive
                     ? t("adminStudents.activeStudent")
@@ -131,21 +160,7 @@ export default async function AdminStudentsPage({
                     ? t("label.class")
                     : t("dashboard.classes")}
                 </small>
-                <div className="card-actions">
-                  <Link
-                    className="secondary-link compact-card-link"
-                    href={`/admin/students/${student.id}/view`}
-                  >
-                    {t("label.view")}
-                  </Link>
-                  <Link
-                    className="text-link compact-card-link"
-                    href={`/admin/students/${student.id}`}
-                  >
-                    {t("label.edit")}
-                  </Link>
-                </div>
-              </article>
+              </Link>
             ))}
             {students.length === 0 ? (
               <p className="muted-copy">{t("adminStudents.noMatches")}</p>

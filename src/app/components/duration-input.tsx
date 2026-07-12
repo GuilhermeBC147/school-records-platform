@@ -3,6 +3,7 @@ import { formatDuration } from "@/lib/class-schedule";
 type DurationInputProps = {
   maxMinutes?: number;
   name: string;
+  placeholder?: string;
   required?: boolean;
   valueMinutes?: number | null;
 };
@@ -10,6 +11,7 @@ type DurationInputProps = {
 export function DurationInput({
   maxMinutes = 720,
   name,
+  placeholder = "HH:MM",
   required = false,
   valueMinutes,
 }: DurationInputProps) {
@@ -21,8 +23,9 @@ export function DurationInput({
       maxLength={5}
       name={name}
       pattern="\d{1,2}:[0-5]\d"
-      placeholder="HH:MM"
+      placeholder={placeholder}
       required={required}
+      title={placeholder}
       type="text"
     />
   );

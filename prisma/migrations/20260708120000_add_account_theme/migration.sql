@@ -1,0 +1,4 @@
+CREATE TYPE "AccountTheme" AS ENUM ('LIGHT', 'DARK');
+
+ALTER TABLE "User"
+ADD COLUMN "theme" "AccountTheme" NOT NULL DEFAULT 'LIGHT';

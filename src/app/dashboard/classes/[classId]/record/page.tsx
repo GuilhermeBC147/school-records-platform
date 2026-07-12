@@ -74,7 +74,7 @@ export default async function ClassRecordPage({
       semester: true,
       year: true,
       teacher: {
-        select: { name: true },
+        select: { id: true, name: true },
       },
       enrollments: {
         where: {
@@ -108,6 +108,12 @@ export default async function ClassRecordPage({
           status: true,
           substitutionNotes: true,
           substitutionStatus: true,
+          submittedById: true,
+          submittedBy: {
+            select: {
+              name: true,
+            },
+          },
           attendanceRecords: {
             select: {
               studentId: true,
@@ -138,6 +144,33 @@ export default async function ClassRecordPage({
   const isEditingSubmitted = lessonRecord?.status === "SUBMITTED";
   const isPendingSubstitution =
     lessonRecord?.substitutionStatus === "PENDING_APPROVAL";
+  const teacherAccounts =
+    currentUser.role === "ADMIN"
+      ? await prisma.user.findMany({
+          orderBy: { name: "asc" },
+          where: { isActive: true, role: "TEACHER" },
+          select: {
+            id: true,
+            name: true,
+          },
+        })
+      : [];
+  const requestedSubmittedById = lessonRecord?.submittedById ?? schoolClass.teacher.id;
+  const submittedById =
+    currentUser.role === "ADMIN"
+      ? (teacherAccounts.some((teacher) => teacher.id === requestedSubmittedById)
+          ? requestedSubmittedById
+          : (teacherAccounts.find((teacher) => teacher.id === schoolClass.teacher.id)
+              ?.id ??
+            teacherAccounts[0]?.id ??
+            ""))
+      : currentUser.id;
+  const submittedByName =
+    currentUser.role === "ADMIN"
+      ? (teacherAccounts.find((teacher) => teacher.id === submittedById)?.name ??
+        lessonRecord?.submittedBy?.name ??
+        schoolClass.teacher.name)
+      : currentUser.name;
 
   return (
     <main className="app-shell">
@@ -205,6 +238,20 @@ export default async function ClassRecordPage({
               />
             </label>
             <label>
+              <span>{t("adminReview.submittedBy")}</span>
+              {currentUser.role === "ADMIN" ? (
+                <select defaultValue={submittedById} name="submittedById" required>
+                  {teacherAccounts.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input readOnly type="text" value={submittedByName} />
+              )}
+            </label>
+            <label>
               <span>{t("label.notes")}</span>
               <textarea
                 defaultValue={lessonRecord?.notes ?? ""}
@@ -229,47 +276,46 @@ export default async function ClassRecordPage({
           <section className="panel data-panel" aria-labelledby="students-title">
             <h2 id="students-title">{t("label.students")}</h2>
             <div className="record-list">
-              {schoolClass.enrollments.map((enrollment) => (
-                <article className="student-record-row" key={enrollment.id}>
-                  <div>
-                    <strong>{enrollment.student.fullName}</strong>
-                  </div>
+              {schoolClass.enrollments.map((enrollment) => {
+                const attendanceStatus = findStudentStatus(
+                  lessonRecord?.attendanceRecords ?? [],
+                  enrollment.student.id,
+                  "ABSENT",
+                );
+                const homeworkStatus = findStudentStatus(
+                  lessonRecord?.homeworkRecords ?? [],
+                  enrollment.student.id,
+                  "INCOMPLETE",
+                );
 
-                  <label>
-                    <span>{t("label.attendance")}</span>
-                    <select
-                      defaultValue={findStudentStatus(
-                        lessonRecord?.attendanceRecords ?? [],
-                        enrollment.student.id,
-                        "ABSENT",
-                      )}
-                      name={`attendance:${enrollment.student.id}`}
-                    >
-                      <option hidden value="ABSENT">
-                        {t("option.attendanceAbsent")}
-                      </option>
-                      <option value="PRESENT">{t("option.attendancePresent")}</option>
-                      <option value="LATE">{t("option.attendanceLate")}</option>
-                      <option value="EXCUSED">{t("option.attendanceExcused")}</option>
-                    </select>
-                  </label>
+                return (
+                  <article className="student-record-row" key={enrollment.id}>
+                    <div>
+                      <strong>{enrollment.student.fullName}</strong>
+                    </div>
 
-                  <label>
-                    <span>{t("label.homework")}</span>
-                    <select
-                      defaultValue={findStudentStatus(
-                        lessonRecord?.homeworkRecords ?? [],
-                        enrollment.student.id,
-                        "INCOMPLETE",
-                      )}
-                      name={`homework:${enrollment.student.id}`}
-                    >
-                      <option value="COMPLETED">{t("option.attendanceComplete")}</option>
-                      <option value="INCOMPLETE">{t("option.attendanceNotDone")}</option>
-                    </select>
-                  </label>
-                </article>
-              ))}
+                    <label className="record-checkbox-label">
+                      <input
+                        defaultChecked={attendanceStatus === "PRESENT"}
+                        name={`attendance:${enrollment.student.id}`}
+                        type="checkbox"
+                        value="PRESENT"
+                      />
+                      <span>{t("option.attendancePresent")}</span>
+                    </label>
+
+                    <label className="record-checkbox-label">
+                      <input
+                        defaultChecked={homeworkStatus === "COMPLETED"}
+                        name={`homework:${enrollment.student.id}`}
+                        type="checkbox"
+                        value="COMPLETED"
+                      />
+                      <span>{t("option.homeworkDone")}</span>
+                    </label>
+                  </article>
+                );
+              })}
             </div>
           </section>
 

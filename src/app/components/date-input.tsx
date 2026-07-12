@@ -12,7 +12,9 @@ type DateInputProps = {
   className?: string;
   dateFormat: AccountDateFormat;
   defaultValue?: string;
+  hideFormatHint?: boolean;
   name: string;
+  placeholderLabels?: Partial<Record<AccountDateFormat, string>>;
   required?: boolean;
 };
 
@@ -27,9 +29,12 @@ export function DateInput({
   className,
   dateFormat,
   defaultValue = "",
+  hideFormatHint = true,
   name,
+  placeholderLabels,
   required = false,
 }: DateInputProps) {
+  const placeholder = placeholderLabels?.[dateFormat] ?? inputLabels[dateFormat];
   const initialDisplayValue = useMemo(
     () => formatIsoDateInput(defaultValue, dateFormat),
     [dateFormat, defaultValue],
@@ -43,7 +48,7 @@ export function DateInput({
     <span className="date-input-group">
       <span className="date-input-row">
         <input
-          aria-describedby={`${name}-date-format`}
+          aria-describedby={hideFormatHint ? undefined : `${name}-date-format`}
           autoComplete="off"
           className={className}
           inputMode="numeric"
@@ -53,8 +58,9 @@ export function DateInput({
               ? "\\d{4}-\\d{1,2}-\\d{1,2}"
               : "\\d{1,2}/\\d{1,2}/(?:\\d{2}|\\d{4})"
           }
-          placeholder={inputLabels[dateFormat]}
+          placeholder={placeholder}
           required={required}
+          title={placeholder}
           type="text"
           value={displayValue}
         />
@@ -69,9 +75,11 @@ export function DateInput({
         />
       </span>
       <input name={name} type="hidden" value={submittedIsoValue} />
-      <small className="field-hint" id={`${name}-date-format`}>
-        {inputLabels[dateFormat]}
-      </small>
+      {hideFormatHint ? null : (
+        <small className="field-hint" id={`${name}-date-format`}>
+          {placeholder}
+        </small>
+      )}
     </span>
   );
 }

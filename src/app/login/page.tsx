@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
-import { accountLocaleOptions, normalizeAccountLocale } from "@/lib/locale";
+import {
+  accountLocaleOptions,
+  normalizeAccountLocale,
+  type AccountLocale,
+} from "@/lib/locale";
 import { getCurrentUser } from "@/lib/session";
 import { getTranslations } from "@/lib/translations";
 
@@ -31,31 +35,46 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     params.error && params.error in errorMessages
       ? errorMessages[params.error as keyof typeof errorMessages]
       : null;
+  const localeHref = (nextLocale: AccountLocale) => {
+    const nextParams = new URLSearchParams({ locale: nextLocale });
+
+    if (params.error) {
+      nextParams.set("error", params.error);
+    }
+
+    if (params.reset) {
+      nextParams.set("reset", params.reset);
+    }
+
+    return `/login?${nextParams.toString()}`;
+  };
 
   return (
     <main className="auth-page">
       <header className="auth-topbar">
-        <form action="/login" className="topbar-locale-form" method="get">
-          {params.error ? <input name="error" type="hidden" value={params.error} /> : null}
-          {params.reset ? <input name="reset" type="hidden" value={params.reset} /> : null}
-          <label>
-            <span>{t("account.language")}</span>
-            <select defaultValue={locale} name="locale">
-              {accountLocaleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button className="secondary-button" type="submit">
-            {t("account.saveLanguage")}
-          </button>
-        </form>
+        <nav
+          aria-label={t("account.language")}
+          className="public-locale-toggle"
+        >
+          {accountLocaleOptions.map((option) => (
+            <Link
+              aria-current={locale === option.value ? "page" : undefined}
+              aria-label={option.label}
+              className="locale-toggle-link"
+              href={localeHref(option.value)}
+              key={option.value}
+            >
+              {option.value === "PT_BR" ? "PT-BR" : "EN"}
+            </Link>
+          ))}
+        </nav>
       </header>
 
       <section className="auth-panel" aria-labelledby="login-title">
-        <p className="eyebrow">{t("auth.teacherAccess")}</p>
+        <Link className="text-link auth-back-link" href="/">
+          {t("auth.backToLanding")}
+        </Link>
+        <p className="eyebrow">{t("auth.Access")}</p>
         <h1 id="login-title">{t("auth.signInTitle")}</h1>
         <p className="lede">{t("auth.loginCopy")}</p>
 
@@ -100,9 +119,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="demo-credentials">
           <strong>{t("auth.devAccounts")}</strong>
           <span>admin@example.com / password123</span>
-          <span>reception@example.com / password123</span>
-          <span>ana@example.com / password123</span>
-          <span>bruno@example.com / password123</span>
+          <span>reception1@example.com / password123</span>
+          <span>teacher1@example.com / password123</span>
+          <span>teacher2@example.com / password123</span>
         </div>
       </section>
     </main>

@@ -5,6 +5,7 @@ import {
   formatWeekdays,
   weekdayOptions,
 } from "@/lib/class-schedule";
+import { formatStartTime } from "@/lib/bonus-classes";
 import { formatShortDate } from "@/lib/date-format";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -94,6 +95,7 @@ export default async function ReceptionClassesPage({
         durationMinutes: true,
         name: true,
         semester: true,
+        startTime: true,
         weekDays: true,
         year: true,
         teacher: { select: { email: true, name: true } },
@@ -280,7 +282,10 @@ export default async function ReceptionClassesPage({
               <article className="class-detail-card">
                 <span>{t("receptionLookup.schedule")}</span>
                 <strong>{formatWeekdays(selectedClass.weekDays, currentUser.locale)}</strong>
-                <small>{formatDuration(selectedClass.durationMinutes)}</small>
+                <small>
+                  {formatStartTime(selectedClass.startTime)} |{" "}
+                  {formatDuration(selectedClass.durationMinutes)}
+                </small>
               </article>
             </div>
             <div className="data-grid class-detail-sections">

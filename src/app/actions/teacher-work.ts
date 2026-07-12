@@ -90,6 +90,8 @@ export async function createTeacherWorkLogAction(formData: FormData) {
   const errorRedirectTo = readErrorRedirect(formData, "/dashboard/work/new");
   const category = String(formData.get("category") ?? "");
   const durationMinutes = readDurationMinutes(formData, errorRedirectTo);
+  const requireCompleteActivity =
+    String(formData.get("requireCompleteActivity") ?? "") === "1";
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const requestedRedirect = String(
     formData.get("redirectTo") ?? "/dashboard/work",
@@ -97,7 +99,8 @@ export async function createTeacherWorkLogAction(formData: FormData) {
   const redirectTo = allowedRedirects.has(requestedRedirect)
     ? requestedRedirect
     : "/dashboard/work";
-  const startTime = readOptionalStartTime(formData.get("startTime"));
+  const startTimeValue = String(formData.get("startTime") ?? "").trim();
+  const startTime = readOptionalStartTime(startTimeValue);
   const selectedStudentIds = readSelectedStudentIds(formData);
   const subject = String(formData.get("subject") ?? "").trim() || null;
   const title = String(formData.get("title") ?? "").trim();
@@ -111,7 +114,11 @@ export async function createTeacherWorkLogAction(formData: FormData) {
     redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
-  if (category === "BONUS_CLASS" && !subject) {
+  if ((category === "BONUS_CLASS" || requireCompleteActivity) && !subject) {
+    redirectWithWorkError(errorRedirectTo, "invalid");
+  }
+
+  if (requireCompleteActivity && !startTime) {
     redirectWithWorkError(errorRedirectTo, "invalid");
   }
 
@@ -145,6 +152,10 @@ export async function createTeacherWorkLogAction(formData: FormData) {
       : [];
 
   if (selectedStudents.length !== selectedStudentIds.length) {
+    redirectWithWorkError(errorRedirectTo, "students");
+  }
+
+  if (requireCompleteActivity && selectedStudents.length === 0) {
     redirectWithWorkError(errorRedirectTo, "students");
   }
 

@@ -18,13 +18,18 @@ Admins can:
 
 Inactive accounts cannot log in because login only accepts active users.
 
-Each account also stores a preferred date format. Staff can update it from
-`/dashboard/account`; filter fields display that account format while still
-submitting ISO date values for server-side queries and database consistency.
+Each account also stores a preferred date format, locale, and theme. Staff can
+update these preferences from `/dashboard/account`; the signed-in language
+selector is grouped with the other account settings instead of the global
+topbar. Filter fields display the account date format while still submitting
+ISO date values for server-side queries and database consistency. The
+supported locales are English and Brazilian Portuguese, with Brazilian
+Portuguese as the default. The supported themes are light and dark, with
+light as the default.
 
 ## Password Reset
 
-Teachers and admins can start password recovery from:
+Admins, teachers, and reception staff can start password recovery from:
 
 ```text
 http://localhost:3000/forgot-password
@@ -38,10 +43,21 @@ In production, the app should send the reset link through a school-approved emai
 
 ## Production Email Requirement
 
-Before production use, choose one password reset delivery path:
+The current plan is to use a dedicated Hostinger Email mailbox for low-volume password-reset messages. The current development flow exposes the reset token in the response for testing, so production must replace that path with real email delivery before launch.
 
-- hosting provider email integration
-- SMTP account owned by the school
-- transactional email provider
+Configure the application with:
+
+- SMTP host `smtp.hostinger.com`;
+- port `465` with SSL, or `587` with STARTTLS;
+- the full mailbox address as the username;
+- an app password if the mailbox supports one;
+- credentials stored only in the VPS environment configuration.
+
+Before launch, verify the sender address, SPF/DKIM/DMARC configuration, delivery to common providers, and the password-reset link. If deliverability is inadequate, use a dedicated transactional email provider without changing the reset workflow.
 
 The email should include only the reset link and its expiry window. It should not include the user's current password.
+
+## Session requirement
+
+Authentication sessions are signed with `AUTH_SECRET`. Set a strong local value
+in `.env.local`, and use a different long random value in production.

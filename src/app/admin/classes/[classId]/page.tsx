@@ -6,7 +6,12 @@ import {
 } from "@/app/actions/classes";
 import { RosterPicker } from "@/app/admin/classes/roster-picker";
 import { DurationInput } from "@/app/components/duration-input";
-import { formatWeekdays, weekdayOptions } from "@/lib/class-schedule";
+import { TimeInput } from "@/app/components/time-input";
+import {
+  classTypeOptions,
+  formatWeekdays,
+  weekdayOptions,
+} from "@/lib/class-schedule";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getTranslations } from "@/lib/translations";
@@ -45,9 +50,11 @@ export default async function EditClassPage({
       select: {
         id: true,
         name: true,
+        classType: true,
         book: true,
         semester: true,
         year: true,
+        startTime: true,
         durationMinutes: true,
         weekDays: true,
         isActive: true,
@@ -115,11 +122,22 @@ export default async function EditClassPage({
           </Link>
           <p className="eyebrow">{t("adminClasses.adminSetup")}</p>
           <h1 id="edit-class-title">{t("adminClasses.editClass")}</h1>
+          <div className="action-row">
+            <Link className="secondary-link" href={`/dashboard/classes/${schoolClass.id}`}>
+              {t("adminClasses.openClassPage")}
+            </Link>
+          </div>
         </section>
 
         <section className="panel">
           {query.error === "invalid" ? (
             <p className="form-error">{t("adminClasses.invalidError")}</p>
+          ) : null}
+          {query.error === "schedule" ? (
+            <p className="form-error">{t("adminClasses.scheduleError")}</p>
+          ) : null}
+          {query.error === "class-roster-size" ? (
+            <p className="form-error">{t("adminClasses.singleStudentRosterError")}</p>
           ) : null}
           {query.status === "roster-updated" ? (
             <p className="form-success">
@@ -131,6 +149,16 @@ export default async function EditClassPage({
             <label>
               <span>{t("label.name")}</span>
               <input defaultValue={schoolClass.name} name="name" required type="text" />
+            </label>
+            <label>
+              <span>{t("adminClasses.classType")}</span>
+              <select defaultValue={schoolClass.classType} name="classType" required>
+                {classTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.translationKey)}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               <span>{t("adminClasses.book")}</span>
@@ -165,6 +193,13 @@ export default async function EditClassPage({
                 min="2000"
                 name="year"
                 type="number"
+              />
+            </label>
+            <label>
+              <span>{t("label.startTime")}</span>
+              <TimeInput
+                defaultValue={schoolClass.startTime ?? ""}
+                name="startTime"
               />
             </label>
             <label>
@@ -228,6 +263,12 @@ export default async function EditClassPage({
         <section className="panel data-panel" aria-labelledby="roster-title">
           {query.error === "roster" ? (
             <p className="form-error">{t("adminClasses.chooseActiveRoster")}</p>
+          ) : null}
+          {query.error === "roster-size" ? (
+            <p className="form-error">{t("adminClasses.singleStudentRosterError")}</p>
+          ) : null}
+          {query.error === "roster-schedule" ? (
+            <p className="form-error">{t("adminClasses.scheduleError")}</p>
           ) : null}
           <h2 id="roster-title">{t("adminClasses.classRoster")}</h2>
           <form action={updateClassRosterAction} className="admin-form">

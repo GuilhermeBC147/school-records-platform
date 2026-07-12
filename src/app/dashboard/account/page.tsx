@@ -3,9 +3,13 @@ import { redirect } from "next/navigation";
 import {
   changeOwnPasswordAction,
   updateOwnDateFormatAction,
+  updateOwnLocaleAction,
+  updateOwnThemeAction,
 } from "@/app/actions/accounts";
 import { accountDateFormatOptions } from "@/lib/date-format";
+import { accountLocaleOptions } from "@/lib/locale";
 import { getCurrentUser } from "@/lib/session";
+import { accountThemeOptions } from "@/lib/theme";
 import { getTranslations } from "@/lib/translations";
 import { AppTopbar } from "@/app/components/app-topbar";
 
@@ -14,6 +18,7 @@ type AccountPageProps = {
     dateFormat?: string;
     locale?: string;
     password?: string;
+    theme?: string;
   }>;
 };
 
@@ -38,6 +43,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const isSuccess = params.password === "updated";
   const dateFormatUpdated = params.dateFormat === "updated";
   const localeUpdated = params.locale === "updated";
+  const themeUpdated = params.theme === "updated";
+  const dashboardHref = currentUser.role === "RECEPTION" ? "/reception" : "/dashboard";
 
   return (
     <main className="app-shell">
@@ -45,15 +52,41 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
       <div className="main data-page">
         <section className="intro" aria-labelledby="account-title">
-          <Link className="text-link" href="/dashboard">
+          <Link className="text-link" href={dashboardHref}>
             {t("account.backToDashboard")}
           </Link>
           <p className="eyebrow">{t("dashboard.account")}</p>
           <h1 id="account-title">{t("account.yourAccount")}</h1>
           <p className="lede">{currentUser.email}</p>
+        </section>
+
+        <section className="panel">
+          <h2>{t("account.language")}</h2>
           {localeUpdated ? (
             <p className="form-success">{t("account.languageUpdated")}</p>
           ) : null}
+          <form action={updateOwnLocaleAction} className="admin-form">
+            <input
+              name="redirectTo"
+              type="hidden"
+              value="/dashboard/account"
+            />
+            <label>
+              <span>{t("account.preferredLanguage")}</span>
+              <select defaultValue={currentUser.locale} name="locale">
+                {accountLocaleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="record-actions">
+              <button className="primary-button" type="submit">
+                {t("account.saveLanguage")}
+              </button>
+            </div>
+          </form>
         </section>
 
         <section className="panel">
@@ -75,6 +108,36 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             <div className="record-actions">
               <button className="primary-button" type="submit">
                 {t("account.saveDateFormat")}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="panel">
+          <h2>{t("account.appearance")}</h2>
+          {themeUpdated ? (
+            <p className="form-success">{t("account.themeUpdated")}</p>
+          ) : null}
+          <form action={updateOwnThemeAction} className="admin-form">
+            <fieldset className="segmented-field">
+              <legend>{t("account.preferredTheme")}</legend>
+              <div className="segmented-control">
+                {accountThemeOptions.map((option) => (
+                  <label className="segmented-option" key={option.value}>
+                    <input
+                      defaultChecked={currentUser.theme === option.value}
+                      name="theme"
+                      type="radio"
+                      value={option.value}
+                    />
+                    <span>{t(option.labelKey)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div className="record-actions">
+              <button className="primary-button" type="submit">
+                {t("account.saveTheme")}
               </button>
             </div>
           </form>

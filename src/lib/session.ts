@@ -111,6 +111,7 @@ export async function getCurrentUser() {
       email: true,
       dateFormat: true,
       locale: true,
+      theme: true,
       role: true,
     },
   });
