@@ -60,6 +60,20 @@ See [Hostinger's VPS backup and restore guide](https://support.hostinger.com/en/
 
 For local development, keep the PostgreSQL Docker volume intact unless you intentionally want to reset sample data.
 
+## Production Backup Automation
+
+Production uses a layered recovery strategy, not CSV exports alone:
+
+- Enable school-owned Hostinger VPS backups or snapshots. This protects the whole server but is not the only recovery layer.
+- `ops/backup-postgres.sh` creates a timestamped compressed PostgreSQL custom archive, first as a hidden partial file. It proves the archive is readable with `pg_restore --list`, writes a SHA-256 sidecar, and only then marks the backup successful.
+- The same script copies the archive and checksum to the configured school-owned `rclone` remote and runs an `rclone check`. In production `REQUIRE_OFFSITE_BACKUP=true` means an unconfigured or failed remote makes the backup fail and sends an alert.
+- `ops/check-backup.sh` alerts when the latest successful backup is missing, older than `BACKUP_MAX_AGE_HOURS`, lacks its checksum, has a hash mismatch, or lacks verified off-VPS status.
+- `ops/restore-rehearsal.sh` restores into a fresh temporary database by default. It verifies accounts, classes, lessons, attendance, homework, grades, risk resolutions, imports, bonus classes, personal bookings, and teacher-work records before removing the temporary database.
+
+The recommended starting retention is 30 days (`BACKUP_RETENTION_DAYS=30`). The school must decide the final retention, storage provider, cost owner, and acceptable recovery point. Keep the backup directory private to the deployment user; never serve it from the web application.
+
+To investigate a restore, set `KEEP_RESTORE_DATABASE=true` only for the one rehearsal command, inspect it, then drop the temporary database explicitly. `ops/restore-postgres.sh` rejects the production database name and refuses to overwrite any existing target.
+
 Before resetting local data, export submitted class records from the admin page and store the CSV somewhere outside the project folder.
 
 For production, use Hostinger VPS backups and the separate logical PostgreSQL backup routine in addition to CSV exports for school reporting.

@@ -379,3 +379,31 @@ None yet.
 - Edge cases found: seeded bonus fixtures can mask recurring warnings by correctly winning as hard conflicts; malformed/missing recurring times are ignored; endpoint adjacency remains allowed; edit must self-exclude only the current bonus class.
 - Verification: 22 workflow assertions, PostgreSQL scheduling integration, bilingual create/edit browser smoke tests, typecheck, Prisma validation, production build, import integration, and diff checks.
 - Next session should read first: this section, `docs/sprint-19-quality-control.md`, and the current handoff in `SPRINTS.md`.
+
+## Sprint 19 production operations
+
+### Deviations
+
+- Prisma runs `generate` during `npm ci`, so the Docker dependency stage now copies the Prisma configuration and schema before installing packages. This keeps the multi-stage build reproducible without adding dependencies.
+- The restore rehearsal compares source and restored record-count snapshots after checking table presence. It is stronger than a schema-only restore check while still allowing legitimately empty record families.
+
+### Discovered edge cases
+
+- The first deployment has no running PostgreSQL service to back up; the deploy path must distinguish an empty bootstrap from later releases and never silently skip a pre-migration backup once production exists.
+- A standalone Next.js runtime image does not reliably include the Prisma CLI, so migrations need a separate image target instead of bloating or mutating the application container.
+- Docker access is effectively root-equivalent even for a dedicated deployment account; least privilege therefore also requires tightly scoped SSH keys, repository access, and host ownership documentation.
+- The protected environment file must not be rewritten for every deployment. Immutable image references are stored separately in `.deploy/`, which lets restart/rollback scripts reuse the last known-good release without write access to secrets.
+- The local runner has no school-owned `rclone` remote, so off-VPS backup transport is implemented and documented but intentionally unclaimed in local validation.
+
+### Questions for review
+
+- Confirm the school-owned off-VPS provider, 30-day retention cost, alert webhook destination, domain, GitHub production-environment protections, Hostinger backup plan, and recovery-contact ownership before launch.
+- SMTP delivery is intentionally deferred to the next focused Sprint 19 task and remains a launch blocker until a real Hostinger-mailbox delivery test passes.
+
+### End-of-session summary
+
+- Deviations: 2 conservative build/rehearsal adjustments.
+- Most likely to revisit: the school-selected `rclone` provider, backup retention cost, and GitHub environment protection available on its plan.
+- Edge cases found: first deploy without a database volume, Prisma post-install schema availability, preserving immutable images across restarts, and schema-only restores that could otherwise mask missing data.
+- Verification: 26 source/operations tests, typecheck, Prisma validation, production build, Compose/Caddy validation, runner/migration images, disposable migrations and health, role permissions, seeded dump/checksum/temporary restore, ShellCheck, actionlint, and diff checks.
+- Next session should read first: `docs/operator-runbook.md`, `docs/sprint-19-quality-control.md`, and the current handoff in `SPRINTS.md`.

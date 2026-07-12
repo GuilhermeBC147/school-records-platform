@@ -11,9 +11,15 @@ Current snapshot: 2026-07-10. The current code and Prisma schema are the source 
 
 ## Production target and operations
 
-The planned production target is a Hostinger VPS in Brazil, with the Next.js application and PostgreSQL running together, preferably through Docker Compose. The VPS is self-managed; the handoff should therefore automate deployment, Prisma migrations, process/container restart, HTTPS renewal, security updates, and health/resource monitoring.
+The production target is a school-owned Hostinger VPS in Brazil. `docker-compose.production.yml` runs Caddy, the Next.js application, PostgreSQL, and a profile-only migration container. Caddy is the only service with host ports (80/443); the app and PostgreSQL communicate only over private Compose networks, so PostgreSQL is not publicly exposed.
 
-Use Hostinger VPS backups plus a nightly logical PostgreSQL dump stored outside the VPS. Alert on failed or missing backups and test restores before launch and periodically afterward. Keep `DATABASE_URL`, `AUTH_SECRET`, and SMTP credentials in VPS environment configuration, not in the repository. These are deployment requirements; the automation is not implemented yet.
+`Dockerfile` produces a multi-stage standalone non-root application image and a separate Prisma migration image. The runtime application role has data read/write grants but does not own schema migrations; the PostgreSQL owner is used by initialization, migration, backup, and restore operations only. Caddy certificate state and PostgreSQL data are persistent volumes, while container log files are bounded.
+
+`/api/health/live` has no database dependency and exposes only a detail-free liveness result. `/api/health/ready` runs a database query and returns only a ready/not-ready status. Compose/deploy automation waits for readiness; an external school-owned uptime monitor should poll liveness.
+
+The GitHub Actions production workflow validates source/build, publishes immutable SHA-tagged application and migration images, then invokes `ops/deploy.sh` through a protected production environment. The server script serializes deploys, takes a pre-migration backup after the first database exists, runs `prisma migrate deploy`, restarts the app, and verifies readiness. Application rollback is explicit and never reverses database migrations.
+
+The layered backup path is Hostinger VPS backups plus a nightly custom-format `pg_dump`, checksum, optional/required production `rclone` copy to a school-owned off-VPS remote, retention, freshness checks, alerting, and restore rehearsal into a temporary database. See `docs/operator-runbook.md` and `docs/production-readiness.md`. Password-reset SMTP is deliberately not implemented yet; credentials and all other production secrets remain only in protected VPS/GitHub configuration.
 
 ## Repository structure
 

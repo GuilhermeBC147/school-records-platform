@@ -136,6 +136,45 @@ Creating a class enrollment for temporary booth use would incorrectly attach tha
 Consequences:
 Admins and reception schedule ad-hoc bookings. Completed bookings and submitted recurring personal lessons are combined as time intervals in teacher work summaries, so concurrent personal work counts once rather than once per student.
 
+---
+
+## 2026-07-12 - Use Caddy and private Docker Compose networks for production
+
+Decision:
+Use Caddy as the public reverse proxy and HTTPS certificate manager. Run Caddy, a standalone non-root Next.js image, PostgreSQL, and a profile-only Prisma migration image through production Docker Compose networks. Only Caddy publishes host ports 80 and 443.
+
+Reason:
+Caddy keeps TLS issuance and renewal approachable for a school-operated VPS. Private Compose networking makes the correct PostgreSQL default explicit and separates public ingress from application/database traffic.
+
+Consequences:
+DNS and firewall prerequisites remain school-owned. Caddy state and PostgreSQL data are persistent volumes. The application image never needs the database owner password; migrations run in a separate image with the owner connection. `DATABASE_URL`, `MIGRATION_DATABASE_URL`, and all production secrets live in `/etc/school-records-platform/production.env`, not Git.
+
+---
+
+## 2026-07-12 - Use forward-only migration recovery and layered logical backups
+
+Decision:
+Deploy immutable Git-SHA images through a protected GitHub production environment and a repository server-side script. Require a pre-migration logical backup after initial bootstrap, do not automate destructive database rollback, and use Hostinger VPS backups plus checksummed `pg_dump` archives copied off-VPS with temporary-database restore rehearsals.
+
+Reason:
+An older application image can sometimes be restored safely, but a general automatic reversal of database migrations can destroy or misinterpret school records. Provider snapshots and CSV exports alone do not provide enough independent recovery coverage.
+
+Consequences:
+`ops/rollback-app.sh` restores only an explicitly compatible application image. Failed deployment/backup/missing-backup conditions use a generic school-owned alert webhook. The initial policy is 30 days of logical archive retention, pending school cost and ownership approval. The repository can validate mechanics locally but cannot claim a real provider/remote restore without school credentials.
+
+---
+
+## 2026-07-12 - Defer SMTP delivery to a focused launch-blocker change
+
+Decision:
+Do not add Hostinger SMTP transport to the production operations PR.
+
+Reason:
+Correct email delivery requires a maintained dependency, injected test transport, localized copy, token-safe failure behavior, and a real mailbox/DNS delivery check. Combining that with deployment and recovery operations would make review and launch evidence less clear.
+
+Consequences:
+The existing reset-token security properties remain unchanged, but production password reset is not launch-ready. The next Sprint 19 task must implement and prove Hostinger SMTP delivery before launch.
+
 ## 2026-07-10 - Confirm personal booth attendance through a teacher workflow
 
 Decision:

@@ -95,7 +95,9 @@ Do not use the local development password in production. Production will use Pos
 
 ## Production target
 
-The current production plan is a Hostinger VPS in Brazil running the Next.js application and PostgreSQL together. Deployment, backups, monitoring, and handoff requirements are documented in [docs/production-readiness.md](docs/production-readiness.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The production foundation targets a school-owned Hostinger VPS in Brazil. Caddy is the public HTTPS proxy; the standalone Next.js app and PostgreSQL run through private Docker Compose networks, so PostgreSQL is not publicly exposed. The repository includes immutable-image deployment, migrations, readiness checks, restart/rollback guidance, resource/backup monitoring, checksummed logical backups, and temporary restore rehearsals. The school must still provide DNS, VPS, GitHub production approval, off-VPS storage, alert, and recovery credentials.
+
+Read [docs/operator-runbook.md](docs/operator-runbook.md) before provisioning, then [docs/production-readiness.md](docs/production-readiness.md), [docs/backup-export.md](docs/backup-export.md), and [`.env.production.example`](.env.production.example). SMTP password-reset delivery remains a separate launch-blocker follow-up.
 
 Seed sample data:
 

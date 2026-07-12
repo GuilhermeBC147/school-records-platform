@@ -1,0 +1,98 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    outputs:
+      app-image: ${{ steps.images.outputs.app-image }}
+      migration-image: ${{ steps.images.outputs.migration-image }}
+    steps:
+      - name: Check out the selected revision
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate source and production build
+        env:
+          DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build
+          AUTH_SECRET: build-only-placeholder-not-used-at-runtime
+        run: |
+          npm test
+          npm run typecheck
+          npm run prisma:validate
+          npm run build
+
+      - name: Derive immutable image names
+        id: images
+        shell: bash
+        run: |
+          repository="${GITHUB_REPOSITORY,,}"
+          echo "app-image=ghcr.io/$repository:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "migration-image=ghcr.io/$repository:${GITHUB_SHA}-migration" >> "$GITHUB_OUTPUT"
+
+      - name: Sign in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish application image
+        run: |
+          docker build --target runner --tag "${{ steps.images.outputs.app-image }}" .
+          docker push "${{ steps.images.outputs.app-image }}"
+
+      - name: Build and publish migration image
+        run: |
+          docker build --target migration --tag "${{ steps.images.outputs.migration-image }}" .
+          docker push "${{ steps.images.outputs.migration-image }}"
+
+  deploy:
+    needs: validate-and-publish
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ vars.PRODUCTION_DOMAIN }}
+    steps:
+      - name: Configure the production SSH identity
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 0700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 0600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 0644 ~/.ssh/known_hosts
+
+      - name: Deploy immutable images and verify readiness
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          APP_IMAGE: ${{ needs.validate-and-publish.outputs.app-image }}
+          MIGRATION_IMAGE: ${{ needs.validate-and-publish.outputs.migration-image }}
+        shell: bash
+        run: |
+          port="${SSH_PORT:-22}"
+          printf -v remote_command 'cd /opt/school-records-platform/current && ./ops/deploy.sh %q %q %q' "$GITHUB_SHA" "$APP_IMAGE" "$MIGRATION_IMAGE"
+          ssh -p "$port" -o BatchMode=yes -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" "$remote_command"

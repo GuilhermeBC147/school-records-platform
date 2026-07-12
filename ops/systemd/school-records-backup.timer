@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the School Records PostgreSQL backup nightly
+
+[Timer]
+OnCalendar=*-*-* 02:15:00 America/Sao_Paulo
+Persistent=true
+RandomizedDelaySec=10m
+Unit=school-records-backup.service
+
+[Install]
+WantedBy=timers.target

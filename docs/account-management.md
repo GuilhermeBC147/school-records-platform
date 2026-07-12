@@ -61,3 +61,8 @@ The email should include only the reset link and its expiry window. It should no
 
 Authentication sessions are signed with `AUTH_SECRET`. Set a strong local value
 in `.env.local`, and use a different long random value in production.
+## Production password-reset delivery status
+
+The application currently creates a cryptographically random reset token, stores only its hash, expires it after 30 minutes, and keeps the public response generic whether or not an active account exists. Development-only flows can reveal the token for safe local testing; production never does.
+
+Production email delivery is intentionally not included in the operations foundation. It remains a launch blocker and the next focused Sprint 19 task. That task must add an isolated mail transport, construct reset links from an explicit production URL, retain generic responses on send failures, provide English and Brazilian Portuguese copy, use the school-owned Hostinger mailbox credentials only in protected production configuration, and prove real delivery after SPF, DKIM, and DMARC are configured. Hostinger documents that its email servers support SMTP and that SPF/DKIM/DMARC protect deliverability and spoofing; see its [SMTP support](https://www.hostinger.com/support/1583644-does-hostinger-support-pop3-imap-and-smtp/) and [DNS guidance](https://support.hostinger.com/en/articles/1583250-what-dns-record-types-are-supported-at-hostinger).

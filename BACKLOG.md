@@ -2,18 +2,13 @@
 
 ## Now
 
-- Complete production-readiness checks across admin, teacher, and reception workflows.
-- Prepare Hostinger VPS deployment automation for the application and PostgreSQL.
-- Configure the Hostinger SMTP password-reset email path.
-- Configure layered PostgreSQL backups, failure alerts, and restore testing.
-- Implement and test the regular-class overlap warning with an explicit save-anyway path.
+- Configure and test the Hostinger SMTP password-reset email path as the remaining Sprint 19 launch blocker.
+- Have the school provision and verify its Hostinger VPS, DNS/HTTPS, GitHub production environment, off-VPS backup storage, alert destination, and first real restore rehearsal using the repository runbook.
 
 ## Next
 
-- Add browser and production-database checks for critical workflows.
-- Run a full quality-control pass for imports, localization, grading, risk review, scheduling, substitutions, exports, and work summaries.
-- Document any remaining launch blockers, the operator runbook, and handoff steps.
-- Verify a restore from the off-VPS logical PostgreSQL backup.
+- Run browser and production-database checks for remaining critical workflows where school-owned deployment access is available.
+- Verify a restore from the real off-VPS logical PostgreSQL backup and record the evidence.
 
 ## Later
 
@@ -26,7 +21,6 @@
 
 - Which Hostinger mailbox/sender address and SMTP credentials should production use?
 - What backup retention and off-VPS storage policy should production use?
-- What warning wording and confirmation UX should the regular-class overlap warning use?
 - Should the school require additional exports for grades, imports, bonus classes, or payroll review?
 
 ## Production decisions

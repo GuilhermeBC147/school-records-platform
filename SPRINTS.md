@@ -4,7 +4,7 @@ Last updated: 2026-07-12
 
 ## Current focus
 
-Continue Sprint 19 with the production environment and Hostinger VPS operations checklist now that the regular-class overlap warning/save-anyway launch blocker is resolved.
+Continue Sprint 19 with the focused production Hostinger SMTP password-reset delivery change, then have the school complete its external VPS/DNS/backup/alert provisioning and real restore rehearsal using the new operator runbook.
 
 ## Current implementation status
 
@@ -19,7 +19,9 @@ Continue Sprint 19 with the production environment and Hostinger VPS operations 
 - English and Brazilian Portuguese critical-screen browser testing is documented in `docs/sprint-19-bilingual-screen-matrix.md`; all public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed locally.
 - PostgreSQL-backed student and class import testing is documented in `docs/sprint-19-import-quality-control.md`; valid, invalid, duplicate, partial-failure, audit-count, and cleanup scenarios pass twice consecutively.
 - Bonus scheduling now hard-blocks overlapping non-canceled bonus classes and warns on active recurring `REGULAR`, `VIP`, or `PERSONAL` class overlaps. Create and edit require an explicit localized save-anyway action, restore the validated proposal after warning, and rerun both conflict checks before writing. Static, PostgreSQL, and bilingual browser checks pass.
-- Sprint 19 production readiness is not complete; school-owned infrastructure, SMTP, monitoring, backup-alert, and restore validation remain.
+- The repository-owned production operations foundation is complete: Caddy/private Compose topology, standalone non-root app/migration images, detail-free health routes, GitHub Actions deployment, restart and app-image rollback guidance, systemd monitoring/backup/rehearsal timers, checksummed `pg_dump` archives, off-VPS `rclone` support, and a beginner operator runbook are in place. PostgreSQL has no public production port and no secrets are committed.
+- Local production-stack, migration, health, logical-backup, checksum, temporary-restore, config, source/build, and script checks are recorded in `docs/sprint-19-quality-control.md`. School-owned VPS/DNS/TLS, Hostinger backup, GitHub approval, alert, off-VPS remote, external uptime, and a real restore rehearsal remain external launch work.
+- Production SMTP password-reset delivery remains the next focused launch blocker. No SMTP code or dependency was added in the operations foundation.
 
 ## Completed workflow decisions
 
@@ -625,12 +627,12 @@ Tasks:
 - [x] Run a full quality-control pass across admin, teacher, reception, localization, import, grading, scheduling, risk-review, and reporting workflows. Baseline evidence and remaining runtime checks are recorded in `docs/sprint-19-quality-control.md`.
 - [x] Test English and Brazilian Portuguese language selection across critical screens. Local browser evidence is recorded in `docs/sprint-19-bilingual-screen-matrix.md`.
 - [x] Test student and class imports with valid files, invalid rows, duplicated data, and partial-failure cases. PostgreSQL evidence is recorded in `docs/sprint-19-import-quality-control.md`.
-- Add production environment checklist.
-- Add Hostinger VPS-in-Brazil setup notes for the application and PostgreSQL.
-- Add automated deployment, restart, HTTPS renewal, security-update, and health/resource monitoring guidance.
-- Add backup/export routine.
-- Add layered Hostinger-plus-off-VPS PostgreSQL backup guidance, failure alerts, and restore testing.
-- Add basic monitoring/logging guidance.
+- [x] Add production environment checklist.
+- [x] Add Hostinger VPS-in-Brazil setup notes for the application and PostgreSQL.
+- [x] Add automated deployment, restart, HTTPS renewal, security-update, and health/resource monitoring guidance.
+- [x] Add backup/export routine.
+- [x] Add layered Hostinger-plus-off-VPS PostgreSQL backup guidance, failure alerts, and restore testing.
+- [x] Add basic monitoring/logging guidance.
 - Add tests for critical teacher, grading, account, and admin review workflows.
 - Confirm exports still include the records the school needs after grading, risk review, bonus classes, substitutions, and teacher work summaries are added.
 - Add backup guidance for grades, risk-review data, bonus classes, substitutions, and teacher work summaries.
