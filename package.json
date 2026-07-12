@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "npm run test:workflows",
+    "test:imports:integration": "tsx --test tests/import-workflows.integration.test.ts",
     "test:workflows": "node --test tests/critical-workflows.test.mjs",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
@@ -28,6 +29,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "prisma": "^7.8.0",
+    "tsx": "^4.23.0",
     "typescript": "latest"
   }
 }
