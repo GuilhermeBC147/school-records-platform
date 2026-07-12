@@ -1253,7 +1253,9 @@ test("personal slot bookings share three-booth capacity and deduplicate paid tim
   assert.match(dashboard, /dateFilter/);
   assert.match(dashboard, /personalSlotBooking\.findMany/);
   assert.match(dashboard, /confirmPersonalSlotBookingAction/);
+  assert.match(dashboard, /formatCompactDuration/);
   assert.match(dashboard, /formatStartTime\(card\.startTime\)/);
+  assert.doesNotMatch(dashboard, /personalSlots\.status/);
   assert.match(dashboard, /selectedDateWeekday === "SUNDAY"/);
   assert.match(dashboard, /name="returnDate"/);
   assert.match(dashboard, /reception\/personal-slots/);

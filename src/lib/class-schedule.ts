@@ -68,6 +68,25 @@ export function formatDuration(minutes: number | null) {
   return formatClockTimeFromMinutes(minutes);
 }
 
+export function formatCompactDuration(minutes: number | null) {
+  if (!minutes) {
+    return "-";
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours === 0) {
+    return `${remainingMinutes}M`;
+  }
+
+  if (remainingMinutes === 0) {
+    return `${hours}H`;
+  }
+
+  return `${hours}H${remainingMinutes}M`;
+}
+
 export function readDurationMinutes(value: FormDataEntryValue | null) {
   const duration = String(value ?? "").trim();
 

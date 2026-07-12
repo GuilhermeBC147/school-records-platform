@@ -11,7 +11,7 @@ import {
   todayDateInputValue,
 } from "@/lib/calendar";
 import {
-  formatDuration,
+  formatCompactDuration,
   formatWeekdays,
   weekdayOptions,
 } from "@/lib/class-schedule";
@@ -171,7 +171,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             status: { not: "CANCELED" },
           },
           select: {
-            attendanceStatus: true,
             durationMinutes: true,
             id: true,
             purpose: true,
@@ -198,22 +197,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       })()
     : selectedDays;
   const selectedDaySet = new Set(weekdayFilterDays);
-  const personalStatusLabel = (status: string) =>
-    status === "COMPLETED"
-      ? t("personalSlots.completed")
-      : t("personalSlots.scheduled");
-  const personalAttendanceLabel = (status: string) => {
-    switch (status) {
-      case "PRESENT":
-        return t("personalSlots.present");
-      case "ABSENT":
-        return t("personalSlots.absent");
-      case "EXCUSED":
-        return t("personalSlots.excused");
-      default:
-        return t("personalSlots.attendancePending");
-    }
-  };
   const scheduleCards = [
     ...classes.map((schoolClass) => ({
       ...schoolClass,
@@ -501,8 +484,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                             </p>
                             <h2>{card.name}</h2>
                             <p>
-                              {formatStartTime(card.startTime)} |{" "}
-                              {formatDuration(card.durationMinutes)} |{" "}
+                              {t("label.startTime")}: {formatStartTime(card.startTime)} |{" "}
+                              {t("label.duration")}: {formatCompactDuration(card.durationMinutes)} |{" "}
                               {formatWeekdays(card.weekDays, currentUser.locale)}
                             </p>
                           </div>
@@ -526,21 +509,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                             <p className="eyebrow">{t("personalSlots.personalBooths")}</p>
                             <h2>{card.student.fullName}</h2>
                             <p>
-                              {formatStartTime(card.startTime)} |{" "}
-                              {formatDuration(card.durationMinutes)}
+                              {t("label.startTime")}: {formatStartTime(card.startTime)} |{" "}
+                              {t("label.duration")}: {formatCompactDuration(card.durationMinutes)}
                             </p>
                             <p>{card.purpose}</p>
                           </div>
-                          <dl>
-                            <div>
-                              <dt>{t("personalSlots.attendance")}</dt>
-                              <dd>{personalAttendanceLabel(card.attendanceStatus)}</dd>
-                            </div>
-                            <div>
-                              <dt>{t("personalSlots.status")}</dt>
-                              <dd>{personalStatusLabel(card.status)}</dd>
-                            </div>
-                          </dl>
                           {card.status === "SCHEDULED" ? (
                             <form
                               action={confirmPersonalSlotBookingAction}
@@ -560,7 +533,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                                 {t("personalSlots.confirmAttendance")}
                               </button>
                             </form>
-                          ) : null}
+                          ) : (
+                            <p className="personal-slot-completed">
+                              {t("personalSlots.completed")}
+                            </p>
+                          )}
                         </article>
                       ),
                     )}

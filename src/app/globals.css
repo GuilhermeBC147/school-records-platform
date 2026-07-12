@@ -1567,11 +1567,6 @@ input[type="time"],
   border-left-color: var(--accent);
 }
 
-.teacher-personal-slot-card dl dd {
-  font-size: 14px;
-  line-height: 1.35;
-}
-
 .personal-slot-confirm-form {
   align-items: end;
   display: flex;
@@ -1591,7 +1586,15 @@ input[type="time"],
   font-weight: 700;
 }
 
+.personal-slot-completed {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
 .teacher-class-grid {
+  align-items: stretch;
   border-top: 1px solid var(--line);
   padding-top: 14px;
 }
@@ -1605,6 +1608,9 @@ input[type="time"],
 
 .teacher-classes-panel .teacher-class-card {
   border-left: 4px solid var(--brand);
+  gap: 14px;
+  height: 100%;
+  padding: 14px;
 }
 
 .teacher-classes-panel .teacher-class-card:hover {
