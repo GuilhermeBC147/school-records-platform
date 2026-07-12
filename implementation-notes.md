@@ -276,3 +276,52 @@ None yet.
 - Edge cases found: Sunday date views omit recurring classes, weekday mode intentionally shows no dated personal bookings, and confirmation redirects preserve the selected date.
 - Verification: `npm.cmd test` (21 passed), `npm.cmd run typecheck`, `npm.cmd run build`, and `git diff --check` passed.
 - Next session should read first: this section, `src/app/dashboard/page.tsx`, and `docs/FEATURES/dashboard.md`.
+
+## Sprint 19 quality-control baseline
+
+### Deviations
+
+- The first branch was created from `main`, but the production build showed that `main` does not contain the completed Sprint 18 imports, calendars, or personal-slot routes. The branch was recreated from `codex/class-cards-and-personal-redesign`, and all checks were rerun against the full platform.
+
+### Discovered edge cases
+
+- A direct typecheck can read stale `.next` route declarations after switching between branches with different route trees; the authoritative result is the clean full-feature rerun plus production build.
+- The static workflow suite validates source patterns, not browser behavior or PostgreSQL writes.
+- Sprint 19 currently depends on the unmerged personal-dashboard branch; its PR must merge first or this PR must be retargeted after the dependency lands.
+
+### Questions for review
+
+- None. The known regular-class overlap warning remains a separate launch blocker rather than being folded into this audit PR.
+
+### End-of-session summary
+
+- Deviations: 1 branch-base correction; no product implementation deviation.
+- Most likely to revisit: whether the QC report should become a signed release artifact once manual tests begin.
+- Edge cases found: stale generated route declarations, static-test limitations, and an unmerged branch dependency.
+- Verification: 21 critical workflow tests, typecheck, Prisma validation, and production build passed.
+- Next session should read first: this section and `docs/sprint-19-quality-control.md`.
+
+## Sprint 19 bilingual critical-screen testing
+
+### Deviations
+
+- None yet.
+
+### Discovered edge cases
+
+- PR #48 merged into PR #47's branch after PR #47 had already merged into `main`; this branch starts from the PR #48 merge commit so the QC report and handoff remain present.
+- Signed-in locale changes persist on the seeded account, while the public login locale is URL-based and does not change account preferences.
+- `npm.cmd run db:seed` is not repeatable against the current populated database: Prisma reports `P2002` on the `id` unique constraint. Testing continues with existing demo data to avoid a destructive reset.
+- The first English request to `/admin/classes/import` hit a transient stale Turbopack module-factory `500`; reloading returned `200`, later bilingual checks passed, and the production build succeeded.
+
+### Questions for review
+
+- None yet. Any defect that expands into scheduling, authorization, or database behavior will pause for a switch to High reasoning.
+
+### End-of-session summary
+
+- Deviations: 0 from the browser matrix; the test used existing data after the non-repeatable seed command failed.
+- Most likely to revisit: add validation-message and success-message interaction cases when each workflow receives database-backed testing.
+- Edge cases found: stacked PR merge ordering, per-account locale cleanup, Playwright button timeouts on long pages, a transient development-cache error, and non-idempotent seed data.
+- Verification: public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed in English and Brazilian Portuguese; browser console errors were empty.
+- Next session should read first: this section and `docs/sprint-19-bilingual-screen-matrix.md`.

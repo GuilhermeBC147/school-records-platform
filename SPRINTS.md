@@ -1,10 +1,10 @@
 # Current Handoff
 
-Last updated: 2026-07-10
+Last updated: 2026-07-12
 
 ## Current focus
 
-Keep the repository documentation synchronized with the implemented platform before starting more product work.
+Complete the Sprint 19 production-readiness quality-control sequence, starting with PostgreSQL-backed import scenarios.
 
 ## Current implementation status
 
@@ -15,7 +15,9 @@ Keep the repository documentation synchronized with the implemented platform bef
 - Role-scoped calendar views are implemented: teachers, admins, and reception can view combined regular classes, bonus classes, and admin-created meetings across a Monday-to-Sunday week, with teachers shown on staff event cards. The admin view shows one card per meeting, and all calendar views keep the weekday header visible while scrolling.
 - Personal booth scheduling supports dated review, make-up lesson, test, and other bookings for any active student and teacher. Recurring personal classes and ad-hoc bookings share three-booth capacity, appear in calendars, and overlapping completed personal work counts once in teacher hours.
 - Overlapping calendar events now group into expandable cards spanning their combined time range; personal groups show occupancy, and teachers can confirm assigned bookings as Present, Absent, or Excused from date-filtered class cards on the teacher dashboard. The legacy personal-slots path redirects there.
-- Sprint 19 production readiness is not complete.
+- The first Sprint 19 quality-control baseline is documented in `docs/sprint-19-quality-control.md`: 21 workflow assertions, typecheck, Prisma validation, and the production build pass on the full feature branch.
+- English and Brazilian Portuguese critical-screen browser testing is documented in `docs/sprint-19-bilingual-screen-matrix.md`; all public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed locally.
+- Sprint 19 production readiness is not complete; browser/database checks, the regular-class overlap warning, and production infrastructure validation remain.
 
 ## Completed workflow decisions
 
@@ -35,7 +37,7 @@ Keep the repository documentation synchronized with the implemented platform bef
 
 ## Next recommended task
 
-Implement and test the regular-class overlap warning, then prepare the Hostinger VPS deployment automation and complete the production-readiness checklist.
+Exercise student and class imports with valid, invalid, duplicate, and partial-failure cases against PostgreSQL. Also decide whether to make `prisma/seed.sql` repeatable against an already-populated development database after the bilingual pass exposed a `P2002` duplicate-ID failure.
 
 ---
 # Sprint Plan
@@ -618,8 +620,8 @@ Goal: prepare the app for school-owned hosting and day-to-day use.
 
 Tasks:
 
-- Run a full quality-control pass across admin, teacher, reception, localization, import, grading, scheduling, risk-review, and reporting workflows.
-- Test English and Brazilian Portuguese language selection across critical screens.
+- [x] Run a full quality-control pass across admin, teacher, reception, localization, import, grading, scheduling, risk-review, and reporting workflows. Baseline evidence and remaining runtime checks are recorded in `docs/sprint-19-quality-control.md`.
+- [x] Test English and Brazilian Portuguese language selection across critical screens. Local browser evidence is recorded in `docs/sprint-19-bilingual-screen-matrix.md`.
 - Test student and class imports with valid files, invalid rows, duplicated data, and partial-failure cases.
 - Add production environment checklist.
 - Add Hostinger VPS-in-Brazil setup notes for the application and PostgreSQL.
