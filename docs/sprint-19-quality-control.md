@@ -60,7 +60,7 @@ npm.cmd run test:bonus-scheduling:browser-fixture -- cleanup
 ### Required before launch
 
 - Add browser/database integration coverage or execute and retain a signed manual test record for the remaining critical writes and permissions outside the now-covered scheduling workflow.
-- Verify SMTP password reset, deployment, monitoring, backup alerts, and a restore rehearsal on school-owned infrastructure.
+- Verify real Hostinger SMTP password reset, deployment, monitoring, backup alerts, and a restore rehearsal on school-owned infrastructure.
 
 ### Branch dependency
 
@@ -70,7 +70,7 @@ PRs #49 and #50 are merged, and the scheduling follow-up branch starts from the 
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Source and operational assertions | Pass | `npm.cmd test`: 26 tests, including private production-network, health, deployment/recovery, environment, and monitoring checks |
+| Source and operational assertions | Pass | `npm.cmd test`: 28 workflow/operations assertions plus 8 executable password-reset SMTP tests |
 | TypeScript and Prisma | Pass | `npm.cmd run typecheck` and `npm.cmd run prisma:validate` |
 | Application build | Pass | `npm.cmd run build`, including `/api/health/live` and `/api/health/ready` |
 | Compose and Caddy configuration | Pass | `docker compose --env-file .env.production.example -f docker-compose.production.yml config`; `caddy validate` |
@@ -83,6 +83,22 @@ PRs #49 and #50 are merged, and the scheduling follow-up branch starts from the 
 
 The local backup test deliberately set `REQUIRE_OFFSITE_BACKUP=false` because no school-owned remote exists. It therefore does not prove `rclone`, Hostinger backup, alert-webhook, TLS/DNS, external uptime monitoring, or a real production restore. The temporary test containers, volume, and backup archives were removed after validation.
 
+## Password-reset SMTP local evidence
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| English active account | Pass locally | Injected transport received English subject/body and the explicit HTTPS `APP_URL` reset link |
+| Brazilian Portuguese active account | Pass locally | Injected transport received localized subject/body for the saved `PT_BR` account locale |
+| Unknown/inactive account | Pass locally | No token record and no delivery callback/message; the action retains the same generic redirect |
+| Token protection | Pass locally | Only SHA-256 hash persisted; expiry remained exactly 30 minutes; production result omitted the raw token |
+| Development seam | Pass locally | Non-production preparation can still expose the raw token for the existing local reset-link page |
+| Delivery failure | Pass locally | Provider error containing simulated credential, recipient, and token data was discarded; only `PASSWORD_RESET_EMAIL_DELIVERY_FAILED` was logged |
+| Hostinger TLS configuration | Pass locally | Port 465/secure and port 587/required-STARTTLS combinations validated; mismatched settings rejected |
+| Production container configuration | Pass locally | Compose passes only the seven explicit protected reset/SMTP variables into the private app service |
+| Standalone production image | Pass locally | Clean `runner` target installed Nodemailer, compiled the application, and produced the non-root standalone image |
+
+These tests use an in-memory repository and fake mail transport. They do not connect to Hostinger, inspect the school's SPF/DKIM/DMARC records, or prove inbox delivery. The school must record real English and Brazilian Portuguese delivery and link use on the deployed HTTPS origin before launch.
+
 ## Exit decision
 
-The automated baseline, local bilingual critical-screen pass, PostgreSQL import pass, PostgreSQL/browser scheduling conflict pass, and repository-owned production operations checks are healthy. The scheduling blocker is resolved, but the platform is not yet launch-ready: the school must complete external production provisioning and real restore evidence, and production password-reset SMTP delivery remains the next focused launch-blocker implementation.
+The automated baseline, local bilingual critical-screen pass, PostgreSQL import pass, PostgreSQL/browser scheduling conflict pass, repository-owned production operations checks, and fake-transport SMTP checks are healthy. The repository-owned SMTP implementation is complete, but the platform is not yet launch-ready: the school must complete external production provisioning, real Hostinger mailbox/DNS delivery evidence, and a real restore rehearsal.

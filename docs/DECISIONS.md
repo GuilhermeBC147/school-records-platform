@@ -175,6 +175,19 @@ Correct email delivery requires a maintained dependency, injected test transport
 Consequences:
 The existing reset-token security properties remain unchanged, but production password reset is not launch-ready. The next Sprint 19 task must implement and prove Hostinger SMTP delivery before launch.
 
+---
+
+## 2026-07-12 - Deliver password resets through isolated Hostinger SMTP
+
+Decision:
+Use Nodemailer with an injected transport to send password-reset messages from a school-owned Hostinger mailbox. Build links only from the explicit HTTPS `APP_URL`, use the saved account locale for English or Brazilian Portuguese copy, and schedule production delivery with Next.js `after()` after the generic requester response.
+
+Reason:
+The existing database token flow is already secure and does not need a schema change. Separating token orchestration from SMTP makes the security properties executable with in-memory tests, while post-response delivery reduces account-enumeration timing differences and keeps a slow provider from blocking the form response.
+
+Consequences:
+Port 465 requires `SMTP_SECURE=true`; port 587 requires `SMTP_SECURE=false` and a mandatory STARTTLS upgrade. Delivery failures log only `PASSWORD_RESET_EMAIL_DELIVERY_FAILED`, never the provider error, recipient, token, or credentials. Local fake-transport tests prove behavior, but launch remains blocked until the school configures the mailbox and SPF/DKIM/DMARC and records a real inbox delivery test.
+
 ## 2026-07-10 - Confirm personal booth attendance through a teacher workflow
 
 Decision:

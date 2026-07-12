@@ -19,13 +19,15 @@ The production target is a school-owned Hostinger VPS in Brazil. `docker-compose
 
 The GitHub Actions production workflow validates source/build, publishes immutable SHA-tagged application and migration images, then invokes `ops/deploy.sh` through a protected production environment. The server script serializes deploys, takes a pre-migration backup after the first database exists, runs `prisma migrate deploy`, restarts the app, and verifies readiness. Application rollback is explicit and never reverses database migrations.
 
-The layered backup path is Hostinger VPS backups plus a nightly custom-format `pg_dump`, checksum, optional/required production `rclone` copy to a school-owned off-VPS remote, retention, freshness checks, alerting, and restore rehearsal into a temporary database. See `docs/operator-runbook.md` and `docs/production-readiness.md`. Password-reset SMTP is deliberately not implemented yet; credentials and all other production secrets remain only in protected VPS/GitHub configuration.
+The layered backup path is Hostinger VPS backups plus a nightly custom-format `pg_dump`, checksum, optional/required production `rclone` copy to a school-owned off-VPS remote, retention, freshness checks, alerting, and restore rehearsal into a temporary database. See `docs/operator-runbook.md` and `docs/production-readiness.md`.
+
+Production password reset uses a school-owned Hostinger mailbox through Nodemailer. The account action keeps its generic response, stores only a SHA-256 token hash with the existing 30-minute expiry, and schedules SMTP delivery with Next.js `after()` so provider latency does not hold the requester response open. `src/lib/password-reset.ts` owns token preparation and safe failure signaling; `src/lib/password-reset-email.ts` owns explicit `APP_URL` validation, bilingual email copy, and injected SMTP transport. The app container receives the seven protected password-reset variables from the VPS environment file. Production never returns the raw token or logs delivery errors; local development retains its existing visible reset-link seam. Real mailbox, SPF/DKIM/DMARC, and inbox delivery remain school-owned launch checks.
 
 ## Repository structure
 
 - `src/app/` - App Router pages, layouts, role-specific workflows, and CSV/template route handlers.
 - `src/app/actions/` - server actions for authentication, accounts, class records, classes, grades, imports, risk review, students, substitutions, bonus classes, and teacher work.
-- `src/lib/` - shared session, password, Prisma, formatting, scheduling, translation, import, grade, bonus-class, and work-summary logic.
+- `src/lib/` - shared session, password/reset-email, Prisma, formatting, scheduling, translation, import, grade, bonus-class, and work-summary logic.
 - `prisma/schema.prisma` - current database models and enums.
 - `prisma/migrations/` - database migration history.
 - `prisma/seed.sql` - repeatable local development data.
@@ -116,6 +118,7 @@ Important invariants:
 - Bonus scheduling blocks overlapping non-canceled bonus classes. An overlap with an active recurring `REGULAR`, `VIP`, or `PERSONAL` class returns the validated proposal to the create/edit form with a localized warning; only the explicit save-anyway submit proceeds, after the server reruns both conflict checks.
 - Reception can view regular classes, bonus classes, and admin-created meetings together across a Monday-to-Sunday calendar.
 - Users can select English or Brazilian Portuguese, a date format, and a light/dark theme.
+- Active users can request a password-reset link. Production sends localized email through the configured Hostinger mailbox after the generic response; unknown and inactive accounts send nothing and receive the same public result.
 - Teachers confirm assigned personal booth attendance from `/dashboard/personal-slots` using Present, Absent, or Excused; completed personal time remains included in merged payroll intervals.
 
 ## Development and verification

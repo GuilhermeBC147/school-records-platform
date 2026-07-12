@@ -15,7 +15,7 @@ Use this checklist before handing the class records platform to the school for d
 - Use a Hostinger VPS in Brazil, owned and controlled by the school, with PostgreSQL hosted alongside the application.
 - Copy `.env.production.example` to `/etc/school-records-platform/production.env`, set owner `root:school-records-deploy`, and set mode `0640`. Never commit it.
 - Generate independent random secrets for `POSTGRES_PASSWORD`, `APP_DATABASE_PASSWORD`, and `AUTH_SECRET`. URL-encode database passwords in connection strings.
-- The production environment file defines `APP_DOMAIN`, `CADDY_ACME_EMAIL`, `APP_IMAGE`, `MIGRATION_IMAGE`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `APP_DATABASE_USER`, `APP_DATABASE_PASSWORD`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `AUTH_SECRET`, `TZ`, `BACKUP_DIR`, `BACKUP_RETENTION_DAYS`, `BACKUP_MAX_AGE_HOURS`, `REQUIRE_OFFSITE_BACKUP`, `RCLONE_REMOTE`, `ALERT_WEBHOOK_URL`, `DISK_WARNING_PERCENT`, `DISK_CRITICAL_PERCENT`, `MEMORY_WARNING_PERCENT`, and optional `CPU_WARNING_PERCENT`.
+- The production environment file defines `APP_DOMAIN`, `APP_URL`, `CADDY_ACME_EMAIL`, `APP_IMAGE`, `MIGRATION_IMAGE`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `APP_DATABASE_USER`, `APP_DATABASE_PASSWORD`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `AUTH_SECRET`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `TZ`, `BACKUP_DIR`, `BACKUP_RETENTION_DAYS`, `BACKUP_MAX_AGE_HOURS`, `REQUIRE_OFFSITE_BACKUP`, `RCLONE_REMOTE`, `ALERT_WEBHOOK_URL`, `DISK_WARNING_PERCENT`, `DISK_CRITICAL_PERCENT`, `MEMORY_WARNING_PERCENT`, and optional `CPU_WARNING_PERCENT`.
 - Run `npm test`, `npm run typecheck`, `npm run prisma:validate`, and `npm run build` before images are published. The deployment workflow does this automatically.
 - Only the migration image runs `prisma migrate deploy`. Never use development migration commands or `db:seed` in production.
 
@@ -61,7 +61,7 @@ The repository validates local dump/checksum/temporary-restore mechanics. It doe
 ## Launch blockers still outside this PR
 
 - DNS, TLS issuance, Hostinger backups, firewall/SSH setup, GitHub production approval, external uptime monitor, off-VPS `rclone` storage, alert destination, and a real restore rehearsal require school-owned accounts and explicit operator action.
-- Production password-reset delivery is not implemented. The current production flow securely stores a hashed 30-minute token but has no SMTP transport. The next focused Sprint 19 task must add and test Hostinger SMTP delivery before password reset can be called launch-ready.
+- Password-reset SMTP is implemented and locally covered with an injected fake transport. The repository cannot prove the school-owned Hostinger mailbox, sender authorization, SPF/DKIM/DMARC, or inbox delivery. A real English and Brazilian Portuguese delivery/reset test on the deployed HTTPS origin is still required before launch.
 
 ## Release Smoke Test
 
@@ -89,7 +89,7 @@ Also smoke-test the current role-specific scope:
 
 ## Known launch blockers
 
-- Production password-reset email delivery still needs the focused SMTP implementation, Hostinger mailbox configuration, and a real delivery test.
+- Production password-reset email delivery still needs school-owned Hostinger mailbox configuration, SPF/DKIM/DMARC verification, and a recorded real delivery test; only fake transport is verified locally.
 - The school must complete the documented VPS/DNS/GitHub/off-VPS-storage/alert provisioning steps and perform a real production restore rehearsal before launch.
 
 ## Resolved scheduling blocker
