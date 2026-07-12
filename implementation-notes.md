@@ -300,3 +300,28 @@ None yet.
 - Edge cases found: stale generated route declarations, static-test limitations, and an unmerged branch dependency.
 - Verification: 21 critical workflow tests, typecheck, Prisma validation, and production build passed.
 - Next session should read first: this section and `docs/sprint-19-quality-control.md`.
+
+## Sprint 19 bilingual critical-screen testing
+
+### Deviations
+
+- None yet.
+
+### Discovered edge cases
+
+- PR #48 merged into PR #47's branch after PR #47 had already merged into `main`; this branch starts from the PR #48 merge commit so the QC report and handoff remain present.
+- Signed-in locale changes persist on the seeded account, while the public login locale is URL-based and does not change account preferences.
+- `npm.cmd run db:seed` is not repeatable against the current populated database: Prisma reports `P2002` on the `id` unique constraint. Testing continues with existing demo data to avoid a destructive reset.
+- The first English request to `/admin/classes/import` hit a transient stale Turbopack module-factory `500`; reloading returned `200`, later bilingual checks passed, and the production build succeeded.
+
+### Questions for review
+
+- None yet. Any defect that expands into scheduling, authorization, or database behavior will pause for a switch to High reasoning.
+
+### End-of-session summary
+
+- Deviations: 0 from the browser matrix; the test used existing data after the non-repeatable seed command failed.
+- Most likely to revisit: add validation-message and success-message interaction cases when each workflow receives database-backed testing.
+- Edge cases found: stacked PR merge ordering, per-account locale cleanup, Playwright button timeouts on long pages, a transient development-cache error, and non-idempotent seed data.
+- Verification: public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed in English and Brazilian Portuguese; browser console errors were empty.
+- Next session should read first: this section and `docs/sprint-19-bilingual-screen-matrix.md`.

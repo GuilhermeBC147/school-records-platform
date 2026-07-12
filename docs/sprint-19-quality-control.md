@@ -22,7 +22,7 @@ The critical workflow suite reads source files and verifies important authorizat
 | Admin | Account, class, student, record, risk, substitution, import, and work-summary assertions | Pass at source/build level | Exercise create, edit, review, export, and undo flows with production-like data |
 | Teacher | Assigned-class access, record submission, grades, substitutions, bonus attendance, personal bookings, and work summaries | Pass at source/build level | Submit and edit records in a browser using a teacher account |
 | Reception | Scoped scheduling and lookup permissions, bonus classes, calendars, and personal bookings | Pass at source/build level | Confirm reception cannot enter general administration routes and complete scheduling flows |
-| Localization | Locale persistence, translation resources, fallback behavior, and localized critical sources | Pass at source/build level | Test English and Brazilian Portuguese across critical screens, validation, success, and empty states |
+| Localization | Locale persistence, translation resources, fallback behavior, localized critical sources, and the browser matrix in `docs/sprint-19-bilingual-screen-matrix.md` | Pass locally | Repeat a focused locale smoke test after production deployment |
 | Imports | Preview validation, duplicate detection, audit summaries, templates, and error reports | Pass at source/build level | Import valid, invalid, duplicate, and partial-failure CSV files against PostgreSQL |
 | Grading | Grade schema, teacher access, value validation, display, and risk inputs | Pass at source/build level | Save and reload representative partial, mid-term, and final grades |
 | Scheduling | Bonus conflicts, personal capacity, calendars, and personal payroll interval merging | Partial | Regular-class overlap warning with explicit save-anyway is not implemented; browser conflict scenarios remain |
@@ -37,7 +37,6 @@ The critical workflow suite reads source files and verifies important authorizat
 
 ### Required before launch
 
-- Run the critical-screen matrix in English and Brazilian Portuguese.
 - Run import scenarios against a production-like PostgreSQL database.
 - Add browser/database integration coverage or execute and retain a signed manual test record for critical writes and permissions.
 - Verify SMTP password reset, deployment, monitoring, backup alerts, and a restore rehearsal on school-owned infrastructure.
@@ -48,4 +47,4 @@ This baseline was run from `codex/class-cards-and-personal-redesign` because `ma
 
 ## Exit decision
 
-The automated baseline is healthy, but the platform is not yet launch-ready. The next Sprint 19 task is the bilingual critical-screen test pass; scheduling overlap behavior and infrastructure checks remain tracked work.
+The automated baseline and local bilingual critical-screen pass are healthy, but the platform is not yet launch-ready. The next Sprint 19 task is the PostgreSQL-backed import scenario pass; scheduling overlap behavior and infrastructure checks remain tracked work.

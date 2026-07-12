@@ -4,7 +4,7 @@ Last updated: 2026-07-12
 
 ## Current focus
 
-Complete the Sprint 19 production-readiness quality-control sequence, starting with bilingual critical-screen testing.
+Complete the Sprint 19 production-readiness quality-control sequence, starting with PostgreSQL-backed import scenarios.
 
 ## Current implementation status
 
@@ -16,6 +16,7 @@ Complete the Sprint 19 production-readiness quality-control sequence, starting w
 - Personal booth scheduling supports dated review, make-up lesson, test, and other bookings for any active student and teacher. Recurring personal classes and ad-hoc bookings share three-booth capacity, appear in calendars, and overlapping completed personal work counts once in teacher hours.
 - Overlapping calendar events now group into expandable cards spanning their combined time range; personal groups show occupancy, and teachers can confirm assigned bookings as Present, Absent, or Excused from date-filtered class cards on the teacher dashboard. The legacy personal-slots path redirects there.
 - The first Sprint 19 quality-control baseline is documented in `docs/sprint-19-quality-control.md`: 21 workflow assertions, typecheck, Prisma validation, and the production build pass on the full feature branch.
+- English and Brazilian Portuguese critical-screen browser testing is documented in `docs/sprint-19-bilingual-screen-matrix.md`; all public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed locally.
 - Sprint 19 production readiness is not complete; browser/database checks, the regular-class overlap warning, and production infrastructure validation remain.
 
 ## Completed workflow decisions
@@ -36,7 +37,7 @@ Complete the Sprint 19 production-readiness quality-control sequence, starting w
 
 ## Next recommended task
 
-Test English and Brazilian Portuguese language selection across critical screens and record the browser evidence. After that, exercise student and class imports with valid, invalid, duplicate, and partial-failure cases against PostgreSQL.
+Exercise student and class imports with valid, invalid, duplicate, and partial-failure cases against PostgreSQL. Also decide whether to make `prisma/seed.sql` repeatable against an already-populated development database after the bilingual pass exposed a `P2002` duplicate-ID failure.
 
 ---
 # Sprint Plan
@@ -620,7 +621,7 @@ Goal: prepare the app for school-owned hosting and day-to-day use.
 Tasks:
 
 - [x] Run a full quality-control pass across admin, teacher, reception, localization, import, grading, scheduling, risk-review, and reporting workflows. Baseline evidence and remaining runtime checks are recorded in `docs/sprint-19-quality-control.md`.
-- Test English and Brazilian Portuguese language selection across critical screens.
+- [x] Test English and Brazilian Portuguese language selection across critical screens. Local browser evidence is recorded in `docs/sprint-19-bilingual-screen-matrix.md`.
 - Test student and class imports with valid files, invalid rows, duplicated data, and partial-failure cases.
 - Add production environment checklist.
 - Add Hostinger VPS-in-Brazil setup notes for the application and PostgreSQL.
