@@ -1,0 +1,13 @@
+[Unit]
+Description=Check School Records backup freshness and integrity
+After=school-records-backup.service
+
+[Service]
+Type=oneshot
+User=school-records-deploy
+Group=school-records-deploy
+Environment=ENV_FILE=/etc/school-records-platform/production.env
+WorkingDirectory=/opt/school-records-platform/current
+ExecStart=/opt/school-records-platform/current/ops/check-backup.sh
+PrivateTmp=true
+NoNewPrivileges=true

@@ -1,0 +1,11 @@
+[Unit]
+Description=Check School Records health and resources every five minutes
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=5m
+Persistent=true
+Unit=school-records-monitor.service
+
+[Install]
+WantedBy=timers.target
