@@ -23,6 +23,7 @@ ENV NODE_ENV=production
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
+COPY ops/bootstrap-first-admin.mjs ./ops/bootstrap-first-admin.mjs
 USER node
 CMD ["npx", "prisma", "migrate", "deploy"]
 

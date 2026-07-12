@@ -1,6 +1,6 @@
 # Production Readiness Checklist
 
-Use this checklist before handing the class records platform to the school for day-to-day use. The repository-owned operations foundation is implemented in `Dockerfile`, `docker-compose.production.yml`, `.github/workflows/deploy.yml`, and `ops/`. The school must still provision and own the external accounts described below. See [operator-runbook.md](operator-runbook.md) for the beginner-friendly procedure.
+Use this checklist before handing the class records platform to the school for day-to-day use. The repository-owned operations foundation is implemented in `Dockerfile`, `docker-compose.production.yml`, `.github/workflows/deploy.yml`, and `ops/`. The school must still provision and own the external accounts described below. See [guia-producao-pt-BR.md](guia-producao-pt-BR.md) for the school-facing Brazilian Portuguese procedure and [operator-runbook.md](operator-runbook.md) for the technical reference.
 
 ## Production architecture
 
@@ -37,6 +37,8 @@ Keep the runbook, recovery contacts, and credentials under school ownership. Git
 The initialization owner runs migrations, backups, and restores. The application uses a separate role granted only table/sequence read-write access. The application container connects over an internal network; do not add a PostgreSQL `ports:` mapping or a public firewall rule. The owner password is not passed to the running application.
 
 Seed data is for local development only. Do not run `npm.cmd run db:seed` against production.
+
+After the first healthy deployment, run `ops/bootstrap-first-admin.sh` manually from an interactive terminal to create the one initial `ADMIN` account. It refuses all non-empty user tables, never echoes the password, and is not a recurring operation.
 
 ## Backup and Export Routine
 

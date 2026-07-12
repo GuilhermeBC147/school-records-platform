@@ -22,6 +22,7 @@ Continue Sprint 19 with the focused production Hostinger SMTP password-reset del
 - The repository-owned production operations foundation is complete: Caddy/private Compose topology, standalone non-root app/migration images, detail-free health routes, GitHub Actions deployment, restart and app-image rollback guidance, systemd monitoring/backup/rehearsal timers, checksummed `pg_dump` archives, off-VPS `rclone` support, and a beginner operator runbook are in place. PostgreSQL has no public production port and no secrets are committed.
 - Local production-stack, migration, health, logical-backup, checksum, temporary-restore, config, source/build, and script checks are recorded in `docs/sprint-19-quality-control.md`. School-owned VPS/DNS/TLS, Hostinger backup, GitHub approval, alert, off-VPS remote, external uptime, and a real restore rehearsal remain external launch work.
 - Production SMTP password-reset delivery remains the next focused launch blocker. No SMTP code or dependency was added in the operations foundation.
+- The school-facing first-deployment and maintenance guide is available in Brazilian Portuguese at `docs/guia-producao-pt-BR.md`. A one-time interactive bootstrap command creates the first administrator only on an empty production user table; it replaces the unsafe idea of seeding demo users in production.
 
 ## Completed workflow decisions
 
