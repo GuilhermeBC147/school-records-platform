@@ -31,7 +31,7 @@ Production password reset uses a school-owned Hostinger mailbox through Nodemail
 - `prisma/schema.prisma` - current database models and enums.
 - `prisma/migrations/` - database migration history.
 - `prisma/seed.sql` - repeatable local development data.
-- `tests/critical-workflows.test.mjs` - static source-level checks for critical workflows.
+- `tests/critical-workflows.test.mjs` - static source-level checks for critical workflows; `tests/browser/` adds self-cleaning Playwright/PostgreSQL coverage against a production-built standalone server.
 - `docs/` - product, architecture, workflow, and operational notes.
 
 The generated Prisma client is written to `src/generated/prisma` by `prisma generate` and should not be edited by hand.
@@ -136,9 +136,10 @@ Useful checks:
 
 ```powershell
 npm.cmd test
+npm.cmd run test:critical:browser
 npm.cmd run typecheck
 npm.cmd run prisma:validate
 npm.cmd run build
 ```
 
-`npm.cmd test` currently runs static critical-workflow assertions rather than browser or database integration tests. See `README.md`, `docs/data-model.md`, and `docs/production-readiness.md` for operational details.
+`npm.cmd test` runs the database-independent workflow/operations and fake SMTP suites. PostgreSQL/browser checks remain explicit commands because they require the local database and, for Playwright, a managed Chromium installation. See `README.md`, `docs/data-model.md`, `docs/sprint-19-critical-workflows-qc.md`, and `docs/production-readiness.md` for details.
