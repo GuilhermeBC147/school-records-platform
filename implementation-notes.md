@@ -325,3 +325,27 @@ None yet.
 - Edge cases found: stacked PR merge ordering, per-account locale cleanup, Playwright button timeouts on long pages, a transient development-cache error, and non-idempotent seed data.
 - Verification: public, admin, teacher, reception, locale-persistence, and reception access-boundary checks passed in English and Brazilian Portuguese; browser console errors were empty.
 - Next session should read first: this section and `docs/sprint-19-bilingual-screen-matrix.md`.
+
+## Sprint 19 PostgreSQL import testing
+
+### Deviations
+
+- The browser-control surface does not expose a reliable file-upload API, so the database pass uses the real import preview/confirm functions through an opt-in integration test instead of automating the OS file picker.
+
+### Discovered edge cases
+
+- Preview is intentionally a database write because it persists audit batches and row-level results before confirmation.
+- Integration fixtures need unique names and identifiers plus `finally` cleanup so repeated runs do not become their own duplicate inputs.
+- The repository compiles test files as CommonJS, so integration module loading belongs in `test.before`; top-level `await` fails before any fixture is written.
+
+### Questions for review
+
+- None yet. `tsx` is added as a development-only runner; the default source-level test command remains database-independent.
+
+### End-of-session summary
+
+- Deviations: 1 test-surface adjustment from browser upload to direct integration coverage of the production import functions.
+- Most likely to revisit: whether the PostgreSQL integration command should become a required CI service job.
+- Edge cases found: preview writes audit data, fixtures must self-clean, and CommonJS tests cannot use top-level `await`.
+- Verification: student and class valid/invalid/duplicate/partial-failure scenarios passed twice consecutively with exact audit-count and persistence assertions.
+- Next session should read first: this section, `tests/import-workflows.integration.test.ts`, and `docs/sprint-19-import-quality-control.md`.
