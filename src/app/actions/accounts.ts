@@ -1,21 +1,19 @@
 "use server";
 
-import crypto from "node:crypto";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { UserRole } from "@/generated/prisma/enums";
 import { normalizeAccountDateFormat } from "@/lib/date-format";
 import { defaultAccountLocale, normalizeAccountLocale } from "@/lib/locale";
 import { hashPassword, verifyPassword } from "@/lib/password";
+import {
+  hashPasswordResetToken,
+  preparePasswordResetRequest,
+} from "@/lib/password-reset";
+import { sendPasswordResetEmail } from "@/lib/password-reset-email";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { normalizeAccountTheme } from "@/lib/theme";
-
-const RESET_TOKEN_BYTES = 32;
-const RESET_TOKEN_MINUTES = 30;
-
-function hashResetToken(token: string) {
-  return crypto.createHash("sha256").update(token).digest("base64url");
-}
 
 function normalizeEmail(formData: FormData) {
   return String(formData.get("email") ?? "")
@@ -71,35 +69,49 @@ export async function requestPasswordResetAction(formData: FormData) {
     redirect("/forgot-password?status=sent");
   }
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email,
-      isActive: true,
+  const isProduction = process.env.NODE_ENV === "production";
+  const request = await preparePasswordResetRequest({
+    email,
+    appUrl: process.env.APP_URL,
+    exposeDevelopmentToken: !isProduction,
+    repository: {
+      async findActiveUserByEmail(normalizedEmail) {
+        const user = await prisma.user.findFirst({
+          where: {
+            email: normalizedEmail,
+            isActive: true,
+          },
+          select: {
+            id: true,
+            email: true,
+            locale: true,
+          },
+        });
+
+        return user
+          ? {
+              ...user,
+              locale: normalizeAccountLocale(user.locale),
+            }
+          : null;
+      },
+      async createToken(input) {
+        await prisma.passwordResetToken.create({
+          data: input,
+        });
+      },
     },
-    select: {
-      id: true,
-    },
+    sendEmail: sendPasswordResetEmail,
   });
 
-  if (!user) {
-    redirect("/forgot-password?status=sent");
+  if (isProduction && request.deliver) {
+    after(request.deliver);
   }
-
-  const token = crypto.randomBytes(RESET_TOKEN_BYTES).toString("base64url");
-  const expiresAt = new Date(Date.now() + RESET_TOKEN_MINUTES * 60 * 1000);
-
-  await prisma.passwordResetToken.create({
-    data: {
-      tokenHash: hashResetToken(token),
-      expiresAt,
-      userId: user.id,
-    },
-  });
 
   const params = new URLSearchParams({ status: "sent" });
 
-  if (process.env.NODE_ENV !== "production") {
-    params.set("token", token);
+  if (request.developmentToken) {
+    params.set("token", request.developmentToken);
   }
 
   redirect(`/forgot-password?${params.toString()}`);
@@ -116,7 +128,7 @@ export async function resetPasswordAction(formData: FormData) {
 
   const resetToken = await prisma.passwordResetToken.findUnique({
     where: {
-      tokenHash: hashResetToken(token),
+      tokenHash: hashPasswordResetToken(token),
     },
     select: {
       id: true,

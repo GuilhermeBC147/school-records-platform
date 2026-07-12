@@ -2,7 +2,7 @@
 
 ## Now
 
-- Configure and test the Hostinger SMTP password-reset email path as the remaining Sprint 19 launch blocker.
+- Have the school configure the protected Hostinger mailbox variables, verify SPF/DKIM/DMARC, and record real English and Brazilian Portuguese password-reset delivery as the remaining SMTP launch gate.
 - Have the school provision and verify its Hostinger VPS, DNS/HTTPS, GitHub production environment, off-VPS backup storage, alert destination, and first real restore rehearsal using the repository runbook.
 
 ## Next

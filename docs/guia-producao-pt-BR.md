@@ -211,12 +211,19 @@ No arquivo, complete pelo menos estes valores:
 | Variável | Como preencher |
 | --- | --- |
 | `APP_DOMAIN` | `<DOMINIO>` sem `https://` |
+| `APP_URL` | `https://<DOMINIO>` sem barra ou caminho no final |
 | `CADDY_ACME_EMAIL` | `<EMAIL_OPERACOES>` |
 | `POSTGRES_PASSWORD` | primeira senha gerada |
 | `APP_DATABASE_PASSWORD` | segunda senha gerada |
 | `DATABASE_URL` | use a senha do app em `postgresql://school_records_app:SENHA@postgres:5432/school_records?schema=public` |
 | `MIGRATION_DATABASE_URL` | use a senha do dono em `postgresql://school_records_owner:SENHA@postgres:5432/school_records?schema=public` |
 | `AUTH_SECRET` | terceira senha gerada |
+| `SMTP_HOST` | `smtp.hostinger.com` |
+| `SMTP_PORT` | `465` (ou `587` se usar STARTTLS) |
+| `SMTP_SECURE` | `true` para 465; `false` para 587 |
+| `SMTP_USER` | endereço completo da caixa de e-mail da escola |
+| `SMTP_PASSWORD` | senha da caixa Hostinger, guardada no cofre; mantenha as aspas simples do modelo |
+| `SMTP_FROM` | remetente aprovado, por exemplo `Registros Escolares <caixa@dominio>` |
 | `RCLONE_REMOTE` | destino de backup da escola, configurado na próxima seção |
 | `ALERT_WEBHOOK_URL` | webhook do alerta institucional, se já disponível |
 
@@ -306,7 +313,22 @@ ENV_FILE=/etc/school-records-platform/production.env ./ops/bootstrap-first-admin
 
 Use um e-mail institucional da escola e uma senha com pelo menos 12 caracteres, guardada apenas no cofre da escola. Em seguida, abra `https://<DOMINIO>/login`, entre com essa conta e crie as demais contas pela tela **Gerenciar contas**. **Nunca rode** `npm run db:seed` em produção.
 
-### 12. Ativar a rotina automática e confirmar o lançamento
+### 12. Testar a recuperação de senha por e-mail
+
+Antes de liberar o sistema, a escola precisa provar que o e-mail verdadeiro funciona. No painel de e-mail/DNS da escola, confirme que SPF, DKIM e DMARC estão ativos para o domínio. Não apague nem invente registros DNS: siga os valores mostrados pela Hostinger para a conta da escola.
+
+1. Na conta administradora, selecione Português Brasileiro em **Configurações da conta** e saia.
+2. Abra `https://<DOMINIO>/forgot-password`, informe o e-mail da conta e confirme que a tela mostra apenas a mensagem genérica.
+3. Abra a caixa de entrada e confirme que chegou uma mensagem em português, enviada pelo `SMTP_FROM`, com um link que começa exatamente com `https://<DOMINIO>/reset-password`.
+4. Use o link e confirme que a nova senha permite entrar. Não copie o link para documento, chamado, log ou conversa: ele contém um token secreto de uso único e expira em 30 minutos.
+5. Repita com uma conta de teste configurada em English e confirme que a mensagem chega em inglês.
+6. Envie também uma solicitação para um endereço que não possui conta. A tela deve mostrar a mesma mensagem genérica, mas nenhum e-mail deve chegar.
+
+Registre apenas data, responsável, remetente, provedor da caixa de destino, idioma e resultado. Não registre senha, token ou link. Se não chegar mensagem, a pessoa técnica pode procurar somente o código seguro `PASSWORD_RESET_EMAIL_DELIVERY_FAILED` nos logs; nunca deve imprimir o erro completo nem as variáveis secretas.
+
+> Os testes automáticos locais usam um transporte falso e provam a lógica sem enviar mensagens. O lançamento continua bloqueado até este teste real passar com a caixa e o domínio da escola.
+
+### 13. Ativar a rotina automática e confirmar o lançamento
 
 Instale os agendamentos:
 

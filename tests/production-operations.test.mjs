@@ -82,6 +82,16 @@ test("production templates and operator automation do not contain real secrets",
 
   assert.match(environment, /APP_DATABASE_USER/);
   assert.match(environment, /MIGRATION_DATABASE_URL/);
+  assert.match(environment, /APP_URL=https:\/\//);
+  assert.match(environment, /SMTP_HOST=smtp\.hostinger\.com/);
+  assert.match(environment, /SMTP_PORT=465/);
+  assert.match(environment, /SMTP_SECURE=true/);
+  assert.match(environment, /SMTP_USER=replace-with-full-hostinger-mailbox/);
+  assert.match(
+    environment,
+    /SMTP_PASSWORD='replace-with-hostinger-mailbox-password'/,
+  );
+  assert.match(environment, /SMTP_FROM=/);
   assert.doesNotMatch(environment, /password123/);
   assert.match(workflow, /environment:\s*\n\s*name: production/);
   assert.match(workflow, /PRODUCTION_SSH_PRIVATE_KEY/);
@@ -90,4 +100,35 @@ test("production templates and operator automation do not contain real secrets",
   assert.match(PortugueseGuide, /primeiro administrador/);
   assert.match(PortugueseGuide, /bootstrap-first-admin\.sh/);
   assert.match(PortugueseGuide, /Não usa terminal/);
+});
+
+test("production password reset passes protected SMTP configuration safely", () => {
+  const compose = read("docker-compose.production.yml");
+  const accountActions = read("src/app/actions/accounts.ts");
+  const resetService = read("src/lib/password-reset.ts");
+  const mailer = read("src/lib/password-reset-email.ts");
+
+  for (const key of [
+    "APP_URL",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_SECURE",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "SMTP_FROM",
+  ]) {
+    assert.ok(
+      compose.includes(`${key}: ` + "${" + `${key}:?${key} is required}`),
+      `${key} must be passed into the production app container`,
+    );
+  }
+
+  assert.match(accountActions, /after\(request\.deliver\)/);
+  assert.match(accountActions, /process\.env\.NODE_ENV === "production"/);
+  assert.match(resetService, /PASSWORD_RESET_EMAIL_DELIVERY_FAILED/);
+  assert.match(resetService, /PASSWORD_RESET_TOKEN_MINUTES = 30/);
+  assert.doesNotMatch(resetService, /console\.error\([^)]*,/);
+  assert.match(mailer, /requireTLS: !config\.secure/);
+  assert.match(mailer, /disableFileAccess: true/);
+  assert.match(mailer, /disableUrlAccess: true/);
 });

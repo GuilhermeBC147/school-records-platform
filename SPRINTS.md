@@ -4,7 +4,7 @@ Last updated: 2026-07-12
 
 ## Current focus
 
-Continue Sprint 19 with the focused production Hostinger SMTP password-reset delivery change, then have the school complete its external VPS/DNS/backup/alert provisioning and real restore rehearsal using the new operator runbook.
+Have the school deploy the implemented Hostinger SMTP password-reset path, verify real English and Brazilian Portuguese inbox delivery plus SPF/DKIM/DMARC, and complete its external VPS/DNS/backup/alert provisioning and first real restore rehearsal.
 
 ## Current implementation status
 
@@ -21,7 +21,7 @@ Continue Sprint 19 with the focused production Hostinger SMTP password-reset del
 - Bonus scheduling now hard-blocks overlapping non-canceled bonus classes and warns on active recurring `REGULAR`, `VIP`, or `PERSONAL` class overlaps. Create and edit require an explicit localized save-anyway action, restore the validated proposal after warning, and rerun both conflict checks before writing. Static, PostgreSQL, and bilingual browser checks pass.
 - The repository-owned production operations foundation is complete: Caddy/private Compose topology, standalone non-root app/migration images, detail-free health routes, GitHub Actions deployment, restart and app-image rollback guidance, systemd monitoring/backup/rehearsal timers, checksummed `pg_dump` archives, off-VPS `rclone` support, and a beginner operator runbook are in place. PostgreSQL has no public production port and no secrets are committed.
 - Local production-stack, migration, health, logical-backup, checksum, temporary-restore, config, source/build, and script checks are recorded in `docs/sprint-19-quality-control.md`. School-owned VPS/DNS/TLS, Hostinger backup, GitHub approval, alert, off-VPS remote, external uptime, and a real restore rehearsal remain external launch work.
-- Production SMTP password-reset delivery remains the next focused launch blocker. No SMTP code or dependency was added in the operations foundation.
+- Production SMTP password-reset delivery is implemented on the current branch with a testable token service, injected Nodemailer transport, explicit HTTPS `APP_URL`, English/Brazilian Portuguese copy, post-response sending, safe fixed failure logging, and eight focused fake-transport tests. No schema change was needed. Real school-owned Hostinger mailbox and DNS/inbox evidence remains a launch gate.
 - The school-facing first-deployment and maintenance guide is available in Brazilian Portuguese at `docs/guia-producao-pt-BR.md`. A one-time interactive bootstrap command creates the first administrator only on an empty production user table; it replaces the unsafe idea of seeding demo users in production.
 
 ## Completed workflow decisions
@@ -34,15 +34,15 @@ Continue Sprint 19 with the focused production Hostinger SMTP password-reset del
 
 ## Known issues / questions
 
-- Production password-reset email delivery still requires a Hostinger SMTP mailbox and configuration.
-- The production target is a Hostinger VPS in Brazil; deployment, restart, monitoring, security-update, and backup automation plus an operator runbook still need implementation.
+- Production password-reset email delivery still requires school-owned Hostinger mailbox configuration, SPF/DKIM/DMARC verification, and real inbox/reset-link evidence.
+- The production operations automation and runbook are implemented; school-owned provisioning and real-provider evidence still need completion.
 - Layered backup ownership, retention, off-VPS storage, and restore testing still need production confirmation.
-- The default `npm test` suite remains source-level; PostgreSQL scheduling/import suites are opt-in, and broader critical-write browser/database coverage is still needed.
+- The default `npm test` suite includes source-level workflow assertions plus executable fake-transport password-reset tests; PostgreSQL scheduling/import suites are opt-in, and broader critical-write browser/database coverage is still needed.
 - The local seed is not repeatable against an already-populated database and can fail with Prisma `P2002` on duplicate IDs.
 
 ## Next recommended task
 
-Add the production environment checklist and concrete Hostinger VPS setup/operations automation: deployment with migrations and restart, HTTPS renewal, security updates, health/resource monitoring, layered backups with failure alerts, and an operator runbook. Keep the non-repeatable seed `P2002` as a separate focused follow-up and do not provision school-owned infrastructure without the required credentials and ownership decisions.
+Deploy the current branch after review, configure the seven protected password-reset variables with a school-owned Hostinger mailbox, verify SPF/DKIM/DMARC and real delivery in both account locales, and record the result. Then complete the runbook's school-owned VPS/DNS/GitHub/off-VPS-backup/alert provisioning and first real restore rehearsal. Do not run the non-repeatable development seed in production.
 
 ---
 # Sprint Plan

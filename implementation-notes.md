@@ -431,3 +431,31 @@ None yet.
 - Edge cases found: a clean migrated database has no admin, the development seed is unsafe for production, and repeated bootstrap attempts must not request a password.
 - Verification: syntax check, 27 source/operations assertions, migration-image build, fresh disposable migrations, interactive first-admin creation with no password echo, and second-attempt refusal.
 - Next session should read first: `docs/guia-producao-pt-BR.md`, `ops/bootstrap-first-admin.mjs`, and `docs/operator-runbook.md`.
+
+## Sprint 19 Hostinger SMTP password reset
+
+### Deviations
+
+- None yet. The implementation starts from the approved isolated mailer, injected test transport, explicit application URL, and post-response production delivery plan.
+
+### Discovered edge cases
+
+- Port 465 requires immediate TLS, while port 587 must use `secure: false` plus a required STARTTLS upgrade; treating both ports as the same boolean configuration would either fail or weaken transport security.
+- SMTP/configuration errors may contain recipient or connection details, so the production failure path must discard the original error and emit only a fixed operational signal.
+- Node's broad `ProcessEnv` index signature does not satisfy a mapped type containing only optional SMTP keys under the current strict TypeScript configuration; the injected environment type keeps named keys plus a compatible string index.
+- Background SMTP work needs bounded connection, greeting, and socket timeouts so one unavailable mail server cannot retain a post-response task indefinitely.
+- The production Compose app service explicitly allowlists environment variables, so updating only `.env.production.example` would leave SMTP unavailable inside the container. The seven new values must also be passed through the app service without changing public ports or networks.
+- `npm audit --omit=dev` reports five moderate advisories through the existing Next.js/PostCSS and Prisma development-tool chains, not Nodemailer. Its automated `--force` suggestions are breaking major downgrades, so this focused change does not apply them.
+- Compose environment files interpolate some unquoted/double-quoted special characters. The SMTP password placeholder is single-quoted so operators can preserve a provider-generated password literally without exposing it in a shell command.
+
+### Questions for review
+
+- None yet. A real school-owned Hostinger mailbox and DNS delivery test remains an external launch gate rather than local implementation evidence.
+
+### End-of-session summary
+
+- Deviations: 0 from the approved isolated-service, injected-transport, post-response delivery plan.
+- Most likely to revisit: replace `after()` with a durable persisted mail job only if real VPS testing shows post-response SMTP is unreliable across restarts.
+- Edge cases found: TLS port pairing, safe error suppression, strict environment typing, bounded SMTP timeouts, Compose environment allowlisting, audit noise outside Nodemailer, and literal password parsing.
+- Verification: 28 workflow/operations assertions, 8 focused SMTP tests, typecheck, Prisma validation, Compose config, production build, standalone runner image, npm audit review, and diff checks.
+- Next session should read first: this section, `src/lib/password-reset.ts`, `src/lib/password-reset-email.ts`, and the SMTP section of `docs/operator-runbook.md`.
