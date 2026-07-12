@@ -276,3 +276,27 @@ None yet.
 - Edge cases found: Sunday date views omit recurring classes, weekday mode intentionally shows no dated personal bookings, and confirmation redirects preserve the selected date.
 - Verification: `npm.cmd test` (21 passed), `npm.cmd run typecheck`, `npm.cmd run build`, and `git diff --check` passed.
 - Next session should read first: this section, `src/app/dashboard/page.tsx`, and `docs/FEATURES/dashboard.md`.
+
+## Sprint 19 quality-control baseline
+
+### Deviations
+
+- The first branch was created from `main`, but the production build showed that `main` does not contain the completed Sprint 18 imports, calendars, or personal-slot routes. The branch was recreated from `codex/class-cards-and-personal-redesign`, and all checks were rerun against the full platform.
+
+### Discovered edge cases
+
+- A direct typecheck can read stale `.next` route declarations after switching between branches with different route trees; the authoritative result is the clean full-feature rerun plus production build.
+- The static workflow suite validates source patterns, not browser behavior or PostgreSQL writes.
+- Sprint 19 currently depends on the unmerged personal-dashboard branch; its PR must merge first or this PR must be retargeted after the dependency lands.
+
+### Questions for review
+
+- None. The known regular-class overlap warning remains a separate launch blocker rather than being folded into this audit PR.
+
+### End-of-session summary
+
+- Deviations: 1 branch-base correction; no product implementation deviation.
+- Most likely to revisit: whether the QC report should become a signed release artifact once manual tests begin.
+- Edge cases found: stale generated route declarations, static-test limitations, and an unmerged branch dependency.
+- Verification: 21 critical workflow tests, typecheck, Prisma validation, and production build passed.
+- Next session should read first: this section and `docs/sprint-19-quality-control.md`.
